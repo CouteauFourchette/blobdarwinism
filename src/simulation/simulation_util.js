@@ -1,23 +1,19 @@
-class SimulationUtil {
-  randomVector() {
-    return [Math.random(), Math.random()];
-  }
+export const NUM_BLOBS = 100;
+export const NUM_FOOD = 50;
+export const WIDTH = 800;
+export const HEIGHT = 600;
 
-  randomPosition() {
-    const position = randomVector();
-    position[0] = Math.floor(SimulationUtil.WIDTH * position[0]);
-    position[1] = Math.floor(SimulationUtil.HEIGHT * position[1]);
-    return position;
-  }
-
-  randomColor() {
-    return [Math.random(), Math.random(), Math.random(), 1];
-  }
+export function randomVector() {
+  return [Math.random(), Math.random()];
 }
 
-SimulationUtil.NUM_BLOBS = 10;
-SimulationUtil.NUM_FOOD = 4;
-SimulationUtil.WIDTH = 800;
-SimulationUtil.HEIGHT = 600;
+export function randomPosition() {
+  const position = randomVector();
+  position[0] = Math.floor(WIDTH * position[0]);
+  position[1] = Math.floor(HEIGHT * position[1]);
+  return position;
+}
 
-export default SimulationUtil;
+export function randomColor() {
+  return [Math.random(), Math.random(), Math.random(), 1];
+}

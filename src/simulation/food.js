@@ -1,4 +1,4 @@
-import SimulationUtil from './simulation_util';
+import * as SimulationUtil from './simulation_util';
 
 class Food {
   constructor(id, position) {

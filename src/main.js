@@ -1,4 +1,5 @@
 require('../style/app.scss');
+import Simulation from './simulation/simulation';
 
 document.addEventListener('DOMContentLoaded', (event) => {
   const canvas = document.getElementById('canvas');
@@ -10,5 +11,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
+    const simulation = new Simulation(GL);
+    simulation.run();
   }
 });

@@ -1,11 +1,11 @@
-import SimulationUtil from './simulation_util';
+import * as SimulationUtil from './simulation_util';
 
 class Blob {
   constructor(id, position) {
     this.id = id;
     this.position = position;
     this.color = SimulationUtil.randomColor();
-    this.velocity = [0, 0];
+    this.velocity = [10, 0];
     this.acceleration = [0, 0];
     this.size = 1;
     this.alive = true;

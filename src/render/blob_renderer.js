@@ -28,9 +28,6 @@ export default class BlobRenderer {
     this.initBuffer();
     this.orthographicMatrix = mat4.create();
     this.createOrthographicMatrix();
-    for(let i = 0; i < 500; i++){
-      this.blobs.push(new BlobRenderable(0, GL, [Math.random()*800,Math.random()*600,0], [0,0,0], [Math.random()*200,Math.random()*200,Math.random()*200], [Math.random(),Math.random(),1,1]));
-    }
     this.render();
     window.addBlob = this.addBlob.bind(this);
     window.removeBlob = this.removeBlob.bind(this);
@@ -67,6 +64,17 @@ export default class BlobRenderer {
     this.GL.clear(this.GL.COLOR_BUFFER_BIT);
   }
 
+  // TODO: Fix this
+  updateBlobs(blobs) {
+    blobs.forEach(blob => {
+      this.blobs.forEach(renderBlob => {
+        if (blob.id === renderBlob.id) {
+          renderBlob.position = [...blob.position, 0];
+        }
+      });
+    });
+  } 
+
   addBlob(blob){
     this.blobs.push(
       new BlobRenderable(
@@ -74,7 +82,7 @@ export default class BlobRenderer {
         this.GL,
         blob.position,
         [0,0,0],
-        blob.size*10,
+        [blob.size * 10, blob.size * 10, 1],
         blob.color
       )
     );
@@ -100,7 +108,6 @@ export default class BlobRenderer {
   }
 
   render(){
-    requestAnimationFrame(this.render.bind(this));
     this.updateTimes();
     this.prepare();
     this.start();
