@@ -5,21 +5,32 @@ class Blob {
     this.id = id;
     this.position = position;
     this.color = SimulationUtil.randomColor();
-    this.velocity = [10, 0];
+    this.velocity = [0, 0];
     this.acceleration = [0, 0];
-    this.size = 1;
+    this.size = 10;
     this.alive = true;
   }
 
   move() {
-    this.accelerate();
+    this.velocity[0] += this.acceleration[0];
+    this.velocity[1] += this.acceleration[1];
+    if (Math.abs(this.velocity[0]) > SimulationUtil.MAX_SPEED) {
+      this.velocity[0] = SimulationUtil.MAX_SPEED * Math.sign(this.velocity[0]);
+    }
+    if (Math.abs(this.velocity[1]) > SimulationUtil.MAX_SPEED) {
+      this.velocity[1] = SimulationUtil.MAX_SPEED * Math.sign(this.velocity[1]);
+    }
     this.position[0] += this.velocity[0];
     this.position[1] += this.velocity[1];
   }
 
-  accelerate() {
-    this.velocity[0] += this.acceleration[0];
-    this.velocity[1] += this.acceleration[1];
+  eat(blob) {
+    this.size += blob.size;
+  }
+
+  accelerate(vector) {
+    this.acceleration[0] = vector[0];
+    this.acceleration[1] = vector[1];
   }
 }
 
