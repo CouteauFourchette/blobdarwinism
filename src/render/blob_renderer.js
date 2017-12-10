@@ -14,8 +14,7 @@ export default class BlobRenderer {
     this.GL.enable(this.GL.SAMPLE_ALPHA_TO_COVERAGE);
     this.GL.sampleCoverage(.5, false);
     this.blobs = {};
-    blobs.forEach(blob => this.addBlob(blob));
-    food.forEach(f => this.addFood(f));
+    blobs.concat(food).forEach(renderObject => this.addRenderObject(renderObject));
 
     this.initTimes();
 
@@ -33,8 +32,6 @@ export default class BlobRenderer {
     this.orthographicMatrix = mat4.create();
     this.createOrthographicMatrix();
     this.render();
-    window.addBlob = this.addBlob.bind(this);
-    window.removeBlob = this.removeBlob.bind(this);
   }
 
   initBuffer(){
@@ -68,7 +65,6 @@ export default class BlobRenderer {
     this.GL.clear(this.GL.COLOR_BUFFER_BIT);
   }
 
-  // TODO: Fix this
   updateBlobs(blobs) {
     blobs.forEach(blob => {
       this.blobs[blob.id].position = [...blob.position, 0];
@@ -76,7 +72,7 @@ export default class BlobRenderer {
     });
   } 
 
-  addBlob(blob){
+  addRenderObject(blob){
       this.blobs[blob.id] =  new BlobRenderable(
         blob.id, 
         this.GL,
@@ -84,16 +80,6 @@ export default class BlobRenderer {
         [0,0,0],
         [blob.size, blob.size, 1],
         blob.color
-      );
-  }
-  addFood(food){
-    this.blobs[food.id] = new BlobRenderable(
-        food.id, 
-        this.GL,
-        food.position,
-        [0,0,0],
-        [5,5,5],
-        food.color
       );
   }
 

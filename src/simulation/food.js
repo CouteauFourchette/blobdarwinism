@@ -5,6 +5,7 @@ class Food {
     this.id = id;
     this.position = position;
     this.color = SimulationUtil.randomColor();
+    this.size = SimulationUtil.FOOD_SIZE;
   }
 }
 

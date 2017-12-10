@@ -41,6 +41,7 @@ class Simulation {
   }
 
   eat() {
+    //Blobs
     for (let i = this.blobs.length - 1; i >= 0; i -= 1) {
       for (let j = (i - 1); j >= 0; j -= 1) {
         if (this.blobs[i] && checkCollisionWithEntity(this.blobs[i], this.blobs[j])) {
@@ -53,6 +54,16 @@ class Simulation {
             this.blobRenderer.removeBlob(this.blobs[i].id);
             this.blobs.splice(i, 1);
           }
+        }
+      }
+    }
+    //Food
+    for (let i = this.blobs.length - 1; i >= 0; i -= 1) {
+      for (let j = this.food.length - 1; j >= 0; j -= 1) {
+        if (checkCollisionWithEntity(this.blobs[i], this.food[j])) {
+          this.blobs[i].eat(this.food[j]);
+          this.blobRenderer.removeBlob(this.food[j].id);
+          this.food.splice(j, 1);
         }
       }
     }

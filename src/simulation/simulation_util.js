@@ -3,6 +3,7 @@ export const NUM_FOOD = 50;
 export const WIDTH = 800;
 export const HEIGHT = 600;
 export const MAX_SPEED = 10;
+export const FOOD_SIZE = 5;
 
 export function randomVector() {
   return [Math.random(), Math.random()];
