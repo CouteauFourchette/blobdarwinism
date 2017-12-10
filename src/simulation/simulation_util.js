@@ -1,4 +1,4 @@
-export const NUM_BLOBS = 100;
+export const NUM_BLOBS = 20;
 export const NUM_FOOD = 50;
 export const WIDTH = 800;
 export const HEIGHT = 600;
