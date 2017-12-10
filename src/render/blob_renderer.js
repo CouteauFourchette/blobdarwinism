@@ -1,6 +1,8 @@
 import vertexSouce from './blob_vs';
 import fragmentSource from './blob_fs';
 import BlobRenderable from './blob_renderable';
+import * as SimulationUtil from '../simulation/simulation_util';
+
 import { mat4 } from 'gl-matrix';
 
 export default class BlobRenderer {
@@ -9,7 +11,9 @@ export default class BlobRenderer {
    */
   constructor(GL, blobs = [], food = []){
     this.GL = GL;
-    this.blobs = [];
+    this.GL.enable(this.GL.SAMPLE_ALPHA_TO_COVERAGE);
+    this.GL.sampleCoverage(.5, false);
+    this.blobs = {};
     blobs.forEach(blob => this.addBlob(blob));
     food.forEach(f => this.addFood(f));
 
@@ -67,52 +71,46 @@ export default class BlobRenderer {
   // TODO: Fix this
   updateBlobs(blobs) {
     blobs.forEach(blob => {
-      this.blobs.forEach(renderBlob => {
-        if (blob.id === renderBlob.id) {
-          renderBlob.position = [...blob.position, 0];
-        }
-      });
+      this.blobs[blob.id].position = [...blob.position, 0];
+      this.blobs[blob.id].scale = [blob.size, blob.size, 1];
     });
   } 
 
   addBlob(blob){
-    this.blobs.push(
-      new BlobRenderable(
+      this.blobs[blob.id] =  new BlobRenderable(
         blob.id, 
         this.GL,
         blob.position,
         [0,0,0],
-        [blob.size * 10, blob.size * 10, 1],
+        [blob.size, blob.size, 1],
         blob.color
-      )
-    );
+      );
   }
   addFood(food){
-    this.blobs.push(
-      new BlobRenderable(
+    this.blobs[food.id] = new BlobRenderable(
         food.id, 
         this.GL,
         food.position,
         [0,0,0],
         [5,5,5],
         food.color
-      )
-    );
+      );
   }
 
   removeBlob(id){
-    this.blobs = this.blobs.filter(blob => id !== blob.id);
+    delete this.blobs[id];
   }
   removeFood(id){
-    this.blobs = this.blobs.filter(blob => id !== blob.id);
+    delete this.blobs[id];
   }
 
   render(){
     this.updateTimes();
     this.prepare();
     this.start();
-    this.blobs.forEach(blob => {
-      blob.prepareRender(this.deltaTime, this.uColor, this.uModel);
+    let blobKeys = Object.keys(this.blobs);
+    blobKeys.forEach(blobKey => {
+      this.blobs[blobKey].prepareRender(this.deltaTime, this.uColor, this.uModel);
       this.GL.drawArrays(this.GL.TRIANGLE_FAN, 0, this.circleVerts.length/2);
     });
     this.stop();
@@ -155,9 +153,9 @@ export default class BlobRenderer {
   }
 
   createOrthographicMatrix(){
-    this.GL.canvas.width = (window.innerWidth);
-    this.GL.canvas.height = (window.innerHeight);
-    this.GL.viewport(0,0,this.GL.canvas.width, this.GL.canvas.height);        
-    mat4.ortho(this.orthographicMatrix, 0, 800, 600, 0, 0, 100);
+    this.GL.canvas.width = 1600;
+    this.GL.canvas.height = 1200;
+    this.GL.viewport(0,0,1600,1200);        
+    mat4.ortho(this.orthographicMatrix, 0, SimulationUtil.WIDTH, SimulationUtil.HEIGHT, 0, 0, 100);
   }
 }
