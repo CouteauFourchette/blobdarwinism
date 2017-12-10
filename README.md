@@ -19,16 +19,18 @@ Users will be able to manipulate various simulation variables, including the num
 
 #### Bonus Features
    - [ ] Add new classifications of blobs with distinct behavior (e.g. herbivores and carnivores)
-   - [ ] Enhance visuals and provide sound effects
-   - [ ] Port the app to another platform (React Native or Electron)
+   - [ ] Follow current best blob with camera
+   - [ ] Enhance visuals and add visual effects
+   - [ ] Port the app to another platform (Electron)
 
 ## Technologies & Technical Challenges
   ##### Backend: Flask
-  ##### Frontend: React/JavaScript
+  ##### Frontend: JavaScript, WebGL
+  #### Libraries: Synapse.js
 
 #### Simulation Constraints
   + #### Rules:
-    + Any blob can eat food. Food is a stationary entity that increased size by one.
+    + Any blob can eat food. Food is a stationary entity that increased size by a small constant value.
     + Large blobs can eat smaller blobs and doing so increases its size by the size of the small blob.
     + Each frame, blobs apply an acceleration vector to its velocity.
     + There is a maximum velocity that is a linear function of size.
@@ -36,6 +38,8 @@ Users will be able to manipulate various simulation variables, including the num
     + Number of blobs in each generation
     + Abundance of food in each generation
     + Initial size of blobs
+    + Size bonus awarded by eating food
+    + Dimensions of the environment
 
 #### Neural Network
   + ##### Input
@@ -69,52 +73,35 @@ Users will be able to manipulate various simulation variables, including the num
 **Brandt Sheets**,
 
 ### Day 1
-  - decide tags
-  - SQL queries/ python exclusion script that filters out songs with conflicting tags **ALEC**
-  - a properly populated entry into database **ADOM**
-    * take some audio
-    * convert and analyze with full suite of features
-    * parse and join back with tag
-  - complete MNIST tutorial **ANDREW**
+  - Refactor the simulation logic as needed
+  - Review our neural network design and begin implementation using synapse.js
+  - Interface neural network with blobs class
+  - Test neural network with random weights
+
 
 ### Day 2
-  - scripting the population process (one at a time) **ADOM**
-    - get song name and tag from MSD (D1)
-    - make API call to Spotify with song name (D1) **ALEC**
-    - buffer object written **ANDREW**
-    - receive audio into buffer and output files (D1)
-    - convert and analyze with full suite of features **ADOM**
-    - parse and join back with tag
-    - enter into master database
-  - How the NN needs to be different for our implementation **GROUP/ANDREW**
-  - Verify schedule and touch base, assess MVPs **decide Day 3/4 roles**
-  - Django setup **ADOM**
+  - Debug neural network implementation
+  - Write first version of genetic algorithm
+  - Integrate and test the genetic algorithm with neural network
 
 ### Day 3
-
- - automating dataset population to n-songs  **TBD**
- - first opportunity to train it/hopefully give it a song **TBD**
- - Django to receive a call, make a call, buffer the object **TBD**
+  - Optimize neural network and/or genetic algorithm through extensive testing
+  - Design a simple UI with some variables for the user to modify **Brandt**
+  - Build a backend with flask for serving and data persistence **Julien**
 
 
 ### Day 4
-  - Frontend index file with webpack, ajax calls in JS, some buttons **TBD**
-  - Django need to correctly take in and return result **TBD**
-  - Get heroku set up **TBD**
+  - Further enhance UI
+  - Refactor simulation to allow user to manipulate more variables
+  - Get heroku set up
+  - Optimize WebGL rendering **Garrett**
 
 ### Day 5
-  - messing with the model or exploring the model
-  - Frontend probabilities display component
-  - Frontend spotify search
-    + search requests
-    + autosuggest population
-    + send id to backend
-    + backend request stream
-    + backend runs feature Extraction
-    + backend runs NN
-    + return result to front end
-  - Frontend 'working' animation/when they're waiting
+  - Enhance the simulation with visual effects and textures **Garrett**
+  - Add support for continuous simulation mode (rather than discrete generations) **Julien**
+  - Choose a bonus feature to add
 
 ### Day 6
- - About the project copy
+ - Fix any outstanding bugs
  - improve UX
+ - Update README to reflect any project changes **Brandt**
