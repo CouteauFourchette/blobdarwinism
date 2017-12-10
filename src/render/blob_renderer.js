@@ -11,7 +11,7 @@ export default class BlobRenderer {
     this.GL = GL;
     this.blobs = [];
     blobs.forEach(blob => this.addBlob(blob));
-    food.forEach(food => this.addFood(food));
+    food.forEach(f => this.addFood(f));
 
     this.initTimes();
 
