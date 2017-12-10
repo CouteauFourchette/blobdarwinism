@@ -12,10 +12,10 @@ export function checkCollisionWithWall(objectA) {
 }
 
 export function checkCollisionWithEntity(objectA, objectB) {
-  const distanceX = objectA.position[0] - objectA.position[0];
-  const distanceY = objectA.position[1] - objectA.position[1];
+  const distanceX = Math.abs(objectA.position[0] - objectB.position[0]);
+  const distanceY = Math.abs(objectA.position[1] - objectB.position[1]);
   const radiusSum = objectA.size + objectB.size;
-  if (distanceX < radiusSum || distanceY < radiusSum) {
+  if (distanceX < radiusSum && distanceY < radiusSum) {
     return true;
   }
   return false;
