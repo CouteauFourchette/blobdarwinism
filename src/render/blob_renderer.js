@@ -7,9 +7,12 @@ export default class BlobRenderer {
   /**
    * @param {WebGLRenderingContext} GL 
    */
-  constructor(GL, blobs = []){
+  constructor(GL, blobs = [], food = []){
     this.GL = GL;
-    this.blobs = blobs;
+    this.blobs = [];
+    blobs.forEach(blob => this.addBlob(blob));
+    food.forEach(food => this.addFood(food));
+
     this.initTimes();
 
     let vertexShader = this.loadShader(vertexSouce, GL.VERTEX_SHADER);
@@ -70,14 +73,29 @@ export default class BlobRenderer {
         blob.id, 
         this.GL,
         blob.position,
-        blob.rotation,
-        blob.scale,
+        [0,0,0],
+        blob.size*10,
         blob.color
+      )
+    );
+  }
+  addFood(food){
+    this.blobs.push(
+      new BlobRenderable(
+        food.id, 
+        this.GL,
+        food.position,
+        [0,0,0],
+        [5,5,5],
+        food.color
       )
     );
   }
 
   removeBlob(id){
+    this.blobs = this.blobs.filter(blob => id !== blob.id);
+  }
+  removeFood(id){
     this.blobs = this.blobs.filter(blob => id !== blob.id);
   }
 

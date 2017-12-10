@@ -8,7 +8,7 @@ export default class BlobRenderable {
   constructor(id, GL, position = [0,0,0], rotation = [0,0,0], scale = [1,1,1], color, primativeType = GL.TRIANGLES){
     this.id = id;
     this.GL = GL;
-    this.position = position;
+    this.position = [position[0], position[1], 0];
     this.rotation = rotation;
     this.scale = scale;
     this.color = color;
