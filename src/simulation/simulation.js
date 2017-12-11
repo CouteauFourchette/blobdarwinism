@@ -1,6 +1,7 @@
 import { inBoundsPosition, checkCollisionWithEntity } from './physics';
 import BlobRenderer from '../render/blob_renderer';
 import * as SimulationUtil from './simulation_util';
+import * as Config from '../config';
 import Blob from './blob';
 import Food from './food';
 
@@ -16,14 +17,14 @@ class Simulation {
   }
 
   generateBlobs() {
-    for (let i = 0; i < SimulationUtil.NUM_BLOBS; i++) {
+    for (let i = 0; i < Config.NUM_BLOBS; i++) {
       this.blobs.push(new Blob(this.entityId, SimulationUtil.randomPosition()));
       this.entityId += 1;
     }
   }
 
   generateFood() {
-    for (let i = 0; i < SimulationUtil.NUM_FOOD; i++) {
+    for (let i = 0; i < Config.NUM_FOOD; i++) {
       this.food.push(new Food(this.entityId, SimulationUtil.randomPosition()));
       this.entityId += 1;
     }

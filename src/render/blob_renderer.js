@@ -1,7 +1,7 @@
 import vertexSouce from './blob_vs';
 import fragmentSource from './blob_fs';
 import BlobRenderable from './blob_renderable';
-import * as SimulationUtil from '../simulation/simulation_util';
+import * as Config from '../config';
 
 import { mat4 } from 'gl-matrix';
 
@@ -142,6 +142,6 @@ export default class BlobRenderer {
     this.GL.canvas.width = 1600;
     this.GL.canvas.height = 1200;
     this.GL.viewport(0,0,1600,1200);        
-    mat4.ortho(this.orthographicMatrix, 0, SimulationUtil.WIDTH, SimulationUtil.HEIGHT, 0, 0, 100);
+    mat4.ortho(this.orthographicMatrix, 0, Config.WIDTH, Config.HEIGHT, 0, 0, 100);
   }
 }

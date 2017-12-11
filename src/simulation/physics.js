@@ -1,4 +1,4 @@
-import * as SimulationUtil from './simulation_util';
+import * as Config from '../config';
 
 export function checkCollisionWithEntity(objectA, objectB) {
   const distanceX = Math.abs(objectA.position[0] - objectB.position[0]);
@@ -17,9 +17,16 @@ export function inBoundsPosition(objectA){
   let yRange = [yPos - objectA.size, yPos + objectA.size];
 
   if(xRange[0] < 0) xPos = objectA.size;
-  else if(xRange[1] > SimulationUtil.WIDTH) xPos = SimulationUtil.WIDTH - objectA.size;
+  else if(xRange[1] > Config.WIDTH) xPos = Config.WIDTH - objectA.size;
   if(yRange[0] < 0) yPos = objectA.size;
-  else if(yRange[1] > SimulationUtil.HEIGHT) yPos = SimulationUtil.HEIGHT - objectA.size;
+  else if(yRange[1] > Config.HEIGHT) yPos = Config.HEIGHT - objectA.size;
 
   return [xPos, yPos];
+}
+
+export function normalizedDistanceToEntity(from, to){
+  return [
+    to.position[0]/Config.WIDTH - from.position[0]/Config.WIDTH,
+    to.position[1]/Config.HEIGHT - from.position[1]/Config.HEIGHT
+  ];
 }
