@@ -59,6 +59,9 @@ Users will be able to manipulate various simulation variables, including the num
 
     Instead, we will use a genetic algorithm to update these weights between generations. This means that an individual blob will not itself learn or improve, but will pass down its behavior (weights) genetically with some probability. This probability is equal to a blob's normalized "fitness," a heuristic which reflects the blobs success and is a function of its size and survival duration.
 
+    The following is [our demo](https://couteaufourchette.github.io/blobgeneticdemo/) of the described demo algorithm.
+
+
 
 ## Accomplished over the Weekend
  - Research machine learning topics including neural networks and genetic algorithms
