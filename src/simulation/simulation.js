@@ -1,5 +1,6 @@
 import { inBoundsPosition, checkCollisionWithEntity } from './physics';
 import BlobRenderer from '../render/blob_renderer';
+import BlobBrains from '../AI/blob_brains';
 import * as SimulationUtil from './simulation_util';
 import Blob from './blob';
 import Food from './food';
@@ -13,6 +14,7 @@ class Simulation {
     this.generateBlobs();
     this.generateFood();
     this.blobRenderer = new BlobRenderer(GL, this.blobs, this.food);
+    this.blobBrains = new BlobBrains(this.blobs);
   }
 
   generateBlobs() {
@@ -31,7 +33,8 @@ class Simulation {
 
   moveBlobs() {
     this.blobs.forEach(blob => {
-      blob.accelerate([(Math.random() - 0.5) / 2, (Math.random() - 0.5) / 2]); //Temporary random acceleration
+      const acceleration = this.blobBrains.takeDecision(blob, []);
+      blob.accelerate(acceleration);
       blob.move();
       blob.position = inBoundsPosition(blob);
     });
@@ -45,10 +48,12 @@ class Simulation {
           if (this.blobs[i].size > this.blobs[j].size) {
             this.blobs[i].eat(this.blobs[j]);
             this.blobRenderer.removeBlob(this.blobs[j].id);
+            this.blobBrains.removeBlob(this.blobs[j]);
             this.blobs.splice(j, 1);
           } else if (this.blobs[i].size <= this.blobs[j].size) {
             this.blobs[j].eat(this.blobs[i]);
             this.blobRenderer.removeBlob(this.blobs[i].id);
+            this.blobBrains.removeBlob(this.blobs[i]);
             this.blobs.splice(i, 1);
           }
         }
