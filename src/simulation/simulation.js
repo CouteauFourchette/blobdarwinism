@@ -35,7 +35,7 @@ class Simulation {
 
   moveBlobs() {
     this.blobs.forEach(blob => {
-      const acceleration = this.blobBrains.takeDecision(blob, []);
+      const acceleration = this.blobBrains.takeDecision(blob, [Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random()]);
       blob.accelerate(acceleration);
       blob.move();
       blob.position = inBoundsPosition(blob);

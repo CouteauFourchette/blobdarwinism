@@ -1,4 +1,4 @@
-import BlobBrain from './blob_brain';
+import BlobNetwork from './blob_network';
 
 class BlobBrains {
   constructor(blobs) {
@@ -12,7 +12,7 @@ class BlobBrains {
   }
 
   addBlob(blob) {
-    this.blobBrains[blob.id] = new BlobBrain(blob);
+    this.blobBrains[blob.id] = new BlobNetwork(blob);
   }
 
   removeBlob(blob) {

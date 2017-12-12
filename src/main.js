@@ -1,10 +1,11 @@
 require('../style/app.scss');
 import Simulation from './simulation/simulation';
+import BlobNetwork from './AI/blob_network';
 
 document.addEventListener('DOMContentLoaded', (event) => {
   const canvas = document.getElementById('canvas');
   const GL = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-  
+
   if (!GL) {
     alert('This browser does not support WebGL');
   } else {
