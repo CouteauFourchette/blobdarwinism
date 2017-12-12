@@ -1,4 +1,5 @@
 import * as SimulationUtil from './simulation_util';
+import * as Config from '../config';
 
 class Blob {
   constructor(id, position) {
@@ -7,7 +8,7 @@ class Blob {
     this.color = SimulationUtil.randomColor();
     this.velocity = [0, 0];
     this.acceleration = [0, 0];
-    this.size = 10;
+    this.size = Config.INITIAL_BLOB_SIZE;
     this.alive = true;
   }
 
@@ -25,7 +26,7 @@ class Blob {
   }
 
   eat(blob) {
-    this.size += blob.size;
+    this.size += (blob.size / 2);
   }
 
   accelerate(vector) {
