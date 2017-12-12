@@ -1,7 +1,9 @@
 import { inBoundsPosition, checkCollisionWithEntity } from './physics';
 import BlobRenderer from '../render/blob_renderer';
 import BlobBrains from '../AI/blob_brains';
+import Genetic from '../AI/genetics';
 import * as SimulationUtil from './simulation_util';
+import * as Config from '../config';
 import Blob from './blob';
 import Food from './food';
 
@@ -18,14 +20,14 @@ class Simulation {
   }
 
   generateBlobs() {
-    for (let i = 0; i < SimulationUtil.NUM_BLOBS; i++) {
+    for (let i = 0; i < Config.NUM_BLOBS; i++) {
       this.blobs.push(new Blob(this.entityId, SimulationUtil.randomPosition()));
       this.entityId += 1;
     }
   }
 
   generateFood() {
-    for (let i = 0; i < SimulationUtil.NUM_FOOD; i++) {
+    for (let i = 0; i < Config.NUM_FOOD; i++) {
       this.food.push(new Food(this.entityId, SimulationUtil.randomPosition()));
       this.entityId += 1;
     }
@@ -48,12 +50,10 @@ class Simulation {
           if (this.blobs[i].size > this.blobs[j].size) {
             this.blobs[i].eat(this.blobs[j]);
             this.blobRenderer.removeBlob(this.blobs[j].id);
-            this.blobBrains.removeBlob(this.blobs[j]);
             this.blobs.splice(j, 1);
           } else if (this.blobs[i].size <= this.blobs[j].size) {
             this.blobs[j].eat(this.blobs[i]);
             this.blobRenderer.removeBlob(this.blobs[i].id);
-            this.blobBrains.removeBlob(this.blobs[i]);
             this.blobs.splice(i, 1);
           }
         }
@@ -72,12 +72,14 @@ class Simulation {
   }
 
   run() {
+    this.initialTime = Date.now();
     this.simulate();
   }
 
   simulate() {
     this.eat();
     this.moveBlobs();
+    this.blobBrains.updateBlobs(this.blobs, Date.now() - this.initialTime);
     this.blobRenderer.updateBlobs(this.blobs);
     this.blobRenderer.render();
     if (!this.simulationComplete) {

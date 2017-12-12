@@ -18,6 +18,12 @@ class BlobBrains {
   removeBlob(blob) {
     delete this.blobBrains[blob.id];
   }
+
+  updateBlobs(blobs, time) {
+    blobs.forEach(blob => {
+      this.blobBrains[blob.id].fitness = blob.size + (time / 100);
+    });
+  }
 }
 
 export default BlobBrains;
