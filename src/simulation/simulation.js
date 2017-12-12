@@ -21,6 +21,7 @@ class Simulation {
   }
 
   generateBlobs() {
+    this.blobs = [];
     for (let i = 0; i < Config.NUM_BLOBS; i++) {
       this.blobs.push(new Blob(this.entityId, SimulationUtil.randomPosition()));
       this.entityId += 1;
@@ -28,6 +29,7 @@ class Simulation {
   }
 
   generateFood() {
+    this.food = [];
     for (let i = 0; i < Config.NUM_FOOD; i++) {
       this.food.push(new Food(this.entityId, SimulationUtil.randomPosition()));
       this.entityId += 1;
@@ -90,6 +92,16 @@ class Simulation {
     this.simulate();
   }
 
+  reset() {
+    this.blobRenderer.removeAllRenderObjects();
+    this.generateBlobs();
+    this.generateFood();
+    this.blobBrains = new BlobBrains(this.blobs);
+    this.blobRenderer.addBlobsAndFood(this.blobs, this.food);
+    this.simulationComplete = false;
+    this.run();
+  }
+
   updateSimulationStatus(condition) {
     let result;
     switch(condition) {
@@ -124,7 +136,9 @@ class Simulation {
     if (!this.simulationComplete) {
       requestAnimationFrame(this.simulate.bind(this));
     } else {
+      // simulation over
       console.log("Simulation complete.");
+      this.reset();
     }
   }
 }

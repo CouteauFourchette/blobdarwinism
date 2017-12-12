@@ -7,6 +7,6 @@ export const FOOD_SIZE = 2;
 export const INITIAL_BLOB_SIZE = 5;
 
 // Default timeout 30 sec
-export const TIME_THRESHOLD = 30;
+export const TIME_THRESHOLD = 10;
 export const NUM_THRESHOLD = 6;
 export const SIZE_THRESHOLD = 100;
