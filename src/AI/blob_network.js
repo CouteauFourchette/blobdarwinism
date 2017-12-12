@@ -1,9 +1,11 @@
 import BlobBrain from './blob_brain';
-import Synaptic from 'synaptic';
+import { Architect, Trainer } from 'synaptic';
 
 class BlobNetwork extends BlobBrain {
   constructor(dimensions = [8, 4, 2]) {
-    this.perceptron = new Synaptic.Architect.Perceptron(...dimensions);
+    super({id: 1});
+    this.perceptron = new Architect.Perceptron(...dimensions);
+    // this.trainer = new Trainer(this.perceptron);
   }
 
   extractAllWeights(layers) {
@@ -15,10 +17,12 @@ class BlobNetwork extends BlobBrain {
   }
 
   extractWeights(layer) {
+    // debugger;
     const connections = layer.connectedTo[0].connections;
-    return Object.keys(connections).map(key => {
-      connections[key].weight;
+    const weights = Object.keys(connections).map(key => {
+      return connections[key].weight;
     });
+    return weights;
   }
 
   setAllWeights(layers, weights) {
