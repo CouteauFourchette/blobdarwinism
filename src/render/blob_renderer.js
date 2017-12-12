@@ -18,8 +18,6 @@ export default class BlobRenderer {
     this.blobs = {};
     blobs.concat(food).forEach(renderObject => this.addRenderObject(renderObject));
 
-    this.initTimes();
-
     let vertexShader = this.loadShader(vertexSouce, GL.VERTEX_SHADER);
     let fragmentShader = this.loadShader(fragmentSource, GL.FRAGMENT_SHADER);
     this.initProgram(vertexShader, fragmentShader);
@@ -62,19 +60,6 @@ export default class BlobRenderer {
     this.GL.drawArrays(this.GL.LINES, 0, 2); 
   }
 
-  initTimes(){
-    this.totalTime = 0;
-    this.deltaTime = 0;
-    this.lastUpdate = Date.now();
-  }
-
-  updateTimes(){
-    let newTime = Date.now();
-    this.deltaTime = (newTime - this.lastUpdate)/1000;
-    this.lastUpdate = newTime;
-    this.totalTime += this.deltaTime;
-  }
-
   prepare(){
     this.GL.clearColor(0,0,0,1);
     this.GL.clear(this.GL.COLOR_BUFFER_BIT);
@@ -115,7 +100,6 @@ export default class BlobRenderer {
   }
 
   render(){
-    this.updateTimes();
     this.prepare();
     this.start();
     let blobKeys = Object.keys(this.blobs);
@@ -142,7 +126,7 @@ export default class BlobRenderer {
       }
       this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.vertexBuffer);
       this.GL.bufferData(this.GL.ARRAY_BUFFER, new Float32Array(this.circleVerts), this.GL.STATIC_DRAW);
-      blob.prepareRender(this.deltaTime, this.uColor, this.uModel);
+      blob.prepareRender(this.uColor, this.uModel);
       this.GL.drawArrays(this.GL.TRIANGLE_FAN, 0, this.circleVerts.length/2);
 
     });

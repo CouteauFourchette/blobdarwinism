@@ -19,9 +19,9 @@ class BlobBrains {
     delete this.blobBrains[blob.id];
   }
 
-  updateBlobs(blobs, time) {
+  updateBlobs(blobs, totalTime) {
     blobs.forEach(blob => {
-      this.blobBrains[blob.id].fitness = blob.size + (time / 100);
+      this.blobBrains[blob.id].fitness = blob.size + totalTime;
     });
   }
 }
