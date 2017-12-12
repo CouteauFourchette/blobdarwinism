@@ -12,6 +12,7 @@ class Simulation {
     this.entityId = 0;
     this.blobs = [];
     this.food = [];
+    this.endCondition = 'TIME'; // Must be one of TIME, SIZE, NUM
     this.simulationComplete = false;
     this.generateBlobs();
     this.generateFood();
@@ -41,7 +42,7 @@ class Simulation {
 
   updateTimes(){
     let newTime = Date.now();
-    this.deltaTime = (newTime - this.lastUpdate)/100;
+    this.deltaTime = (newTime - this.lastUpdate)/1000;
     this.lastUpdate = newTime;
     this.totalTime += this.deltaTime;
   }
@@ -89,6 +90,29 @@ class Simulation {
     this.simulate();
   }
 
+  updateSimulationStatus(condition) {
+    let result;
+    switch(condition) {
+      case 'TIME':
+        result = this.totalTime > Config.TIME_THRESHOLD;
+        break;
+      case 'NUM':
+        console.log("num blobs remaining:", this.blobs.length);
+        result = this.blobs.length < Config.NUM_THRESHOLD;
+        break;
+      case 'SIZE':
+        const largestBlobSize = this.blobs.map(blob => blob.size).reduce(
+          (a, b) => Math.max(a, b)
+        );
+        console.log("current largest blob: ", largestBlobSize);
+        result = largestBlobSize > Config.SIZE_THRESHOLD;
+        break;
+      default:
+        result = false;
+    }
+    this.simulationComplete = result;
+  }
+
   simulate() {
     this.updateTimes();
     this.eat();
@@ -96,8 +120,11 @@ class Simulation {
     this.blobBrains.updateBlobs(this.blobs, this.totalTime);
     this.blobRenderer.updateBlobs(this.blobs);
     this.blobRenderer.render();
+    this.updateSimulationStatus(this.endCondition);
     if (!this.simulationComplete) {
       requestAnimationFrame(this.simulate.bind(this));
+    } else {
+      console.log("Simulation complete.");
     }
   }
 }
