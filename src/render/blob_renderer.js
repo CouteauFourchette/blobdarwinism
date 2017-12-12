@@ -2,6 +2,8 @@ import vertexSouce from './blob_vs';
 import fragmentSource from './blob_fs';
 import BlobRenderable from './blob_renderable';
 import * as Config from '../config';
+import * as SimulationUtil from '../simulation/simulation_util';
+import * as Physics from '../simulation/physics';
 
 import { mat4 } from 'gl-matrix';
 
@@ -28,13 +30,15 @@ export default class BlobRenderer {
     this.uModel = this.GL.getUniformLocation(this.program, "u_ModelMatrix");
     this.uTime = this.GL.getUniformLocation(this.program, "u_Time");
 
-    this.initBuffer();
+    this.lineModelMatrix = mat4.create();
+
+    this.initBuffers();
     this.orthographicMatrix = mat4.create();
     this.createOrthographicMatrix();
     this.render();
   }
 
-  initBuffer(){
+  initBuffers(){
     this.circleVerts = new Float32Array(1024);
     let j = 0;
     for (var i = 0; i < 512; i++) {
@@ -45,6 +49,17 @@ export default class BlobRenderer {
     this.vertexBuffer = this.GL.createBuffer();
     this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.vertexBuffer);
     this.GL.bufferData(this.GL.ARRAY_BUFFER, new Float32Array(this.circleVerts), this.GL.STATIC_DRAW);
+
+    this.lineBuffer = this.GL.createBuffer();
+
+  }
+
+  renderLine(color, from, to){
+    this.GL.uniformMatrix4fv(this.uModel, false, this.lineModelMatrix);
+    this.GL.bufferData(this.GL.ARRAY_BUFFER, new Float32Array(from.concat(to)), this.GL.STATIC_DRAW);
+    this.GL.uniform4fv(this.uColor, color);   
+    this.GL.vertexAttribPointer(this.aPosition, 2, this.GL.FLOAT, false, 0, 0);    
+    this.GL.drawArrays(this.GL.LINES, 0, 2); 
   }
 
   initTimes(){
@@ -69,6 +84,7 @@ export default class BlobRenderer {
     blobs.forEach(blob => {
       this.blobs[blob.id].position = [...blob.position, 0];
       this.blobs[blob.id].scale = [blob.size, blob.size, 1];
+      this.blobs[blob.id].size = blob.size;
     });
   } 
 
@@ -95,9 +111,32 @@ export default class BlobRenderer {
     this.prepare();
     this.start();
     let blobKeys = Object.keys(this.blobs);
+    let blobArray = [];
+    blobKeys.forEach(blobKey => blobArray.push(this.blobs[blobKey]));
     blobKeys.forEach(blobKey => {
-      this.blobs[blobKey].prepareRender(this.deltaTime, this.uColor, this.uModel);
+      let blob = this.blobs[blobKey];
+      if(blob.size !== Config.FOOD_SIZE){
+        let closeBlob = SimulationUtil.closestConsumable(blob, blobArray, []);
+        let closePredator = SimulationUtil.closestPredator(blob, blobArray);
+        if(closeBlob)
+        {
+          closeBlob = Physics.distanceVectorToWorldSpace(closeBlob);
+          this.renderLine([0,1,0,1], 
+            [blob.position[0]+5, blob.position[1] + 5],
+            [blob.position[0] + closeBlob[0],blob.position[1] + closeBlob[1]]);
+        }
+        if(closePredator){
+          closePredator = Physics.distanceVectorToWorldSpace(closePredator);          
+          this.renderLine([1,0,0,1], 
+            [blob.position[0] - 5, blob.position[1] + 5],
+            [blob.position[0] + closePredator[0],blob.position[1] + closePredator[1]]);
+        } 
+      }
+      this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.vertexBuffer);
+      this.GL.bufferData(this.GL.ARRAY_BUFFER, new Float32Array(this.circleVerts), this.GL.STATIC_DRAW);
+      blob.prepareRender(this.deltaTime, this.uColor, this.uModel);
       this.GL.drawArrays(this.GL.TRIANGLE_FAN, 0, this.circleVerts.length/2);
+
     });
     this.stop();
   }
@@ -116,7 +155,6 @@ export default class BlobRenderer {
   start(){
     this.GL.useProgram(this.program);
     this.GL.enableVertexAttribArray(this.aPosition);
-    this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.vertexBuffer);
     this.GL.vertexAttribPointer(this.aPosition, 2, this.GL.FLOAT, false, 0, 0);
     this.GL.uniform1f(this.uTime, this.totalTime);
     this.GL.uniformMatrix4fv(this.uOrthographic, false, this.orthographicMatrix);    

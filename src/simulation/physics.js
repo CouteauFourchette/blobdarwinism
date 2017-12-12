@@ -24,9 +24,17 @@ export function inBoundsPosition(objectA){
   return [xPos, yPos];
 }
 
-export function normalizedDistanceToEntity(from, to){
+export function normalizedVectorToEntity(from, to){
   return [
-    to.position[0]/Config.WIDTH - from.position[0]/Config.WIDTH,
-    to.position[1]/Config.HEIGHT - from.position[1]/Config.HEIGHT
+    (1 + to.position[0]/Config.WIDTH - from.position[0]/Config.WIDTH) / 2,
+    (1 + to.position[1]/Config.HEIGHT - from.position[1]/Config.HEIGHT) / 2
   ];
+}
+
+export function normalizedVectorToDistance(vector){
+  return (Math.pow((vector[0]*2-1)*Config.WIDTH, 2) + Math.pow((vector[1]*2-1)*Config.HEIGHT, 2));
+}
+
+export function distanceVectorToWorldSpace(vector){
+  return [(vector[0]*2-1)*Config.WIDTH, (vector[1]*2-1)*Config.HEIGHT];
 }

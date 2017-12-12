@@ -11,6 +11,7 @@ export default class BlobRenderable {
     this.position = [position[0], position[1], 0];
     this.rotation = rotation;
     this.scale = scale;
+    this.size = scale[0];
     this.color = color;
     this.modelMatrix = createModelMatrix(this.position, this.rotation, this.scale);
     this.primativeType = primativeType;
