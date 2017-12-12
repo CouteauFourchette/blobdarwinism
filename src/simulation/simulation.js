@@ -36,6 +36,18 @@ class Simulation {
     }
   }
 
+  newGeneration() {
+    const prevGeneration = this.blobBrains;
+    const newGeneration = new BlobBrains(this.generateBlobs());
+    newGeneration.allBrains().forEach(brain => {
+      const newWeights = Genetic.produceChildWeights(prevGeneration);
+      brain.setNetwork(
+        // new Network(newWeights);
+      );
+    });
+    this.blobBrains = newGeneration;
+  }
+
   initTimes(){
     this.totalTime = 0;
     this.deltaTime = 0;
@@ -45,6 +57,7 @@ class Simulation {
   updateTimes(){
     let newTime = Date.now();
     this.deltaTime = (newTime - this.lastUpdate)/1000;
+    if (this.deltaTime === 0) { this.deltaTime = 0.001; }
     this.lastUpdate = newTime;
     this.totalTime += this.deltaTime;
   }
@@ -94,9 +107,8 @@ class Simulation {
 
   reset() {
     this.blobRenderer.removeAllRenderObjects();
-    this.generateBlobs();
     this.generateFood();
-    this.blobBrains = new BlobBrains(this.blobs);
+    this.newGeneration(); // invokes this.generateBlobs() internally
     this.blobRenderer.addBlobsAndFood(this.blobs, this.food);
     this.simulationComplete = false;
     this.run();

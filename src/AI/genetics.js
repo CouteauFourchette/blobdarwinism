@@ -19,21 +19,28 @@ class Genetic {
     }
   }
 
-  static breed(networkA, networkB) {
-    const networkSize = networkA.length;
-    const networkC = [];
+  static produceChildWeights(blobBrainsObj) {
+    return Genetic.breed(
+      Genetic.getFitParent(blobBrainsObj).getWeights(),
+      Genetic.getFitParent(blobBrainsObj).getWeights()
+    );
+  }
+
+  static breed(weightsA, weightsB) {
+    const networkSize = weightsA.length;
+    const newWeights = [];
     for (let i = 0; i < networkSize; i += 1) {
       if (Math.random() <= GENETIC_CROSSOVER) {
-        networkC[i] = networkA[i];
+        newWeights[i] = weightsA[i];
       } else {
-        networkC[i] = networkB[i];
+        newWeights[i] = weightsB[i];
       }
 
       if (Math.random() < MUTATION_RATE) {
-        networkC[i] += (Math.random()-0.5) * MUTATION_RANGE;
+        newWeights[i] += (Math.random()-0.5) * MUTATION_RANGE;
       }
     }
-    return networkC;
+    return newWeights;
   }
 }
 

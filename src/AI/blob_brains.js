@@ -1,9 +1,13 @@
-import BlobNetwork from './blob_network';
+import BlobBrain from './blob_brain';
 
 class BlobBrains {
   constructor(blobs) {
     this.blobBrains = {};
     blobs.forEach(blob => this.addBlob(blob));
+  }
+
+  allBrains() {
+    Object.keys(this.blobBrains).map(key => this.blobBrains[key]);
   }
 
   takeDecision(blob, input) {
@@ -12,7 +16,8 @@ class BlobBrains {
   }
 
   addBlob(blob) {
-    this.blobBrains[blob.id] = new BlobNetwork(blob);
+    const blobNetwork = new BlobBrain(blob);
+    this.blobBrains[blob.id] = blobNetwork;
   }
 
   removeBlob(blob) {

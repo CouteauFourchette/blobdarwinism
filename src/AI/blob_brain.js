@@ -1,12 +1,21 @@
-class BlobBrain {
-  constructor(blob) {
-    this.id = blob.id;
-    this.fitness = 0;
+import BrainInterface from './brain_interface';
+
+class BlobBrain extends BrainInterface {
+  constructor(blob, network) {
+    super(blob, network);
+  }
+
+  getNetwork() {
+    return this.network;
+  }
+
+  setNetwork(network) {
+    this.network = network;
   }
 
   //Overwrite to make intelligent :)
   takeDecision(input) {
-    return [(Math.random() - 0.5) / 2, (Math.random() - 0.5) / 2];
+    // return this.network.activate(input)
   }
 }
 

@@ -15,11 +15,11 @@ class Blob {
   move(deltaTime) {
     this.velocity[0] += this.acceleration[0];
     this.velocity[1] += this.acceleration[1];
-    if (Math.abs(this.velocity[0]) > SimulationUtil.MAX_SPEED) {
-      this.velocity[0] = SimulationUtil.MAX_SPEED * Math.sign(this.velocity[0]);
+    if (Math.abs(this.velocity[0]) > Config.MAX_SPEED) {
+      this.velocity[0] = Config.MAX_SPEED * Math.sign(this.velocity[0]);
     }
-    if (Math.abs(this.velocity[1]) > SimulationUtil.MAX_SPEED) {
-      this.velocity[1] = SimulationUtil.MAX_SPEED * Math.sign(this.velocity[1]);
+    if (Math.abs(this.velocity[1]) > Config.MAX_SPEED) {
+      this.velocity[1] = Config.MAX_SPEED * Math.sign(this.velocity[1]);
     }
     this.position[0] += this.velocity[0]*deltaTime;
     this.position[1] += this.velocity[1]*deltaTime;
