@@ -1,11 +1,12 @@
 import * as SimulationUtil from './simulation_util';
+import * as Config from '../config';
 
 class Food {
   constructor(id, position) {
     this.id = id;
     this.position = position;
     this.color = SimulationUtil.randomColor();
-    this.size = SimulationUtil.FOOD_SIZE;
+    this.size = Config.FOOD_SIZE;
   }
 }
 
