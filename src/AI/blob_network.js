@@ -1,57 +1,34 @@
 import BlobBrain from './blob_brain';
-import { Architect, Trainer } from 'synaptic';
+import { Architect, Trainer, Network } from 'synaptic';
 
 class BlobNetwork extends BlobBrain {
-  constructor(dimensions = [8, 4, 2]) {
-    super({id: 1});
-    this.perceptron = new Architect.Perceptron(...dimensions);
-    // this.trainer = new Trainer(this.perceptron);
+  constructor(blob, network, dimensions = [8, 4, 2]) {
+    super(blob);
+    if (network) {
+      this.perceptron = network;
+    } else {
+      this.perceptron = new Architect.Perceptron(...dimensions);
+    }
   }
 
-  extractAllWeights(layers) {
-    const weights = [];
-    layers.forEach(layer => {
-      weights.concat(this.extractWeights(layer));
-    });
+  extractWeights() {
+    const jsonPerceptron = this.perceptron.toJSON();
+    const connections = Object.keys(jsonPerceptron.connections);
+    const weights = connections.map(c => jsonPerceptron.connections[c].weight);
     return weights;
   }
 
-  extractWeights(layer) {
-    // debugger;
-    const connections = layer.connectedTo[0].connections;
-    const weights = Object.keys(connections).map(key => {
-      return connections[key].weight;
+  networkFromWeights(weights) {
+    const jsonPerceptron = JSON.parse(this.perceptron.toJSON());
+    weights.forEach((weight, idx) => {
+      jsonPerceptron.connections[idx].weight = weight;
     });
-    return weights;
+    return Network.fromJSON(jsonPerceptron);
   }
 
-  setAllWeights(layers, weights) {
-    let start = 0;
-    let numWeights = 0;
-    layers.forEach(layer => {
-      numWeights = Object.keys(layer.connectedTo[0].connections).length;
-      this.setWeights(layer, weights.slice(start, start + numWeights));
-      start = weightCount;
-    });
-  }
-
-  setWeights(layer, weights) {
-    const connections = layer.connectedTo[0].connections;
-    Object.keys(connections).forEach((key, idx) => {
-      connections[key].weight = weights[idx];
-    });
-  }
-
-  getInputLayer(){
-    return this.perceptron.layers.input;
-  }
-
-  getHiddenLayer(depth = 0) {
-    return this.perceptron.layers.hidden[depth];
-  }
-
-  getOutputLayer() {
-    return this.perceptron.layers.output;
+  takeDecision(input) {
+    const positiveVector = this.perceptron.activate(input);
+    return [positiveVector[0] - 0.5, positiveVector[1] - 0.5];
   }
 }
 
