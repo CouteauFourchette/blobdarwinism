@@ -106,6 +106,10 @@ export default class BlobRenderer {
     delete this.blobs[id];
   }
 
+  removeAllRenderObjects(){
+    this.blobs = {};
+  }
+
   render(){
     this.updateTimes();
     this.prepare();
