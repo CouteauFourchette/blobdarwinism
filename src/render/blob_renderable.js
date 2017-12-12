@@ -17,7 +17,7 @@ export default class BlobRenderable {
     this.primativeType = primativeType;
   }
 
-  prepareRender(deltaTime, uColor, uModelMatrix){
+  prepareRender(uColor, uModelMatrix){
     updateModelMatrix(this.modelMatrix, this.position, this.rotation, this.scale);
     this.GL.uniformMatrix4fv(uModelMatrix, false, this.modelMatrix);     
     this.GL.uniform4fv(uColor, this.color);

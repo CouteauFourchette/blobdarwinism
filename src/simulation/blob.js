@@ -12,7 +12,7 @@ class Blob {
     this.alive = true;
   }
 
-  move() {
+  move(deltaTime) {
     this.velocity[0] += this.acceleration[0];
     this.velocity[1] += this.acceleration[1];
     if (Math.abs(this.velocity[0]) > SimulationUtil.MAX_SPEED) {
@@ -21,8 +21,8 @@ class Blob {
     if (Math.abs(this.velocity[1]) > SimulationUtil.MAX_SPEED) {
       this.velocity[1] = SimulationUtil.MAX_SPEED * Math.sign(this.velocity[1]);
     }
-    this.position[0] += this.velocity[0];
-    this.position[1] += this.velocity[1];
+    this.position[0] += this.velocity[0]*deltaTime;
+    this.position[1] += this.velocity[1]*deltaTime;
   }
 
   eat(blob) {

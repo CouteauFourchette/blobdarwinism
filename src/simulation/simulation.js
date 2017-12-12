@@ -33,11 +33,24 @@ class Simulation {
     }
   }
 
+  initTimes(){
+    this.totalTime = 0;
+    this.deltaTime = 0;
+    this.lastUpdate = Date.now();
+  }
+
+  updateTimes(){
+    let newTime = Date.now();
+    this.deltaTime = (newTime - this.lastUpdate)/100;
+    this.lastUpdate = newTime;
+    this.totalTime += this.deltaTime;
+  }
+
   moveBlobs() {
     this.blobs.forEach(blob => {
       const acceleration = this.blobBrains.takeDecision(blob, [Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random()]);
       blob.accelerate(acceleration);
-      blob.move();
+      blob.move(this.deltaTime);
       blob.position = inBoundsPosition(blob);
     });
   }
@@ -72,14 +85,15 @@ class Simulation {
   }
 
   run() {
-    this.initialTime = Date.now();
+    this.initTimes();
     this.simulate();
   }
 
   simulate() {
+    this.updateTimes();
     this.eat();
     this.moveBlobs();
-    this.blobBrains.updateBlobs(this.blobs, Date.now() - this.initialTime);
+    this.blobBrains.updateBlobs(this.blobs, this.totalTime);
     this.blobRenderer.updateBlobs(this.blobs);
     this.blobRenderer.render();
     if (!this.simulationComplete) {
