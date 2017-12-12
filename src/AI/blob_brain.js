@@ -1,6 +1,7 @@
 class BlobBrain {
   constructor(blob) {
     this.id = blob.id;
+    this.fitness = 0;
   }
 
   //Overwrite to make intelligent :)
