@@ -88,6 +88,10 @@ export default class BlobRenderer {
     });
   } 
 
+  addBlobsAndFood(blobs, food){
+    blobs.concat(food).forEach(renderObject => this.addRenderObject(renderObject));    
+  }
+
   addRenderObject(blob){
       this.blobs[blob.id] =  new BlobRenderable(
         blob.id, 
