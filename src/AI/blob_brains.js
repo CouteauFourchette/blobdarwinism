@@ -7,7 +7,7 @@ class BlobBrains {
   }
 
   allBrains() {
-    Object.keys(this.blobBrains).map(key => this.blobBrains[key]);
+    return Object.keys(this.blobBrains).map(key => this.blobBrains[key]);
   }
 
   takeDecision(blob, input) {

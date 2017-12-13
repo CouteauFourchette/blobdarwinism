@@ -12,7 +12,7 @@ class Simulation {
     this.entityId = 0;
     this.blobs = [];
     this.food = [];
-    this.endCondition = 'TIME'; // Must be one of TIME, SIZE, NUM
+    this.endCondition = 'NONE'; // TIME, SIZE, NUM, or default behavior
     this.simulationComplete = false;
     this.generateBlobs();
     this.generateFood();

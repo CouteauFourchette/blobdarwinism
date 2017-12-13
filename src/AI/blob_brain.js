@@ -13,8 +13,8 @@ class BlobBrain extends BrainInterface {
     this.network = network;
   }
 
-  //Overwrite to make intelligent :)
   takeDecision(input) {
+    return [(Math.random() * 2) - 1, (Math.random() * 2) - 1];
     // return this.network.activate(input)
   }
 }
