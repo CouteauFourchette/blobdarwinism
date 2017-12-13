@@ -9,24 +9,6 @@ class Genetic {
     const totalFit = blobBrains.reduce((acc, brain) => acc + brain.fitness, 0);
     const probability = Math.random();
 
-<<<<<<< HEAD
-    const sortedBrains = blobBrains.sort((a, b) => {
-      if (a.fitness > b.fitness) return -1;
-      if (b.fitness > a.fitness) return 1;
-      return 0;
-    });
-
-    return sortedBrains[0];
-
-    // let cumProb = 0;
-    // for (let i = 0; i < blobBrains.length; i += 1) {
-    //   const brain = blobBrains[i];
-    //   if (probability < ((brain.fitness / totalFit) + cumProb)) {
-    //     return brain;
-    //   }
-    //   cumProb += (brain.fitness / totalFit);
-    // }
-=======
     let cumProb = 0;
     for (let i = 0; i < blobBrains.length; i += 1) {
       const brain = blobBrains[i];
@@ -35,7 +17,6 @@ class Genetic {
       }
       cumProb += (brain.fitness / totalFit);
     }
->>>>>>> AI/new-network
   }
 
   static produceChildWeights(blobBrainsObj) {
