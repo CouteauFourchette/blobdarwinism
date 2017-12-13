@@ -10,6 +10,17 @@ export function checkCollisionWithEntity(objectA, objectB) {
   return false;
 }
 
+export function checkCollisionWithWall(objectA) {
+  if ((objectA.position[0] - objectA.size) < 0 ||
+      (objectA.position[0] + objectA.size) > Config.WIDTH ||
+      (objectA.position[1] - objectA.size) < 0 ||
+      (objectA.position[1] + objectA.size) > Config.HEIGHT)
+  {
+    return true;
+  }
+  return false;
+}
+
 export function inBoundsPosition(objectA){
   let xPos = objectA.position[0];
   let yPos = objectA.position[1];
@@ -26,15 +37,15 @@ export function inBoundsPosition(objectA){
 
 export function normalizedVectorToEntity(from, to){
   return [
-    (1 + to.position[0]/Config.WIDTH - from.position[0]/Config.WIDTH) / 2,
-    (1 + to.position[1]/Config.HEIGHT - from.position[1]/Config.HEIGHT) / 2
+    (to.position[0]/Config.WIDTH - from.position[0]/Config.WIDTH),
+    (to.position[1]/Config.HEIGHT - from.position[1]/Config.HEIGHT)
   ];
 }
 
 export function normalizedVectorToDistance(vector){
-  return (Math.pow((vector[0]*2-1)*Config.WIDTH, 2) + Math.pow((vector[1]*2-1)*Config.HEIGHT, 2));
+  return (Math.pow((vector[0])*Config.WIDTH, 2) + Math.pow((vector[1])*Config.HEIGHT, 2));
 }
 
 export function distanceVectorToWorldSpace(vector){
-  return [(vector[0]*2-1)*Config.WIDTH, (vector[1]*2-1)*Config.HEIGHT];
+  return [(vector[0])*Config.WIDTH, (vector[1])*Config.HEIGHT];
 }

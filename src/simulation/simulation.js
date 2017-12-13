@@ -1,4 +1,4 @@
-import { inBoundsPosition, checkCollisionWithEntity } from './physics';
+import { inBoundsPosition, checkCollisionWithEntity, checkCollisionWithWall } from './physics';
 import BlobRenderer from '../render/blob_renderer';
 import BlobBrains from '../AI/blob_brains';
 import Genetic from '../AI/genetics';
@@ -13,7 +13,7 @@ class Simulation {
     this.entityId = 0;
     this.blobs = [];
     this.food = [];
-    this.endCondition = 'NONE'; // TIME, SIZE, NUM, or default behavior
+    this.endCondition = 'asdasd'; // TIME, SIZE, NUM, or default behavior
     this.simulationComplete = false;
     this.generateBlobs();
     this.generateFood();
@@ -24,6 +24,7 @@ class Simulation {
         new Network(8, [4], 2)
       );
     });
+    window.reset = this.reset.bind(this);
   }
 
   generateBlobs() {
@@ -43,16 +44,19 @@ class Simulation {
   }
 
   newGeneration() {
-    const prevGeneration = this.blobBrains;
+    let prevGeneration = this.blobBrains;
     this.generateBlobs();
-    const newGeneration = new BlobBrains(this.blobs);
+    let newGeneration = new BlobBrains(this.blobs);
     newGeneration.allBrains().forEach(brain => {
       const newWeights = Genetic.produceChildWeights(prevGeneration);
       brain.setNetwork(
         new Network(8, [4], 2, newWeights)
       );
     });
+
+    prevGeneration.allBrains().forEach(brain => brain.getNetwork().delete());
     this.blobBrains = newGeneration;
+    prevGeneration = newGeneration = null;
   }
 
   initTimes(){
@@ -71,14 +75,22 @@ class Simulation {
 
   moveBlobs() {
     this.blobs.forEach(blob => {
-      this.blobBrains.takeDecision(blob, [Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1])
+      const largestBlob = SimulationUtil.getLargestBlob(this.blobs);
+      const closestConsumable = SimulationUtil.closestConsumable(blob, this.blobs, this.food);
+      closestConsumable[2] = closestConsumable[2] / largestBlob;
+      const closestPredator = SimulationUtil.closestPredator(blob, this.blobs);
+      closestPredator[2] = closestPredator[2] / largestBlob;   
+      this.blobBrains.takeDecision(blob, [...closestConsumable, ...closestPredator, ((2*blob.position[0]/Config.WIDTH) - 1), (2 * blob.position[1]/Config.HEIGHT) - 1])
         .then((acceleration) => {
-          console.log(acceleration);
           blob.accelerate(acceleration);
       });
       
       blob.move(this.deltaTime);
-      blob.position = inBoundsPosition(blob);
+      // blob.position = inBoundsPosition(blob);
+      if(checkCollisionWithWall(blob)){
+        // this.blobRenderer.removeBlob(blob.id);
+        this.blobs = this.blobs.filter(otherBlob => otherBlob.id !== blob.id);
+      }
     });
   }
 
@@ -143,7 +155,11 @@ class Simulation {
         result = largestBlobSize > Config.SIZE_THRESHOLD;
         break;
       default:
-        result = false;
+        if(this.blobs.length === 0){
+          result = true;
+        }else{
+          result = false;
+        }
     }
     this.simulationComplete = result;
   }

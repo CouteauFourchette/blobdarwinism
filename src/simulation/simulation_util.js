@@ -16,9 +16,15 @@ export function randomColor() {
   return [Math.random(), Math.random(), Math.random(), 1];
 }
 
+export function getLargestBlob(blobs){
+  return blobs.map(blob => blob.size).reduce(
+    (a, b) => Math.max(a, b)
+  );
+}
+
 export function closestConsumable(blob, blobs, food){
   let closestDistance = Infinity;
-  let returnConsumable = undefined;
+  let returnConsumable = [0,0,0];
   blobs.concat(food).forEach((entity) => {
     if(blob.id === entity.id || blob.size <= entity.size) return;
     let vector = normalizedVectorToEntity(blob, entity);
@@ -33,7 +39,7 @@ export function closestConsumable(blob, blobs, food){
 
 export function closestPredator(blob, blobs){
   let closestDistance = Infinity;
-  let returnPredator = undefined;
+  let returnPredator = [0,0,0];
   blobs.forEach((entity) => {
     if(blob.id === entity.id || blob.size >= entity.size) return;
     let vector = normalizedVectorToEntity(blob, entity);

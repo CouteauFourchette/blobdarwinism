@@ -1,6 +1,6 @@
-import { Graph, Array1D, Array2D, NDArrayMathGPU, Session } from 'deeplearn';
+import { Graph, Array1D, Array2D, NDArrayMathCPU, Session } from 'deeplearn';
 
-const math = new NDArrayMathGPU();
+const math = new NDArrayMathCPU();
 
 class Network {
   constructor(input, hidden, output, weights) {
@@ -18,11 +18,11 @@ class Network {
       let previous = input;
       this.weightArray = [];
       for (let i = 0; i < hidden.length; i += 1) {
-        const randomWeights = [...new Array(previous * hidden[i])].map(() => Math.random());
+        const randomWeights = [...new Array(previous * hidden[i])].map(() => 2*Math.random()-1);
         this.weightArray.push(randomWeights);
         previous = hidden[i];
       }
-      const randomWeights = [...new Array(output * hidden[hidden.length - 1])].map(() => Math.random());
+      const randomWeights = [...new Array(output * hidden[hidden.length - 1])].map(() => 2*Math.random()-1);
       this.weightArray.push(randomWeights);
     }
 
@@ -38,7 +38,6 @@ class Network {
       previous = hidden[i];
       previousLayer = hiddenLayers[i];
     }
-    console.log(graph);
 
     const array2d = Array2D.new([hidden[hidden.length - 1], output], this.weightArray[hidden.length]);
     const weight = graph.variable(`w${hidden.length}`, array2d);
@@ -57,6 +56,10 @@ class Network {
     const tensorInput = Array1D.new(input);
     const result = this.session.eval(this.outputLayer, [{ tensor: this.inputLayer, data: tensorInput }]);
     return result.data();
+  }
+
+  delete() {
+    this.session = undefined;
   }
 }
 
