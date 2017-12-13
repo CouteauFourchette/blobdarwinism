@@ -54,7 +54,6 @@ class Simulation {
       );
     });
 
-    prevGeneration.allBrains().forEach(brain => brain.getNetwork().delete());
     this.blobBrains = newGeneration;
     prevGeneration = newGeneration = null;
   }
