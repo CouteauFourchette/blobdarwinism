@@ -1,6 +1,5 @@
 require('../style/app.scss');
 import Simulation from './simulation/simulation';
-import BlobNetwork from './AI/blob_network';
 
 document.addEventListener('DOMContentLoaded', (event) => {
   const canvas = document.getElementById('canvas');

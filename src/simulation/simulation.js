@@ -38,7 +38,8 @@ class Simulation {
 
   newGeneration() {
     const prevGeneration = this.blobBrains;
-    const newGeneration = new BlobBrains(this.generateBlobs());
+    this.generateBlobs();
+    const newGeneration = new BlobBrains(this.blobs);
     newGeneration.allBrains().forEach(brain => {
       const newWeights = Genetic.produceChildWeights(prevGeneration);
       brain.setNetwork(
