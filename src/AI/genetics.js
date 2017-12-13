@@ -9,6 +9,7 @@ class Genetic {
     const totalFit = blobBrains.reduce((acc, brain) => acc + brain.fitness, 0);
     const probability = Math.random();
 
+<<<<<<< HEAD
     const sortedBrains = blobBrains.sort((a, b) => {
       if (a.fitness > b.fitness) return -1;
       if (b.fitness > a.fitness) return 1;
@@ -25,6 +26,16 @@ class Genetic {
     //   }
     //   cumProb += (brain.fitness / totalFit);
     // }
+=======
+    let cumProb = 0;
+    for (let i = 0; i < blobBrains.length; i += 1) {
+      const brain = blobBrains[i];
+      if (probability < ((brain.fitness / totalFit) + cumProb)) {
+        return brain;
+      }
+      cumProb += (brain.fitness / totalFit);
+    }
+>>>>>>> AI/new-network
   }
 
   static produceChildWeights(blobBrainsObj) {
@@ -40,15 +51,19 @@ class Genetic {
     for (let i = 0; i < networkSize; i += 1) {
       newWeights[i] = [];
       for(let j = 0; j < weightsA[i].length; j++){
-        if (Math.random() <= GENETIC_CROSSOVER) {
-          newWeights[i][j] = weightsA[i][j];
-        } else {
-          newWeights[i][j] = weightsB[i][j];
+        newWeights[i][j] = [];
+        for (let k = 0; k < weightsA[i][j].length; k += 1) {
+          if (Math.random() <= GENETIC_CROSSOVER) {
+            newWeights[i][j][k] = weightsA[i][j][k];
+          } else {
+            newWeights[i][j][k] = weightsB[i][j][k];
+          }
+
+          if (Math.random() < MUTATION_RATE) {
+            newWeights[i][j][k] += (2 * Math.random() - 1) * MUTATION_RANGE;
+          }
         }
 
-        if (Math.random() < MUTATION_RATE) {
-          newWeights[i][j] += (2*Math.random()-1) * MUTATION_RANGE;
-        }
       }
     }
     return newWeights;
