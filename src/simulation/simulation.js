@@ -111,7 +111,7 @@ class Simulation {
             this.blobs[i].eat(this.blobs[j]);
             this.blobRenderer.removeBlob(this.blobs[j].id);
             this.blobs.splice(j, 1);
-          } else if (this.blobs[i].size <= this.blobs[j].size) {
+          } else if (this.blobs[i].size < this.blobs[j].size) {
             this.blobs[j].eat(this.blobs[i]);
             this.blobRenderer.removeBlob(this.blobs[i].id);
             this.blobs.splice(i, 1);
