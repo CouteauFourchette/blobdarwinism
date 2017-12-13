@@ -15,7 +15,7 @@ class Genetic {
       return 0;
     });
 
-    return sortedBrains[Math.floor(Math.random() * 2)];
+    return sortedBrains[0];
 
     // let cumProb = 0;
     // for (let i = 0; i < blobBrains.length; i += 1) {

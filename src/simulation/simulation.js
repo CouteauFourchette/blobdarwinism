@@ -21,7 +21,7 @@ class Simulation {
     this.blobBrains = new BlobBrains(this.blobs);
     this.blobBrains.allBrains().forEach(brain => {
       brain.setNetwork(
-        new Network(8, [4], 2)
+        new Network(8, [16, 16], 2)
       );
     });
     window.reset = this.reset.bind(this);
@@ -50,7 +50,7 @@ class Simulation {
     newGeneration.allBrains().forEach(brain => {
       const newWeights = Genetic.produceChildWeights(prevGeneration);
       brain.setNetwork(
-        new Network(8, [4], 2, newWeights)
+        new Network(8, [16, 16], 2, newWeights)
       );
     });
 
