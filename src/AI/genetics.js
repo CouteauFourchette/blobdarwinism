@@ -21,8 +21,8 @@ class Genetic {
 
   static produceChildWeights(blobBrainsObj) {
     return Genetic.breed(
-      Genetic.getFitParent(blobBrainsObj).getWeights(),
-      Genetic.getFitParent(blobBrainsObj).getWeights()
+      Genetic.getFitParent(blobBrainsObj).getNetwork().extractWeights(),
+      Genetic.getFitParent(blobBrainsObj).getNetwork().extractWeights()
     );
   }
 

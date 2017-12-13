@@ -19,7 +19,7 @@
     "webpack": "^3.10.0"
   },
   "dependencies": {
-    "gl-matrix": "^2.4.0",
-    "synaptic": "^1.1.4"
+    "deeplearn": "^0.3.14",
+    "gl-matrix": "^2.4.0"
   }
 }

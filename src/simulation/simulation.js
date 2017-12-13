@@ -2,6 +2,7 @@ import { inBoundsPosition, checkCollisionWithEntity } from './physics';
 import BlobRenderer from '../render/blob_renderer';
 import BlobBrains from '../AI/blob_brains';
 import Genetic from '../AI/genetics';
+import Network from '../AI/network';
 import * as SimulationUtil from './simulation_util';
 import * as Config from '../config';
 import Blob from './blob';
@@ -18,6 +19,11 @@ class Simulation {
     this.generateFood();
     this.blobRenderer = new BlobRenderer(GL, this.blobs, this.food);
     this.blobBrains = new BlobBrains(this.blobs);
+    this.blobBrains.allBrains().forEach(brain => {
+      brain.setNetwork(
+        new Network(8, [4], 2)
+      );
+    });
   }
 
   generateBlobs() {
@@ -43,7 +49,7 @@ class Simulation {
     newGeneration.allBrains().forEach(brain => {
       const newWeights = Genetic.produceChildWeights(prevGeneration);
       brain.setNetwork(
-        // new Network(newWeights);
+        new Network(8, [4], 2, newWeights)
       );
     });
     this.blobBrains = newGeneration;
@@ -65,8 +71,12 @@ class Simulation {
 
   moveBlobs() {
     this.blobs.forEach(blob => {
-      const acceleration = this.blobBrains.takeDecision(blob, [Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random(), Math.random()]);
-      blob.accelerate(acceleration);
+      this.blobBrains.takeDecision(blob, [Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1])
+        .then((acceleration) => {
+          console.log(acceleration);
+          blob.accelerate(acceleration);
+      });
+      
       blob.move(this.deltaTime);
       blob.position = inBoundsPosition(blob);
     });
