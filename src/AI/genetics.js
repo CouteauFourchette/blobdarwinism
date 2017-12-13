@@ -11,7 +11,7 @@ class Genetic {
 
     const sortedBrains = blobBrains.sort((a, b) => {
       if (a.fitness > b.fitness) return -1;
-      if (b.fitness < a.fitness) return 1;
+      if (b.fitness > a.fitness) return 1;
       return 0;
     });
 
@@ -50,7 +50,7 @@ class Genetic {
           newWeights[i][j] += (2*Math.random()-1) * MUTATION_RANGE;
         }
       }
-    }  
+    }
     return newWeights;
   }
 }

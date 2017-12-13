@@ -79,10 +79,10 @@ class Simulation {
       const closestConsumable = SimulationUtil.closestConsumable(blob, this.blobs, this.food);
       closestConsumable[2] = closestConsumable[2] / largestBlob;
       const closestPredator = SimulationUtil.closestPredator(blob, this.blobs);
-      closestPredator[2] = closestPredator[2] / largestBlob;   
+      closestPredator[2] = closestPredator[2] / largestBlob;
       const acceleration = this.blobBrains.takeDecision(blob, [...closestConsumable, ...closestPredator, ((2*blob.position[0]/Config.WIDTH) - 1), (2 * blob.position[1]/Config.HEIGHT) - 1]);
       blob.accelerate(acceleration);
-      
+
       blob.move(this.deltaTime);
       // blob.position = inBoundsPosition(blob);
       if(checkCollisionWithWall(blob)){
