@@ -1,7 +1,7 @@
-export const NUM_BLOBS = 3;
-export const NUM_FOOD = 25;
-export const WIDTH = 800;
-export const HEIGHT = 600;
+export const NUM_BLOBS = 15;
+export const NUM_FOOD = 50;
+export const WIDTH = 1600;
+export const HEIGHT = 1200;
 export const MAX_SPEED = 25;
 export const FOOD_SIZE = 2;
 export const INITIAL_BLOB_SIZE = 5;

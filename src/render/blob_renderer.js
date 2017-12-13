@@ -116,21 +116,21 @@ export default class BlobRenderer {
           this.renderLine([0,1,0,1], 
             [blob.position[0]+5, blob.position[1] + 5],
             [blob.position[0] + closeBlob[0],blob.position[1] + closeBlob[1]]);
-        }
-        if(closePredator){
-          closePredator = Physics.distanceVectorToWorldSpace(closePredator);          
-          this.renderLine([1,0,0,1], 
-            [blob.position[0] - 5, blob.position[1] + 5],
-            [blob.position[0] + closePredator[0],blob.position[1] + closePredator[1]]);
-        } 
-      }
-      this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.vertexBuffer);
-      this.GL.bufferData(this.GL.ARRAY_BUFFER, new Float32Array(this.circleVerts), this.GL.STATIC_DRAW);
-      blob.prepareRender(this.uColor, this.uModel);
-      this.GL.drawArrays(this.GL.TRIANGLE_FAN, 0, this.circleVerts.length/2);
-
-    });
-    this.stop();
+          }
+          if(closePredator){
+            closePredator = Physics.distanceVectorToWorldSpace(closePredator);          
+            this.renderLine([1,0,0,1], 
+              [blob.position[0] - 5, blob.position[1] + 5],
+              [blob.position[0] + closePredator[0],blob.position[1] + closePredator[1]]);
+            } 
+          }
+          this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.vertexBuffer);
+          this.GL.bufferData(this.GL.ARRAY_BUFFER, this.circleVerts, this.GL.STATIC_DRAW);
+          blob.prepareRender(this.uColor, this.uModel);
+          this.GL.drawArrays(this.GL.TRIANGLE_FAN, 0, this.circleVerts.length/2);
+          
+        });
+        this.stop();
   }
 
   loadShader(shaderSource, shaderType){

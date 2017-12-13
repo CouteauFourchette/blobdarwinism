@@ -24,7 +24,7 @@ class Simulation {
         new Network(8, [16, 16], 2)
       );
     });
-    window.reset = this.reset.bind(this);
+    window.reset = this.manualReset.bind(this);
   }
 
   generateBlobs() {
@@ -80,10 +80,8 @@ class Simulation {
       closestConsumable[2] = closestConsumable[2] / largestBlob;
       const closestPredator = SimulationUtil.closestPredator(blob, this.blobs);
       closestPredator[2] = closestPredator[2] / largestBlob;   
-      this.blobBrains.takeDecision(blob, [...closestConsumable, ...closestPredator, ((2*blob.position[0]/Config.WIDTH) - 1), (2 * blob.position[1]/Config.HEIGHT) - 1])
-        .then((acceleration) => {
-          blob.accelerate(acceleration);
-      });
+      const acceleration = this.blobBrains.takeDecision(blob, [...closestConsumable, ...closestPredator, ((2*blob.position[0]/Config.WIDTH) - 1), (2 * blob.position[1]/Config.HEIGHT) - 1]);
+      blob.accelerate(acceleration);
       
       blob.move(this.deltaTime);
       // blob.position = inBoundsPosition(blob);
@@ -126,6 +124,10 @@ class Simulation {
   run() {
     this.initTimes();
     this.simulate();
+  }
+
+  manualReset(){
+    this.simulationComplete  = true;
   }
 
   reset() {
@@ -171,7 +173,6 @@ class Simulation {
     this.blobBrains.updateBlobs(this.blobs, this.totalTime);
     this.blobRenderer.updateBlobs(this.blobs);
     this.blobRenderer.render();
-    this.updateSimulationStatus(this.endCondition);
     if (!this.simulationComplete) {
       requestAnimationFrame(this.simulate.bind(this));
     } else {
@@ -179,6 +180,7 @@ class Simulation {
       console.log("Simulation complete.");
       this.reset();
     }
+    this.updateSimulationStatus(this.endCondition);
   }
 }
 
