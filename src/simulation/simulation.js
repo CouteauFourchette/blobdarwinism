@@ -13,7 +13,6 @@ class Simulation {
     this.entityId = 0;
     this.blobs = [];
     this.food = [];
-    this.endCondition = 'asdasd'; // TIME, SIZE, NUM, or default behavior
     this.simulationComplete = false;
     this.generateBlobs();
     this.generateFood();
@@ -21,7 +20,7 @@ class Simulation {
     this.blobBrains = new BlobBrains(this.blobs);
     this.blobBrains.allBrains().forEach(brain => {
       brain.setNetwork(
-        new Network(8, [16, 16], 2)
+        new Network(...Config.NETWORK_DIMENSIONS)
       );
     });
     window.reset = this.manualReset.bind(this);
@@ -50,10 +49,9 @@ class Simulation {
     newGeneration.allBrains().forEach(brain => {
       const newWeights = Genetic.produceChildWeights(prevGeneration);
       brain.setNetwork(
-        new Network(8, [16, 16], 2, newWeights)
+        new Network(...Config.NETWORK_DIMENSIONS, newWeights)
       );
     });
-
     this.blobBrains = newGeneration;
     prevGeneration = newGeneration = null;
   }
@@ -79,9 +77,22 @@ class Simulation {
       closestConsumable[2] = closestConsumable[2] / largestBlob;
       const closestPredator = SimulationUtil.closestPredator(blob, this.blobs);
       closestPredator[2] = closestPredator[2] / largestBlob;
-      const acceleration = this.blobBrains.takeDecision(blob, [...closestConsumable, ...closestPredator, ((2*blob.position[0]/Config.WIDTH) - 1), (2 * blob.position[1]/Config.HEIGHT) - 1]);
-      blob.accelerate(acceleration);
+      // const closestFood = SimulationUtil.closestFood(blob, this.food);
+      // const closestBlob = SimulationUtil.closestBlob(blob, this.blobs);
+      // closestBlob[2] /= largestBlob;
 
+      const inputs = [
+        ...closestConsumable,
+        ...closestPredator,
+        ((2 * blob.position[0] / Config.WIDTH) - 1),
+        ((2 * blob.position[1] / Config.HEIGHT) - 1),
+        (blob.velocity[0]) / Config.MAX_SPEED,
+        (blob.velocity[1]) / Config.MAX_SPEED
+      ];
+
+      const acceleration = this.blobBrains.takeDecision(blob, inputs);
+
+      blob.accelerate(acceleration);
       blob.move(this.deltaTime);
       // blob.position = inBoundsPosition(blob);
       if(checkCollisionWithWall(blob)){
@@ -126,7 +137,7 @@ class Simulation {
   }
 
   manualReset(){
-    this.simulationComplete  = true;
+    this.simulationComplete = true;
   }
 
   reset() {
@@ -138,30 +149,23 @@ class Simulation {
     this.run();
   }
 
-  updateSimulationStatus(condition) {
-    let result;
-    switch(condition) {
-      case 'TIME':
-        result = this.totalTime > Config.TIME_THRESHOLD;
-        break;
-      case 'NUM':
-        console.log("num blobs remaining:", this.blobs.length);
-        result = this.blobs.length < Config.NUM_THRESHOLD;
-        break;
-      case 'SIZE':
-        const largestBlobSize = this.blobs.map(blob => blob.size).reduce(
-          (a, b) => Math.max(a, b)
-        );
-        console.log("current largest blob: ", largestBlobSize);
-        result = largestBlobSize > Config.SIZE_THRESHOLD;
-        break;
-      default:
-        if(this.blobs.length === 0){
-          result = true;
-        }else{
-          result = false;
-        }
-    }
+  updateSimulationStatus(conditions) {
+    let result = false;
+    conditions.forEach(condition => {
+      if (result) { return; }
+      switch(condition) {
+        case 'TIME':
+          result = result || this.totalTime > Config.TIME_THRESHOLD;
+          break;
+        case 'NUM':
+          result = result || this.blobs.length < Config.NUM_THRESHOLD;
+          break;
+        case 'SIZE':
+          const largestBlobSize = SimulationUtil.getLargestBlob(this.blobs);
+          result = result || largestBlobSize > Config.SIZE_THRESHOLD;
+          break;
+      }
+    });
     this.simulationComplete = result;
   }
 
@@ -175,11 +179,10 @@ class Simulation {
     if (!this.simulationComplete) {
       requestAnimationFrame(this.simulate.bind(this));
     } else {
-      // simulation over
       console.log("Simulation complete.");
       this.reset();
     }
-    this.updateSimulationStatus(this.endCondition);
+    this.updateSimulationStatus(Config.END_CONDITIONS);
   }
 }
 

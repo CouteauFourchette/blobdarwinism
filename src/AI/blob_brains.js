@@ -1,4 +1,5 @@
 import BlobBrain from './blob_brain';
+import { SIZE_FACTOR, TIME_FACTOR } from '../config';
 
 class BlobBrains {
   constructor(blobs) {
@@ -26,11 +27,8 @@ class BlobBrains {
 
   updateBlobs(blobs, totalTime) {
     blobs.forEach(blob => {
-      this.blobBrains[blob.id].fitness = 2*blob.size + totalTime;
-      console.log(`blob.id: ${blob.id},
-         blob.size: ${blob.size},
-         totalTime: ${totalTime},
-         fitness: ${this.blobBrains[blob.id].fitness}`);
+      const fitness = (SIZE_FACTOR * blob.size) + (TIME_FACTOR * totalTime);
+      this.blobBrains[blob.id].fitness = fitness;
     });
   }
 }

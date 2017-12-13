@@ -51,3 +51,32 @@ export function closestPredator(blob, blobs){
   });
   return returnPredator;
 }
+
+export function closestBlob(blob, blobs) {
+  let closestDistance = Infinity;
+  let returnBlob = [0, 0, 0];
+  blobs.forEach((otherBlob) => {
+    if (blob.id === otherBlob.id) { return; }
+    let vector = normalizedVectorToEntity(blob, otherBlob);
+    let distance = normalizedVectorToDistance(vector);
+    if(distance < closestDistance) {
+      returnBlob = [vector[0], vector[1], otherBlob.size];
+      closestDistance = distance;
+    }
+  });
+  return returnBlob;
+}
+
+export function closestFood(blob, foods) {
+  let closestDistance = Infinity;
+  let returnFood = [0, 0, 0];
+  foods.forEach((food) => {
+    let vector = normalizedVectorToEntity(blob, food);
+    let distance = normalizedVectorToDistance(vector);
+    if(distance < closestDistance) {
+      returnFood = [vector[0], vector[1]];
+      closestDistance = distance;
+    }
+  });
+  return returnFood;
+}
