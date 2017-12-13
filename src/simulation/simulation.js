@@ -88,8 +88,8 @@ class Simulation {
       blob.move(this.deltaTime);
       // blob.position = inBoundsPosition(blob);
       if(checkCollisionWithWall(blob)){
-        // this.blobRenderer.removeBlob(blob.id);
         this.blobs = this.blobs.filter(otherBlob => otherBlob.id !== blob.id);
+        this.blobRenderer.removeBlob(blob.id);
       }
     });
   }
