@@ -75,6 +75,13 @@ export default class BlobRenderer {
       this.blobs[blob.id].position = [...blob.position, 0];
       this.blobs[blob.id].scale = [blob.size, blob.size, 1];
       this.blobs[blob.id].size = blob.size;
+      if(blob.velocity){
+        // if(blob.velocity[1] === 0){
+
+        // }
+        // this.blobs[blob.id].rotation[2] = 180/Math.PI * Math.asin(blob.velocity[0]/blob.velocity[1]) - 45;
+        // console.log(blob.velocity);
+      }
     });
   } 
 
@@ -83,14 +90,18 @@ export default class BlobRenderer {
   }
 
   addRenderObject(blob){
-      this.blobs[blob.id] =  new BlobRenderable(
-        blob.id, 
-        this.GL,
-        blob.position,
-        [0,0,0],
-        [blob.size, blob.size, 1],
-        blob.color
-      );
+    let rotation = 0;
+    if(blob.velocity){
+      // rotation = 180/Math.PI * Math.acos(blob.velocity[0]/blob.velocity[1]);
+    }
+    this.blobs[blob.id] =  new BlobRenderable(
+      blob.id, 
+      this.GL,
+      blob.position,
+      [0,0, rotation],
+      [blob.size, blob.size, 1],
+      blob.color
+    );
   }
 
   removeBlob(id){

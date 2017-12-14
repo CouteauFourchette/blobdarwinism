@@ -1,11 +1,11 @@
 // Simulation constants
-export const NUM_BLOBS = 15;
+export const NUM_BLOBS = 50;
 export const NUM_FOOD = 100;
-export const WIDTH = 800;
-export const HEIGHT = 600;
-export const MAX_SPEED = 25;
+export const WIDTH = 1600;
+export const HEIGHT = 1200;
+export const MAX_SPEED = 5;
 export const FOOD_SIZE = 2;
-export const INITIAL_BLOB_SIZE = 5;
+export const INITIAL_BLOB_SIZE = 10;
 
 // Simulation end conditions
 export const END_CONDITIONS = ["TIME", "NUM"];
