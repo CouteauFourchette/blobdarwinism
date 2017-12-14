@@ -191,19 +191,11 @@ class Simulation {
     this.eat();
     this.moveBlobs();
     this.blobBrains.updateBlobs(this.blobs, this.totalTime);
-<<<<<<< HEAD
-    this.blobRenderer.updateBlobs(this.blobs);
-    this.blobRenderer.render(this.totalTime);
-    if (!this.simulationComplete) {
-      requestAnimationFrame(this.simulate.bind(this));
-    } else {
-=======
     if (this.renderSimulation) {
       this.blobRenderer.updateBlobs(this.blobs);
-      this.blobRenderer.render();
+      this.blobRenderer.render(this.totalTime);
     }
     if (this.simulationComplete) {
->>>>>>> config
       console.log("Simulation complete.");
       this.reset();
     } else {
