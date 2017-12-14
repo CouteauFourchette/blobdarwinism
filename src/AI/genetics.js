@@ -1,8 +1,19 @@
-const GENETIC_CROSSOVER = 0.5;
-const MUTATION_RATE = 0.02;
-const MUTATION_RANGE = 0.2;
+import * as Config from '../config';
+import BlobBrains from './blob_brains';
+import Network from './network';
 
 class Genetic {
+
+  static newGeneration(blobs, oldGeneration) {
+    const blobBrains = new BlobBrains(blobs);
+    blobBrains.allBrains().forEach(brain => {
+      const newWeights = oldGeneration ? Genetic.produceChildWeights(oldGeneration) : undefined;
+      brain.setNetwork(
+        new Network(...Config.NETWORK_DIMENSIONS, newWeights)
+      );
+    });
+    return blobBrains;
+  }
 
   static getFitParent(blobBrainsObj) {
     const blobBrains = blobBrainsObj.allBrains();
@@ -34,14 +45,14 @@ class Genetic {
       for(let j = 0; j < weightsA[i].length; j++){
         newWeights[i][j] = [];
         for (let k = 0; k < weightsA[i][j].length; k += 1) {
-          if (Math.random() <= GENETIC_CROSSOVER) {
+          if (Math.random() <= Config.GENETIC_CROSSOVER) {
             newWeights[i][j][k] = weightsA[i][j][k];
           } else {
             newWeights[i][j][k] = weightsB[i][j][k];
           }
 
-          if (Math.random() < MUTATION_RATE) {
-            newWeights[i][j][k] += (2 * Math.random() - 1) * MUTATION_RANGE;
+          if (Math.random() < Config.MUTATION_RATE) {
+            newWeights[i][j][k] += (2 * Math.random() - 1) * Config.MUTATION_RANGE;
           }
         }
 

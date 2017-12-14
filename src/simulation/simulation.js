@@ -17,12 +17,7 @@ class Simulation {
     this.generateBlobs();
     this.generateFood();
     this.blobRenderer = new BlobRenderer(GL, this.blobs, this.food);
-    this.blobBrains = new BlobBrains(this.blobs);
-    this.blobBrains.allBrains().forEach(brain => {
-      brain.setNetwork(
-        new Network(...Config.NETWORK_DIMENSIONS)
-      );
-    });
+    this.blobBrains = Genetic.newGeneration(this.blobs);
     window.reset = this.manualReset.bind(this);
   }
 
@@ -43,17 +38,8 @@ class Simulation {
   }
 
   newGeneration() {
-    let prevGeneration = this.blobBrains;
     this.generateBlobs();
-    let newGeneration = new BlobBrains(this.blobs);
-    newGeneration.allBrains().forEach(brain => {
-      const newWeights = Genetic.produceChildWeights(prevGeneration);
-      brain.setNetwork(
-        new Network(...Config.NETWORK_DIMENSIONS, newWeights)
-      );
-    });
-    this.blobBrains = newGeneration;
-    prevGeneration = newGeneration = null;
+    this.blobBrains = Genetic.newGeneration(this.blobs, this.blobBrains);
   }
 
   initTimes(){
