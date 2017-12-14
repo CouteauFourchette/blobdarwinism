@@ -75,12 +75,15 @@ export default class BlobRenderer {
       this.blobs[blob.id].position = [...blob.position, 0];
       this.blobs[blob.id].scale = [blob.size, blob.size, 1];
       this.blobs[blob.id].size = blob.size;
-      if(blob.velocity){
-        // if(blob.velocity[1] === 0){
-
-        // }
-        // this.blobs[blob.id].rotation[2] = 180/Math.PI * Math.asin(blob.velocity[0]/blob.velocity[1]) - 45;
-        // console.log(blob.velocity);
+      if(blob.acceleration){
+        let acceleration = [blob.acceleration[0],blob.acceleration[1]];
+        if(acceleration[0] === 0) acceleration[0] = .0000001;
+        if(acceleration[1] === 0) acceleration[1] = .0000001;
+        this.blobs[blob.id].rotation[2] = 180 + 180/Math.PI * Math.atan(acceleration[1]/acceleration[0]);
+        if(acceleration[0] < 0)
+        {
+          this.blobs[blob.id].rotation[2] += 180;
+        }
       }
     });
   } 
