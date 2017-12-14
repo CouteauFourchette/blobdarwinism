@@ -27,7 +27,7 @@ class BlobBrains {
 
   updateBlobs(blobs, totalTime) {
     blobs.forEach(blob => {
-      const fitness = (SIZE_FACTOR * blob.size) + (TIME_FACTOR * totalTime);
+      const fitness = Math.pow((SIZE_FACTOR * blob.size + TIME_FACTOR * totalTime), 2);
       this.blobBrains[blob.id].fitness = fitness;
     });
   }

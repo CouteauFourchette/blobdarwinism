@@ -1,18 +1,58 @@
 import * as Config from '../config';
 import BlobBrains from './blob_brains';
 import Network from './network';
+import { debug } from 'util';
 
 class Genetic {
 
   static newGeneration(blobs, oldGeneration) {
     const blobBrains = new BlobBrains(blobs);
     blobBrains.allBrains().forEach(brain => {
-      const newWeights = oldGeneration ? Genetic.produceChildWeights(oldGeneration) : undefined;
+      let newWeights;
+      let newBias;
+      if (oldGeneration) {
+        const parent1 = Genetic.getFitParent(oldGeneration);
+        const parent2 = Genetic.getFitParent(oldGeneration);
+        newWeights =  Genetic.produceChildWeights(parent1, parent2);
+        newBias = parent1.getNetwork().extractBias();
+      }
+
+      if (Math.random() < Config.NEW_ENTITIES) newWeights = undefined;
+
       brain.setNetwork(
-        new Network(...Config.NETWORK_DIMENSIONS, newWeights)
+        new Network(...Config.NETWORK_DIMENSIONS, newWeights, newBias)
       );
     });
     return blobBrains;
+  }
+
+  static saveGeneration(generation) {
+    const jsonObject = { 'brains': {}, 'config': {}};
+    generation.allBrains().forEach((blobBrain) => {
+      const network = blobBrain.getNetwork();
+      jsonObject['brains'][blobBrain.id] = {
+        structure: network.extractStructure(),
+        weights: network.extractWeights(),
+        bias: network.extractBias()
+      };
+    });
+    const config = Object.keys(Config);
+    for (let i = 0; i < config.length; i += 1) {
+      jsonObject['config'][config[i]] = Config[config[i]];
+    }
+
+    console.log(jsonObject);
+  }
+
+  static loadGeneration(jsonGeneration) {
+    const generation = JSON.parse(jsonGeneration);
+    const ids = Object.keys(generation);
+    const blobBrains = [];
+    ids.forEach(id => {
+      const weights = generation[id].weights;
+      const bias = generation[id].bias;
+      const structure = generation[id].structure;
+    });
   }
 
   static getFitParent(blobBrainsObj) {
@@ -30,10 +70,17 @@ class Genetic {
     }
   }
 
-  static produceChildWeights(blobBrainsObj) {
+  static produceChildWeights(parent1, parent2) {
     return Genetic.breed(
-      Genetic.getFitParent(blobBrainsObj).getNetwork().extractWeights(),
-      Genetic.getFitParent(blobBrainsObj).getNetwork().extractWeights()
+      parent1.getNetwork().extractWeights(),
+      parent2.getNetwork().extractWeights()
+    );
+  }
+
+  static produceChildBias(parent1, parent2) {
+    return Genetic.breed(
+      parent1.getNetwork().extractBias(),
+      parent2.getNetwork().extractBias()
     );
   }
 
