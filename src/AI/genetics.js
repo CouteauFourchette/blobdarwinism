@@ -7,9 +7,19 @@ class Genetic {
   static newGeneration(blobs, oldGeneration) {
     const blobBrains = new BlobBrains(blobs);
     blobBrains.allBrains().forEach(brain => {
-      const newWeights = oldGeneration ? Genetic.produceChildWeights(oldGeneration) : undefined;
+      let newWeights;
+      let newBias;
+      if (oldGeneration) {
+        const parent1 = Genetic.getFitParent(oldGeneration);
+        const parent2 = Genetic.getFitParent(oldGeneration);
+        newWeights =  Genetic.produceChildWeights(parent1, parent2);
+        newBias = parent1.getNetwork().extractBias();
+      }
+
+      if (Math.random() < Config.NEW_ENTITIES) newWeights = undefined;
+
       brain.setNetwork(
-        new Network(...Config.NETWORK_DIMENSIONS, newWeights)
+        new Network(...Config.NETWORK_DIMENSIONS, newWeights, newBias)
       );
     });
     return blobBrains;
@@ -30,10 +40,17 @@ class Genetic {
     }
   }
 
-  static produceChildWeights(blobBrainsObj) {
+  static produceChildWeights(parent1, parent2) {
     return Genetic.breed(
-      Genetic.getFitParent(blobBrainsObj).getNetwork().extractWeights(),
-      Genetic.getFitParent(blobBrainsObj).getNetwork().extractWeights()
+      parent1.getNetwork().extractWeights(),
+      parent2.getNetwork().extractWeights()
+    );
+  }
+
+  static produceChildBias(parent1, parent2) {
+    return Genetic.breed(
+      parent1.getNetwork().extractBias(),
+      parent2.getNetwork().extractBias()
     );
   }
 
