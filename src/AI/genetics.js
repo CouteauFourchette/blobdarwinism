@@ -1,6 +1,7 @@
 import * as Config from '../config';
 import BlobBrains from './blob_brains';
 import Network from './network';
+import { debug } from 'util';
 
 class Genetic {
 
@@ -23,6 +24,35 @@ class Genetic {
       );
     });
     return blobBrains;
+  }
+
+  static saveGeneration(generation) {
+    const jsonObject = { 'brains': {}, 'config': {}};
+    generation.allBrains().forEach((blobBrain) => {
+      const network = blobBrain.getNetwork();
+      jsonObject['brains'][blobBrain.id] = {
+        structure: network.extractStructure(),
+        weights: network.extractWeights(),
+        bias: network.extractBias()
+      };
+    });
+    const config = Object.keys(Config);
+    for (let i = 0; i < config.length; i += 1) {
+      jsonObject['config'][config[i]] = Config[config[i]];
+    }
+
+    console.log(jsonObject);
+  }
+
+  static loadGeneration(jsonGeneration) {
+    const generation = JSON.parse(jsonGeneration);
+    const ids = Object.keys(generation);
+    const blobBrains = [];
+    ids.forEach(id => {
+      const weights = generation[id].weights;
+      const bias = generation[id].bias;
+      const structure = generation[id].structure;
+    });
   }
 
   static getFitParent(blobBrainsObj) {
