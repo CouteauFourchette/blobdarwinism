@@ -13,6 +13,8 @@ class Simulation {
     this.entityId = 0;
     this.blobs = [];
     this.food = [];
+    this.renderSimulation = true;
+    this.simulationDepth = 0;
     this.simulationComplete = false;
     this.generateBlobs();
     this.generateFood();
@@ -56,28 +58,49 @@ class Simulation {
     this.totalTime += this.deltaTime;
   }
 
+  getInputs(blob, inputTypes) {
+    let inputs = [];
+    const largestBlob = SimulationUtil.getLargestBlob(this.blobs);
+    inputTypes.forEach(inputType => {
+      switch(inputType) {
+        case "SIZE":
+          inputs.push(blob.size/largestBlob);
+          break;
+        case "POS":
+          const x = 2 * blob.position[0] / Config.WIDTH - 1;
+          const y = 2 * blob.position[1] / Config.HEIGHT - 1;
+          inputs.push(x);
+          inputs.push(y);
+          break;
+        case "VEL":
+          inputs.push(blob.velocity[0] / Config.MAX_SPEED);
+          inputs.push(blob.velocity[1] / Config.MAX_SPEED);
+          break;
+        case "CONS":
+          const cons = SimulationUtil.closestConsumable(blob, this.blobs, this.food);
+          inputs = inputs.concat(cons);
+          break;
+        case "PRED":
+          const pred = SimulationUtil.closestPredator(blob, this.blobs);
+          inputs = inputs.concat(pred);
+          break;
+        case "FOOD":
+          const food = SimulationUtil.closestFood(blob, this.food);
+          inputs = inputs.concat(food);
+          break;
+        case "BLOB":
+          const otherBlob = SimulationUtil.closestBlob(blob, this.blobs);
+          inputs = inputs.concat(otherBlob);
+          break;
+      }
+    });
+    return inputs;
+  }
+
   moveBlobs() {
     this.blobs.forEach(blob => {
-      const largestBlob = SimulationUtil.getLargestBlob(this.blobs);
-      const closestConsumable = SimulationUtil.closestConsumable(blob, this.blobs, this.food);
-      closestConsumable[2] = closestConsumable[2] / largestBlob;
-      const closestPredator = SimulationUtil.closestPredator(blob, this.blobs);
-      closestPredator[2] = closestPredator[2] / largestBlob;
-      // const closestFood = SimulationUtil.closestFood(blob, this.food);
-      // const closestBlob = SimulationUtil.closestBlob(blob, this.blobs);
-      // closestBlob[2] /= largestBlob;
-
-      const inputs = [
-        ...closestConsumable,
-        ...closestPredator,
-        ((2 * blob.position[0] / Config.WIDTH) - 1),
-        ((2 * blob.position[1] / Config.HEIGHT) - 1),
-        (blob.velocity[0]) / Config.MAX_SPEED,
-        (blob.velocity[1]) / Config.MAX_SPEED
-      ];
-
+      const inputs = this.getInputs(blob, Config.INPUTS);
       const acceleration = this.blobBrains.takeDecision(blob, inputs);
-
       blob.accelerate(acceleration);
       blob.move(this.deltaTime);
       // blob.position = inBoundsPosition(blob);
@@ -127,10 +150,13 @@ class Simulation {
   }
 
   reset() {
-    this.blobRenderer.removeAllRenderObjects();
+    this.simulationDepth = 0;
     this.generateFood();
     this.newGeneration(); // invokes this.generateBlobs() internally
-    this.blobRenderer.addBlobsAndFood(this.blobs, this.food);
+    if (this.renderSimulation) {
+      this.blobRenderer.removeAllRenderObjects();
+      this.blobRenderer.addBlobsAndFood(this.blobs, this.food);
+    }
     this.simulationComplete = false;
     this.run();
   }
@@ -150,23 +176,39 @@ class Simulation {
           const largestBlobSize = SimulationUtil.getLargestBlob(this.blobs);
           result = result || largestBlobSize > Config.SIZE_THRESHOLD;
           break;
+        case 'DEPTH':
+          // console.log("simulationDepth: ", this.simulationDepth);
+          result = result || this.simulationDepth > Config.DEPTH_THRESHOLD;
+          break;
       }
     });
     this.simulationComplete = result;
   }
 
   simulate() {
+    this.simulationDepth += 1;
     this.updateTimes();
     this.eat();
     this.moveBlobs();
     this.blobBrains.updateBlobs(this.blobs, this.totalTime);
+<<<<<<< HEAD
     this.blobRenderer.updateBlobs(this.blobs);
     this.blobRenderer.render(this.totalTime);
     if (!this.simulationComplete) {
       requestAnimationFrame(this.simulate.bind(this));
     } else {
+=======
+    if (this.renderSimulation) {
+      this.blobRenderer.updateBlobs(this.blobs);
+      this.blobRenderer.render();
+    }
+    if (this.simulationComplete) {
+>>>>>>> config
       console.log("Simulation complete.");
       this.reset();
+    } else {
+      setTimeout(this.simulate.bind(this), 0);
+      // setInterval(this.simulate.bind(this), 0);
     }
     this.updateSimulationStatus(Config.END_CONDITIONS);
   }
