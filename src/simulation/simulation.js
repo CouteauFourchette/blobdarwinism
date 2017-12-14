@@ -161,7 +161,7 @@ class Simulation {
     this.moveBlobs();
     this.blobBrains.updateBlobs(this.blobs, this.totalTime);
     this.blobRenderer.updateBlobs(this.blobs);
-    this.blobRenderer.render();
+    this.blobRenderer.render(this.totalTime);
     if (!this.simulationComplete) {
       requestAnimationFrame(this.simulate.bind(this));
     } else {

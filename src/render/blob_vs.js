@@ -8,11 +8,21 @@ precision mediump float;
 uniform mat4 u_OrthographicMatrix;
 uniform mat4 u_ModelMatrix;
 uniform float u_Time;
+uniform vec4 u_Color;
+
+varying vec4 v_Color;
 
 attribute vec2 a_Position;
 
 void main() {
-  gl_Position = u_OrthographicMatrix * u_ModelMatrix * vec4( a_Position,0.0, 1.0);
+  float x = (pow(sin(u_Time),1.0) * sin(a_Position.x*20.0 + a_Position.y*20.0))/10.0 - a_Position.x;
+  // float x = a_Position.x*sin(u_Time);
+  float y = (pow(cos(u_Time),1.0) * cos(a_Position.x*20.0 + a_Position.y*20.0))/10.0 + a_Position.y;
+  gl_Position = u_OrthographicMatrix * u_ModelMatrix * vec4(
+    x,
+    a_Position.y,
+    0.0, 1.0);
+    v_Color = u_Color * abs(x) * abs(y) * 3.0;
 }
 `;
 

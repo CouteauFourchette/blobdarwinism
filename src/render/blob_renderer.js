@@ -1,5 +1,6 @@
 import vertexSouce from './blob_vs';
 import fragmentSource from './blob_fs';
+import normalVertexSource from './normal_vs';
 import BlobRenderable from './blob_renderable';
 import * as Config from '../config';
 import * as SimulationUtil from '../simulation/simulation_util';
@@ -20,15 +21,20 @@ export default class BlobRenderer {
 
     let vertexShader = this.loadShader(vertexSouce, GL.VERTEX_SHADER);
     let fragmentShader = this.loadShader(fragmentSource, GL.FRAGMENT_SHADER);
-    this.initProgram(vertexShader, fragmentShader);
+    let normalVertexShader = this.loadShader(normalVertexSource, GL.VERTEX_SHADER);
+    this.blobProgram = this.initProgram(vertexShader, fragmentShader);
+    this.lineProgram = this.initProgram(normalVertexShader, fragmentShader);
 
-    this.aPosition = this.GL.getAttribLocation(this.program, "a_Position");
-    this.uColor = this.GL.getUniformLocation(this.program, "u_Color");
-    this.uOrthographic = this.GL.getUniformLocation(this.program, "u_OrthographicMatrix");
-    this.uModel = this.GL.getUniformLocation(this.program, "u_ModelMatrix");
-    this.uTime = this.GL.getUniformLocation(this.program, "u_Time");
+    this.aPosition = this.GL.getAttribLocation(this.blobProgram, "a_Position");
+    this.uColor = this.GL.getUniformLocation(this.blobProgram, "u_Color");
+    this.uOrthographic = this.GL.getUniformLocation(this.blobProgram, "u_OrthographicMatrix");
+    this.uModel = this.GL.getUniformLocation(this.blobProgram, "u_ModelMatrix");
+    this.uTime = this.GL.getUniformLocation(this.blobProgram, "u_Time");
 
-    this.lineModelMatrix = mat4.create();
+    this.aPositionLines = this.GL.getAttribLocation(this.lineProgram, "a_Position");
+    this.uColorLines = this.GL.getUniformLocation(this.lineProgram, "u_Color");
+    this.uOrthographicLines = this.GL.getUniformLocation(this.lineProgram, "u_OrthographicMatrix");
+    this.uModelLines = this.GL.getUniformLocation(this.lineProgram, "u_ModelMatrix");
 
     this.initBuffers();
     this.orthographicMatrix = mat4.create();
@@ -53,10 +59,9 @@ export default class BlobRenderer {
   }
 
   renderLine(color, from, to){
-    this.GL.uniformMatrix4fv(this.uModel, false, this.lineModelMatrix);
     this.GL.bufferData(this.GL.ARRAY_BUFFER, new Float32Array(from.concat(to)), this.GL.STATIC_DRAW);
-    this.GL.uniform4fv(this.uColor, color);   
-    this.GL.vertexAttribPointer(this.aPosition, 2, this.GL.FLOAT, false, 0, 0);    
+    this.GL.uniform4fv(this.uColorLines, color);   
+    // this.GL.vertexAttribPointer(this.aPositionLines, 2, this.GL.FLOAT, false, 0, 0);    
     this.GL.drawArrays(this.GL.LINES, 0, 2); 
   }
 
@@ -99,12 +104,29 @@ export default class BlobRenderer {
     this.blobs = {};
   }
 
-  render(){
+  render(totalTime){
     this.prepare();
-    this.start();
+    this.start(totalTime);
     let blobKeys = Object.keys(this.blobs);
     let blobArray = [];
-    blobKeys.forEach(blobKey => blobArray.push(this.blobs[blobKey]));
+    blobKeys.forEach(blobKey => {
+      let blob = this.blobs[blobKey];
+      blob.prepareRender(this.uColor, this.uModel);
+      this.GL.drawArrays(this.GL.TRIANGLE_FAN, 0, this.circleVerts.length/2);
+    });
+    this.stop();
+    this.renderLines();
+  }
+
+  renderLines(){
+    let blobKeys = Object.keys(this.blobs);
+    let blobArray = [];
+    blobKeys.forEach(blobKey => blobArray.push(this.blobs[blobKey]));    
+    this.GL.useProgram(this.lineProgram);
+    this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.lineBuffer);    
+    this.GL.enableVertexAttribArray(this.aPositionLines);
+    this.GL.vertexAttribPointer(this.aPositionLines, 2, this.GL.FLOAT, false, 0, 0);
+    this.GL.uniformMatrix4fv(this.uOrthographicLines, false, this.orthographicMatrix);
     blobKeys.forEach(blobKey => {
       let blob = this.blobs[blobKey];
       if(blob.size !== Config.FOOD_SIZE){
@@ -116,21 +138,16 @@ export default class BlobRenderer {
           this.renderLine([0,1,0,1], 
             [blob.position[0]+5, blob.position[1] + 5],
             [blob.position[0] + closeBlob[0],blob.position[1] + closeBlob[1]]);
-          }
-          if(closePredator){
-            closePredator = Physics.distanceVectorToWorldSpace(closePredator);          
-            this.renderLine([1,0,0,1], 
-              [blob.position[0] - 5, blob.position[1] + 5],
-              [blob.position[0] + closePredator[0],blob.position[1] + closePredator[1]]);
-            } 
-          }
-          this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.vertexBuffer);
-          this.GL.bufferData(this.GL.ARRAY_BUFFER, this.circleVerts, this.GL.STATIC_DRAW);
-          blob.prepareRender(this.uColor, this.uModel);
-          this.GL.drawArrays(this.GL.TRIANGLE_FAN, 0, this.circleVerts.length/2);
-          
-        });
-        this.stop();
+        }
+        if(closePredator){
+          closePredator = Physics.distanceVectorToWorldSpace(closePredator);          
+          this.renderLine([1,0,0,1], 
+            [blob.position[0] - 5, blob.position[1] + 5],
+            [blob.position[0] + closePredator[0],blob.position[1] + closePredator[1]]);
+        } 
+      }
+    });    
+    this.GL.disableVertexAttribArray(this.aPositionLines);      
   }
 
   loadShader(shaderSource, shaderType){
@@ -144,11 +161,13 @@ export default class BlobRenderer {
     return shader;
   }
 
-  start(){
-    this.GL.useProgram(this.program);
+  start(totalTime){
+    this.GL.useProgram(this.blobProgram);
+    this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.vertexBuffer);
+    this.GL.bufferData(this.GL.ARRAY_BUFFER, this.circleVerts, this.GL.STATIC_DRAW);
     this.GL.enableVertexAttribArray(this.aPosition);
     this.GL.vertexAttribPointer(this.aPosition, 2, this.GL.FLOAT, false, 0, 0);
-    this.GL.uniform1f(this.uTime, this.totalTime);
+    this.GL.uniform1f(this.uTime, totalTime);
     this.GL.uniformMatrix4fv(this.uOrthographic, false, this.orthographicMatrix);    
   }
 
@@ -157,15 +176,16 @@ export default class BlobRenderer {
   }
 
   initProgram(vertexShader, fragmentShader){
-    this.program = this.GL.createProgram();
-    this.GL.attachShader(this.program, vertexShader);
-    this.GL.attachShader(this.program, fragmentShader);
-    this.GL.linkProgram(this.program);
-    this.GL.validateProgram(this.program);
-    let status = this.GL.getProgramParameter( this.program, this.GL.LINK_STATUS);
+    let program = this.GL.createProgram();
+    this.GL.attachShader(program, vertexShader);
+    this.GL.attachShader(program, fragmentShader);
+    this.GL.linkProgram(program);
+    this.GL.validateProgram(program);
+    let status = this.GL.getProgramParameter( program, this.GL.LINK_STATUS);
     if (!status) {
-      throw "Link error in program:  " + this.GL.getProgramInfoLog(this.program);
+      throw "Link error in program:  " + this.GL.getProgramInfoLog(program);
     }
+    return program;
   }
 
   createOrthographicMatrix(){
