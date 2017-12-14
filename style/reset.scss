@@ -36,7 +36,11 @@ button {
   -webkit-appearance: none;
   -moz-appearance: none;
 }
-
+input
+{
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
 button,
 input[type="submit"] {
   cursor: pointer;

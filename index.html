@@ -4,11 +4,61 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <script src="dist/bundle.js"></script>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet">  
   <link rel="stylesheet" href="dist/style.css">
+  <script src="./src/index.js"></script>
   <title>Blob Darwinism</title>
 </head>
-<body>
-  <canvas id="canvas"></canvas> 
+<body class="index">
+  <div class="header">
+    <div class="title">
+      <h1>Blob Darwinism</h1>
+      <h2>Visualize Machine Learning</h2>
+    </div>
+    <div class="header-image-container">
+      <img src="./learning.gif" alt="">
+    </div>
+  </div>
+  <div class="content">
+    <div class="settings">
+      <div class = "slider-container">
+        <p id = "amplitudeVal">Width</p>
+        <input id = "amplitude" type="range" min = "1" max = "200" value = "100"/>
+      </div>
+      <div class = "slider-container">
+        <p id = "wavelengthVal">Height</p>
+        <input id = "wavelength" type="range" min = "40" max = "150" value = "95"/>
+      </div>
+      <div class = "slider-container">
+        <p id = "frequencyVal">Max Speed</p>
+        <input id = "frequency" type="range" min = "0" max = "200" value = "100"/>
+      </div>
+      <div class = "slider-container">
+          <p id = "steepnessVal">Number of Blobs</p>
+          <input id = "steepness" type="range" min = "0" max = "100" value = "100"/>
+      </div>
+      <button id="start-simulation">
+        Start Simulation
+      </button>
+    </div>
+    <div class="description-container">
+      <div class="description">
+        <h2>
+          Description
+        </h2>
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tempora doloremque quae, corporis repellat nam cumque consequatur excepturi possimus quasi unde dolorum eligendi inventore quisquam! Dicta incidunt ipsa perferendis illo eveniet?
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi et architecto atque, quidem doloribus, delectus a hic optio magnam quia totam, quibusdam officia quaerat pariatur aut libero laudantium ab praesentium.
+          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Vero quisquam earum dolorum perferendis. Rerum voluptates commodi illum distinctio omnis tempora, saepe ducimus nulla error accusamus! Accusantium animi hic quis repellat!
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis, aperiam velit et nesciunt inventore accusantium! Quod minima aut quo, dolorem obcaecati, nam totam necessitatibus sit quam, ducimus repellat reiciendis non.
+        </p>
+      </div>
+      <div class="contributors">
+        <p>Julien Gurunlian</p>
+        <p>Brandt Sheets</p>
+        <p>Garrett Tongue</p>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
