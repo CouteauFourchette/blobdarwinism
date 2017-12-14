@@ -5,3 +5,4 @@ bundle.js.map
 style.css
 style.css.map
 .eslintrc
+*.log
