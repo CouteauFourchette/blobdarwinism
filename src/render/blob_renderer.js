@@ -17,6 +17,8 @@ export default class BlobRenderer {
     this.GL.enable(this.GL.SAMPLE_ALPHA_TO_COVERAGE);
     this.GL.sampleCoverage(.5, false);
     this.blobs = {};
+    this.food = {};
+    
     blobs.concat(food).forEach(renderObject => this.addRenderObject(renderObject));
 
     let vertexShader = this.loadShader(vertexSouce, GL.VERTEX_SHADER);
@@ -135,31 +137,36 @@ export default class BlobRenderer {
   renderLines(){
     let blobKeys = Object.keys(this.blobs);
     let blobArray = [];
-    blobKeys.forEach(blobKey => blobArray.push(this.blobs[blobKey]));    
+    let foodArray = [];
+    blobKeys.forEach(blobKey =>{
+      if(this.blobs[blobKey].size === Config.FOOD_SIZE){
+        foodArray.push(this.blobs[blobKey]);
+      }else{
+        blobArray.push(this.blobs[blobKey]);
+      }
+    });    
     this.GL.useProgram(this.lineProgram);
     this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.lineBuffer);    
     this.GL.enableVertexAttribArray(this.aPositionLines);
     this.GL.vertexAttribPointer(this.aPositionLines, 2, this.GL.FLOAT, false, 0, 0);
     this.GL.uniformMatrix4fv(this.uOrthographicLines, false, this.orthographicMatrix);
-    blobKeys.forEach(blobKey => {
-      let blob = this.blobs[blobKey];
-      if(blob.size !== Config.FOOD_SIZE){
-        let closeBlob = SimulationUtil.closestConsumable(blob, blobArray, []);
-        let closePredator = SimulationUtil.closestPredator(blob, blobArray);
-        if(closeBlob)
-        {
-          closeBlob = Physics.distanceVectorToWorldSpace(closeBlob);
-          this.renderLine([0,1,0,1], 
-            [blob.position[0]+5, blob.position[1] + 5],
-            [blob.position[0] + closeBlob[0],blob.position[1] + closeBlob[1]]);
-        }
-        if(closePredator){
-          closePredator = Physics.distanceVectorToWorldSpace(closePredator);          
-          this.renderLine([1,0,0,1], 
-            [blob.position[0] - 5, blob.position[1] + 5],
-            [blob.position[0] + closePredator[0],blob.position[1] + closePredator[1]]);
-        } 
+    blobArray.forEach(blob => {
+      let closeFood = SimulationUtil.closestFood(blob, foodArray);
+      let closeBlob = SimulationUtil.closestBlob(blob, blobArray);
+
+      if(closeBlob)
+      {
+        closeBlob = Physics.distanceVectorToWorldSpace(closeBlob);
+        this.renderLine([0,1,0,1], 
+          [blob.position[0]+5, blob.position[1] + 5],
+          [blob.position[0] + closeBlob[0],blob.position[1] + closeBlob[1]]);
       }
+      if(closeFood){
+        closeFood = Physics.distanceVectorToWorldSpace(closeFood);          
+        this.renderLine([1,0,0,1], 
+          [blob.position[0] - 5, blob.position[1] + 5],
+          [blob.position[0] + closeFood[0],blob.position[1] + closeFood[1]]);
+      } 
     });    
     this.GL.disableVertexAttribArray(this.aPositionLines);      
   }
