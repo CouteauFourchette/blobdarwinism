@@ -15,12 +15,13 @@ class Simulation {
     this.food = [];
     this.renderSimulation = true;
     this.simulationDepth = 0;
-    this.simulationComplete = false;
+    this.generationComplete = false;
     this.generateBlobs();
     this.generateFood();
     this.blobRenderer = new BlobRenderer(GL, this.blobs, this.food);
     this.blobBrains = Genetic.newGeneration(this.blobs);
-    window.reset = this.manualReset.bind(this);
+    window.simulateNextGeneration = this.manualReset.bind(this);
+    console.log("Configuration: ", Config);
   }
 
   generateBlobs() {
@@ -80,7 +81,8 @@ class Simulation {
           inputs.push(blob.velocity[1] / Config.MAX_SPEED);
           break;
         case "CONS":
-          const cons = SimulationUtil.closestConsumable(blob, this.blobs, this.food);
+          const cons = SimulationUtil.closestConsumable(
+            blob, this.blobs, this.food);
           inputs = inputs.concat(cons);
           break;
         case "PRED":
@@ -149,10 +151,10 @@ class Simulation {
   }
 
   manualReset(){
-    this.simulationComplete = true;
+    this.generationComplete = true;
   }
 
-  reset() {
+  simulateNextGeneration() {
     this.simulationDepth = 0;
     this.generateFood();
     this.newGeneration(); // invokes this.generateBlobs() internally
@@ -160,11 +162,19 @@ class Simulation {
       this.blobRenderer.removeAllRenderObjects();
       this.blobRenderer.addBlobsAndFood(this.blobs, this.food);
     }
-    this.simulationComplete = false;
+    this.generationComplete = false;
     this.run();
   }
 
-  updateSimulationStatus(conditions) {
+  stop() {
+    this.blobRenderer.removeAllRenderObjects();
+    this.blobs = [];
+    this.food = [];
+    this.blobBrains = null;
+    this.blobRenderer = null;
+  }
+
+  updateGenerationStatus(conditions) {
     let result = false;
     conditions.forEach(condition => {
       if (result) { return; }
@@ -180,32 +190,34 @@ class Simulation {
           result = result || largestBlobSize > Config.SIZE_THRESHOLD;
           break;
         case 'DEPTH':
-          // console.log("simulationDepth: ", this.simulationDepth);
           result = result || this.simulationDepth > Config.DEPTH_THRESHOLD;
           break;
       }
     });
-    this.simulationComplete = result;
+    this.generationComplete = result;
   }
 
   simulate() {
-    this.simulationDepth += 1;
-    this.updateTimes();
-    this.eat();
-    this.moveBlobs();
-    this.blobBrains.updateBlobs(this.blobs, this.totalTime);
-    if (this.renderSimulation) {
-      this.blobRenderer.updateBlobs(this.blobs);
-      this.blobRenderer.render(this.totalTime);
-    }
-    if (this.simulationComplete) {
-      console.log("Simulation complete.");
-      this.reset();
-    } else {
+    try {
+      if (this.generationComplete) {
+        console.log("Generation complete.");
+        this.simulateNextGeneration();
+        return;
+      }
+      this.simulationDepth += 1;
+      this.updateTimes();
+      this.eat();
+      this.moveBlobs();
+      this.blobBrains.updateBlobs(this.blobs, this.totalTime);
+      if (this.renderSimulation) {
+        this.blobRenderer.updateBlobs(this.blobs);
+        this.blobRenderer.render(this.totalTime);
+      }
+      this.updateGenerationStatus(Config.END_CONDITIONS);
       setTimeout(this.simulate.bind(this), 0);
-      // setInterval(this.simulate.bind(this), 0);
+    } catch (e) {
+      // Forgive me father for I have sinned.
     }
-    this.updateSimulationStatus(Config.END_CONDITIONS);
   }
 }
 

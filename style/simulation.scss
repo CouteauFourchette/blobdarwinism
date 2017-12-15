@@ -1,0 +1,27 @@
+#simulation-footer {
+  padding: 20px;
+  background-color: lightgrey;
+}
+
+#simulation-footer button,
+#back-link {
+  background-color: black;
+  color: white;
+  border: 1px solid white;
+  border-radius: 5px;
+  font-family: sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 10px 20px;
+  margin-right: 10px;
+}
+
+#simulation-footer button:hover,
+#back-link:hover {
+  background-color: #333;
+  transition: background-color 300ms ease-out;
+}
+
+#download-link {
+  display: hidden;
+}

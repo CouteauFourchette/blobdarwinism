@@ -49,8 +49,9 @@ class Genetic {
     for (let i = 0; i < config.length; i += 1) {
       jsonObject['config'][config[i]] = Config[config[i]];
     }
-
-    console.log(jsonObject);
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(
+      JSON.stringify(jsonObject));
+    return dataStr;
   }
 
   static loadGeneration(jsonGeneration) {
