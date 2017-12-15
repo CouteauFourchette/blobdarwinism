@@ -10,11 +10,16 @@ class Genetic {
     blobBrains.allBrains().forEach(brain => {
       let newWeights;
       let newBias;
+      let newColor;
       if (oldGeneration) {
         const parent1 = Genetic.getFitParent(oldGeneration);
         const parent2 = Genetic.getFitParent(oldGeneration);
         newWeights =  Genetic.produceChildWeights(parent1, parent2);
         newBias = parent1.getNetwork().extractBias();
+        newColor = parent1.color.map((color, idx) => {
+          return (color + parent2.color[idx])/2;
+        });
+        brain.color = newColor;
       }
 
       if (Math.random() < Config.NEW_ENTITIES) newWeights = undefined;

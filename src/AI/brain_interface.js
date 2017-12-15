@@ -1,6 +1,7 @@
 class BrainInterface {
   constructor(blob, network) {
     this.id = blob.id;
+    this.color = blob.color;
     this.fitness = 0;
     if (network) {
       this.network = network;

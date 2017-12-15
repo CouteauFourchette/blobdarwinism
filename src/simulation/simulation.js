@@ -42,6 +42,9 @@ class Simulation {
   newGeneration() {
     this.generateBlobs();
     this.blobBrains = Genetic.newGeneration(this.blobs, this.blobBrains);
+    this.blobs.forEach((blob) =>{
+      blob.color = this.blobBrains.blobBrains[blob.id].color;
+    });
   }
 
   initTimes(){
