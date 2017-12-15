@@ -1,5 +1,5 @@
 import BlobBrain from './blob_brain';
-import { SIZE_FACTOR, TIME_FACTOR } from '../config';
+import { DEGREE, SIZE_FACTOR, TIME_FACTOR } from '../config';
 
 class BlobBrains {
   constructor(blobs) {
@@ -27,8 +27,9 @@ class BlobBrains {
 
   updateBlobs(blobs, totalTime) {
     blobs.forEach(blob => {
-      const fitness = Math.pow((SIZE_FACTOR * blob.size + TIME_FACTOR * totalTime), 3);
-      this.blobBrains[blob.id].fitness = fitness;
+      this.blobBrains[blob.id].fitness =
+      Math.pow((SIZE_FACTOR * blob.size), DEGREE) *
+      Math.pow((TIME_FACTOR * totalTime), DEGREE);
     });
   }
 }

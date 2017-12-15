@@ -25,12 +25,13 @@ export function getLargestBlob(blobs){
 export function closestConsumable(blob, blobs, food){
   let closestDistance = Infinity;
   let returnConsumable = [0,0,0];
+  const largestBlob = getLargestBlob(blobs);
   blobs.concat(food).forEach((entity) => {
     if(blob.id === entity.id || blob.size <= entity.size) return;
     let vector = normalizedVectorToEntity(blob, entity);
     let distance = normalizedVectorToDistance(vector);
     if(distance < closestDistance) {
-      returnConsumable = [vector[0], vector[1], entity.size];
+      returnConsumable = [vector[0], vector[1], entity.size/largestBlob];
       closestDistance = distance;
     }
   });
@@ -40,12 +41,13 @@ export function closestConsumable(blob, blobs, food){
 export function closestPredator(blob, blobs){
   let closestDistance = Infinity;
   let returnPredator = [0,0,0];
+  const largestBlob = getLargestBlob(blobs);
   blobs.forEach((entity) => {
     if(blob.id === entity.id || blob.size >= entity.size) return;
     let vector = normalizedVectorToEntity(blob, entity);
     let distance = normalizedVectorToDistance(vector);
     if(distance < closestDistance) {
-      returnPredator = [vector[0], vector[1], entity.size];
+      returnPredator = [vector[0], vector[1], entity.size/largestBlob];
       closestDistance = distance;
     }
   });
@@ -55,12 +57,13 @@ export function closestPredator(blob, blobs){
 export function closestBlob(blob, blobs) {
   let closestDistance = Infinity;
   let returnBlob = [0, 0, 0];
+  const largestBlob = getLargestBlob(blobs);
   blobs.forEach((otherBlob) => {
     if (blob.id === otherBlob.id) { return; }
     let vector = normalizedVectorToEntity(blob, otherBlob);
     let distance = normalizedVectorToDistance(vector);
     if(distance < closestDistance) {
-      returnBlob = [vector[0], vector[1], otherBlob.size];
+      returnBlob = [vector[0], vector[1], otherBlob.size/largestBlob];
       closestDistance = distance;
     }
   });

@@ -1,5 +1,6 @@
 import * as Config from '../config';
 import BlobBrains from './blob_brains';
+import * as SimulationUtil from '../simulation/simulation_util';
 import Network from './network';
 import { debug } from 'util';
 
@@ -10,14 +11,22 @@ class Genetic {
     blobBrains.allBrains().forEach(brain => {
       let newWeights;
       let newBias;
+      let newColor;
       if (oldGeneration) {
         const parent1 = Genetic.getFitParent(oldGeneration);
         const parent2 = Genetic.getFitParent(oldGeneration);
         newWeights =  Genetic.produceChildWeights(parent1, parent2);
         newBias = parent1.getNetwork().extractBias();
+        newColor = parent1.color.map((color, idx) => {
+          return (color + parent2.color[idx])/2;
+        });
+        brain.color = newColor;
       }
 
-      if (Math.random() < Config.NEW_ENTITIES) newWeights = undefined;
+      if (Math.random() < Config.NEW_ENTITIES) {
+        newWeights = undefined;
+        brain.color = SimulationUtil.randomColor();
+      }
 
       brain.setNetwork(
         new Network(...Config.NETWORK_DIMENSIONS, newWeights, newBias)
@@ -40,8 +49,9 @@ class Genetic {
     for (let i = 0; i < config.length; i += 1) {
       jsonObject['config'][config[i]] = Config[config[i]];
     }
-
-    console.log(jsonObject);
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(
+      JSON.stringify(jsonObject));
+    return dataStr;
   }
 
   static loadGeneration(jsonGeneration) {

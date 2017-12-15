@@ -20,9 +20,9 @@ void main() {
   float y = (pow(cos(u_Time),1.0) * cos(a_Position.x*20.0 + a_Position.y*20.0))/10.0 + a_Position.y;
   gl_Position = u_OrthographicMatrix * u_ModelMatrix * vec4(
     x,
-    a_Position.y,
+    y,
     0.0, 1.0);
-    v_Color = u_Color * abs(x) * abs(y) * 3.0;
+    v_Color = vec4((u_Color * abs(x) * abs(y) * 3.0).xyz, 1.0);
 }
 `;
 

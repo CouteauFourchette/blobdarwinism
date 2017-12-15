@@ -1,10 +1,14 @@
 import vertexSouce from './blob_vs';
 import fragmentSource from './blob_fs';
 import normalVertexSource from './normal_vs';
+import backgroundVertexSource from './background_vs';
+import backgroundFragmentSource from './background_fs';
 import BlobRenderable from './blob_renderable';
+import backgroundURL from './sprites/grid.jpg';
 import * as Config from '../config';
 import * as SimulationUtil from '../simulation/simulation_util';
 import * as Physics from '../simulation/physics';
+import * as RenderUtil from './render_util';
 
 import { mat4 } from 'gl-matrix';
 
@@ -17,13 +21,19 @@ export default class BlobRenderer {
     this.GL.enable(this.GL.SAMPLE_ALPHA_TO_COVERAGE);
     this.GL.sampleCoverage(.5, false);
     this.blobs = {};
+    this.food = {};
+    
     blobs.concat(food).forEach(renderObject => this.addRenderObject(renderObject));
 
     let vertexShader = this.loadShader(vertexSouce, GL.VERTEX_SHADER);
     let fragmentShader = this.loadShader(fragmentSource, GL.FRAGMENT_SHADER);
     let normalVertexShader = this.loadShader(normalVertexSource, GL.VERTEX_SHADER);
+    let backgroundVertexShader = this.loadShader(backgroundVertexSource, GL.VERTEX_SHADER);
+    let backgroundFragmentShader = this.loadShader(backgroundFragmentSource, GL.FRAGMENT_SHADER);
+
     this.blobProgram = this.initProgram(vertexShader, fragmentShader);
     this.lineProgram = this.initProgram(normalVertexShader, fragmentShader);
+    this.backgroundProgram = this.initProgram(backgroundVertexShader, backgroundFragmentShader);
 
     this.aPosition = this.GL.getAttribLocation(this.blobProgram, "a_Position");
     this.uColor = this.GL.getUniformLocation(this.blobProgram, "u_Color");
@@ -36,10 +46,20 @@ export default class BlobRenderer {
     this.uOrthographicLines = this.GL.getUniformLocation(this.lineProgram, "u_OrthographicMatrix");
     this.uModelLines = this.GL.getUniformLocation(this.lineProgram, "u_ModelMatrix");
 
+    this.aPositionBackground = this.GL.getAttribLocation(this.backgroundProgram, "a_Position");
+    this.aTexCoordBackground = this.GL.getAttribLocation(this.backgroundProgram, "a_TexCoord");
+    this.uSamplerBackground = this.GL.getUniformLocation(this.backgroundProgram, "u_Sampler");
+
     this.initBuffers();
+    this.initTexture();
+
     this.orthographicMatrix = mat4.create();
     this.createOrthographicMatrix();
     this.render();
+  }
+
+  initTexture(){
+    this.backgroundTexture = RenderUtil.loadTexture(this.GL, backgroundURL);
   }
 
   initBuffers(){
@@ -56,12 +76,16 @@ export default class BlobRenderer {
 
     this.lineBuffer = this.GL.createBuffer();
 
+    this.backgroundBuffer = this.GL.createBuffer();
+    this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.backgroundBuffer);
+    this.GL.bufferData(this.GL.ARRAY_BUFFER, new Float32Array([
+      -1, 1, -1, -1, 1, -1,
+      -1, 1, 1, -1, 1, 1]), this.GL.STATIC_DRAW);
   }
 
   renderLine(color, from, to){
     this.GL.bufferData(this.GL.ARRAY_BUFFER, new Float32Array(from.concat(to)), this.GL.STATIC_DRAW);
     this.GL.uniform4fv(this.uColorLines, color);   
-    // this.GL.vertexAttribPointer(this.aPositionLines, 2, this.GL.FLOAT, false, 0, 0);    
     this.GL.drawArrays(this.GL.LINES, 0, 2); 
   }
 
@@ -120,6 +144,7 @@ export default class BlobRenderer {
 
   render(totalTime){
     this.prepare();
+    this.renderBackground();
     this.start(totalTime);
     let blobKeys = Object.keys(this.blobs);
     let blobArray = [];
@@ -132,34 +157,54 @@ export default class BlobRenderer {
     this.renderLines();
   }
 
+  renderBackground(){
+    this.GL.useProgram(this.backgroundProgram);
+
+    this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.backgroundBuffer);
+    this.GL.enableVertexAttribArray(this.aPositionBackground);
+    this.GL.vertexAttribPointer(this.aPositionBackground, 2, this.GL.FLOAT, false, 0, 0);
+    
+    this.GL.activeTexture(this.GL.TEXTURE0);
+    this.GL.bindTexture(this.GL.TEXTURE_2D, this.backgroundTexture);
+    this.GL.uniform1i(this.uSamplerBackground, 0);
+
+    this.GL.drawArrays(this.GL.TRIANGLE_STRIP, 0, 6);
+    this.GL.disableVertexAttribArray(this.aPositionBackground);
+  }
+
   renderLines(){
     let blobKeys = Object.keys(this.blobs);
     let blobArray = [];
-    blobKeys.forEach(blobKey => blobArray.push(this.blobs[blobKey]));    
+    let foodArray = [];
+    blobKeys.forEach(blobKey =>{
+      if(this.blobs[blobKey].size === Config.FOOD_SIZE){
+        foodArray.push(this.blobs[blobKey]);
+      }else{
+        blobArray.push(this.blobs[blobKey]);
+      }
+    });    
     this.GL.useProgram(this.lineProgram);
     this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.lineBuffer);    
     this.GL.enableVertexAttribArray(this.aPositionLines);
     this.GL.vertexAttribPointer(this.aPositionLines, 2, this.GL.FLOAT, false, 0, 0);
     this.GL.uniformMatrix4fv(this.uOrthographicLines, false, this.orthographicMatrix);
-    blobKeys.forEach(blobKey => {
-      let blob = this.blobs[blobKey];
-      if(blob.size !== Config.FOOD_SIZE){
-        let closeBlob = SimulationUtil.closestConsumable(blob, blobArray, []);
-        let closePredator = SimulationUtil.closestPredator(blob, blobArray);
-        if(closeBlob)
-        {
-          closeBlob = Physics.distanceVectorToWorldSpace(closeBlob);
-          this.renderLine([0,1,0,1], 
-            [blob.position[0]+5, blob.position[1] + 5],
-            [blob.position[0] + closeBlob[0],blob.position[1] + closeBlob[1]]);
-        }
-        if(closePredator){
-          closePredator = Physics.distanceVectorToWorldSpace(closePredator);          
-          this.renderLine([1,0,0,1], 
-            [blob.position[0] - 5, blob.position[1] + 5],
-            [blob.position[0] + closePredator[0],blob.position[1] + closePredator[1]]);
-        } 
+    blobArray.forEach(blob => {
+      let closeFood = SimulationUtil.closestFood(blob, foodArray);
+      let closeBlob = SimulationUtil.closestBlob(blob, blobArray);
+
+      if(closeBlob)
+      {
+        closeBlob = Physics.distanceVectorToWorldSpace(closeBlob);
+        this.renderLine([0,1,0,1], 
+          [blob.position[0]+5, blob.position[1] + 5],
+          [blob.position[0] + closeBlob[0],blob.position[1] + closeBlob[1]]);
       }
+      if(closeFood){
+        closeFood = Physics.distanceVectorToWorldSpace(closeFood);          
+        this.renderLine([1,0,0,1], 
+          [blob.position[0] - 5, blob.position[1] + 5],
+          [blob.position[0] + closeFood[0],blob.position[1] + closeFood[1]]);
+      } 
     });    
     this.GL.disableVertexAttribArray(this.aPositionLines);      
   }
@@ -204,8 +249,8 @@ export default class BlobRenderer {
 
   createOrthographicMatrix(){
     this.GL.canvas.width = 1600;
-    this.GL.canvas.height = 1200;
-    this.GL.viewport(0,0,1600,1200);        
+    this.GL.canvas.height = 1600;
+    this.GL.viewport(0,0,1600,1600);
     mat4.ortho(this.orthographicMatrix, 0, Config.WIDTH, Config.HEIGHT, 0, 0, 100);
   }
 }

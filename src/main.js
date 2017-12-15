@@ -1,5 +1,6 @@
 require('../style/app.scss');
 import Simulation from './simulation/simulation';
+import Genetic from './AI/genetics';
 
 document.addEventListener('DOMContentLoaded', (event) => {
   const canvas = document.getElementById('canvas');
@@ -11,7 +12,22 @@ document.addEventListener('DOMContentLoaded', (event) => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const simulation = new Simulation(GL);
+    let simulation = new Simulation(GL);
     simulation.run();
+
+    const resetButton = document.getElementById('reset-button');
+    resetButton.addEventListener('click', () => {
+      simulation.stop();
+      simulation = new Simulation(GL);
+      simulation.run();
+    });
+
+    const saveButton = document.getElementById('save-button');
+    saveButton.addEventListener('click', () => {
+      const downloadLink = document.getElementById('download-link');
+      downloadLink.setAttribute("href", Genetic.saveGeneration(simulation.blobBrains));
+      downloadLink.setAttribute("download", "blobDarwinSave.json");
+      downloadLink.click();
+    });
   }
 });
