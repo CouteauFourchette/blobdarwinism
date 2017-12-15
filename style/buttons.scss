@@ -1,0 +1,38 @@
+.end-conditions {
+  button {
+    margin: 5px;
+    background: #eee;
+    color: black;
+    font-size: 30px;
+    &.activated {
+      color: white;
+      background-color: rgb(99, 180, 44);
+    }
+    &:hover {
+      color: white;
+      background-color: rgb(99, 180, 44);
+    }
+    padding: 5px 10px;
+  }
+}
+
+.end-condition {
+  width: 100%;
+  display: block;
+  margin-top: 10px;
+  .description {
+    width: 70%;
+    display: block;
+    float: left;
+  }
+}
+
+.start {
+  margin: 10px auto;
+  background-color: rgb(99, 180, 44);
+  text-align: center;
+  padding: 10px;
+  width: 80%;
+  display: block;
+  color: white;
+}

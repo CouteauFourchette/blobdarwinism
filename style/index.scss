@@ -1,10 +1,8 @@
 .index {
-  background-color: lightgrey;
+  background-color: rgb(255, 255, 255);
   padding: 10px;
   font-family: 'Roboto', sans-serif;  
   color: black;
-  overflow: hidden;
-  box-sizing: border-box;
 }
 
 .index h1 {
@@ -25,9 +23,24 @@
   height: 100px;
 }
 
+.description-container {
+  min-height: 300px;
+}
+
+.description {
+  font-size: 12px;
+}
+
 .title{
   width: 250px;
   text-align: center;
+}
+
+.content {
+  display: flex;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .header-image-container{
@@ -35,59 +48,67 @@
   width: calc(100% - 250px);
 }
 
-.content {
-  padding: 10px 0;
-  display: flex;
-  justify-content: space-between;
-  height: calc(100vh - 120px);
+.description-container {
+  width: 100%;
+  margin: 10px;
+  p { font-size: 16px; }
+  .contributors {
+    display: flex;
+    justify-content: space-around;
+  }
 }
 
-.settings {
-  // background-color: red;
-  box-sizing: border-box;
+.bottom-settings {
+  width: 100%;
+  display: flex;
+  justify-content: center; 
+}
+
+.nn-setting {
+  border: 1px solid #eee;
   padding: 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  width: calc(50% - 5px);
+  margin: 5px;
+  h1 {
+    margin-bottom: 10px;
+    font-size: 22px;
+  }
+  p {
+    padding-bottom: 10px;
+  }
 }
 
-.settings button {
-  background-color: gray;
-  color: white;
-  border-radius: 0;
-  transition: background-color .5s ease;
+.genetics-setting {
+  border: 1px solid #eee;
+    padding: 10px;
+    margin: 5px;
+      h1 {
+    margin-bottom: 10px;
+        font-size: 22px;
+  }
+  p {
+    padding-bottom: 10px;
+  }
+}
+
+.simulation-setting {
+  width: 40%;
+  min-width: 300px;
+  margin: 5px;
+  border: 1px solid #eee;
   padding: 10px;
-  margin: 0 auto;
-}  
-
-.settings button:hover {
-  background-color: black;
-}  
-
-.description {
-  padding: 10px;
-  // background-color: white;
-  // box-shadow: 2px 4px 8px 0 rgba(0, 0, 0, 0.4);
-  font-size: 18px;
-  // margin: auto 0;
+  h1 {
+    margin-bottom: 10px;
+        font-size: 22px;
+  }
+  p {
+    padding-bottom: 10px;
+  }
 }
 
-.description h2 {
-  font-size: 28px;
-  // text-align: right;
-  padding-bottom: 10px;
+.nn-setting {
+  width: 50%;
 }
 
-.description-container{
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  width: calc(50% - 5px);  
-}
-
-.contributors {
-  display: flex;
-  font-size: 25px;
-  justify-content: space-around;
+.genetics-setting {
+  width: 50%;
 }

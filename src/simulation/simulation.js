@@ -163,7 +163,7 @@ class Simulation {
     this.blobRenderer.updateBlobs(this.blobs);
     this.blobRenderer.render(this.totalTime);
     if (!this.simulationComplete) {
-      requestAnimationFrame(this.simulate.bind(this));
+      window.setTimeout(this.simulate.bind(this), 0);
     } else {
       console.log("Simulation complete.");
       this.reset();

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link href="https://fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet">  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="dist/style.css">
   <script src="./src/index.js"></script>
   <title>Blob Darwinism</title>
@@ -16,49 +17,110 @@
       <h2>Visualize Machine Learning</h2>
     </div>
     <div class="header-image-container">
-      <img src="./learning.gif" alt="">
+      <img src="./images/learning.gif" alt="">
     </div>
   </div>
   <div class="content">
-    <div class="settings">
-      <div class = "slider-container">
-        <p id = "amplitudeVal">Width</p>
-        <input id = "amplitude" type="range" min = "1" max = "200" value = "100"/>
+    <div class="simulation-setting">
+      <h1>Simulation Settings</h1>
+
+      <div class="map-size">
+        <p>Map Size</p>
+        <label>Width:
+          <input type="text" placeholder="Width" value="100" />
+        </label>
+        <label> Height:
+          <input type="text" placeholder="Height" value="100" />
+        </label>
       </div>
-      <div class = "slider-container">
-        <p id = "wavelengthVal">Height</p>
-        <input id = "wavelength" type="range" min = "40" max = "150" value = "95"/>
+      <p>End Conditions</p>
+      <div class="end-conditions">
+        <div class="end-condition">
+          <p>Time</p>
+          <p class="description"> The simulation will create the next generation after 30 seconds</p>
+          <button class='activated'>
+            <i class="fa fa-clock-o" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div class="end-condition">
+          <p>Quantity</p>
+          <p class="description"> The simulation will create the next generation when there are no blobs left</p>
+          <button class='activated'>
+            <i class="fa fa-arrow-circle-down" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div class="end-condition">
+          <p>Size</p>
+          <p class="description"> The simulation will create the next generation when a blob is at size 45</p>
+          <button class='not-activated'>
+            <i class="fa fa-arrows-alt" aria-hidden="true"></i>
+          </button>
+        </div>
       </div>
-      <div class = "slider-container">
-        <p id = "frequencyVal">Max Speed</p>
-        <input id = "frequency" type="range" min = "0" max = "200" value = "100"/>
+      <p>Blobs: </p>
+      <div class="slider-container">
+        <input id="blobs-number" type="range" min="1" max="250" value="20" />
+        <canvas id="blobs"></canvas>
       </div>
-      <div class = "slider-container">
-          <p id = "steepnessVal">Number of Blobs</p>
-          <input id = "steepness" type="range" min = "0" max = "100" value = "100"/>
+      <p>Food: </p>
+      <div class="slider-container">
+        <input id="food-number" type="range" min="1" max="2000" value="200" step="1" />
+        <canvas id="foods"></canvas>
       </div>
-      <button id="start-simulation">
-        Start Simulation
-      </button>
     </div>
-    <div class="description-container">
-      <div class="description">
-        <h2>
-          Description
-        </h2>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tempora doloremque quae, corporis repellat nam cumque consequatur excepturi possimus quasi unde dolorum eligendi inventore quisquam! Dicta incidunt ipsa perferendis illo eveniet?
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi et architecto atque, quidem doloribus, delectus a hic optio magnam quia totam, quibusdam officia quaerat pariatur aut libero laudantium ab praesentium.
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Vero quisquam earum dolorum perferendis. Rerum voluptates commodi illum distinctio omnis tempora, saepe ducimus nulla error accusamus! Accusantium animi hic quis repellat!
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Perferendis, aperiam velit et nesciunt inventore accusantium! Quod minima aut quo, dolorem obcaecati, nam totam necessitatibus sit quam, ducimus repellat reiciendis non.
-        </p>
+    <div>
+    <div class="bottom-settings">
+      <div class="nn-setting">
+        <h1>Neural Network Settings</h1>
+        <div class="mutation">
+          <p>Layers</p>
+          <p class="description"> The percentage chance a gene will mutate</p>
+          <label>Mutation rate:
+            <input type="text" placeholder="Width" value="100" />
+          </label>
+          <label>Mutation range: </label>
+          <p class="description"> The impact of the mutation</p>
+          <input type="text" placeholder="Height" value="100" />
+        </div>
       </div>
-      <div class="contributors">
-        <p>Julien Gurunlian</p>
-        <p>Brandt Sheets</p>
-        <p>Garrett Tongue</p>
+      <div class="genetics-setting">
+        <h1>Genetic Settings</h1>
+        <div class="mutation">
+          <p>Mutation</p>
+          <p class="description"> The percentage chance a gene will mutate</p>
+          <label>Mutation rate:
+            <input type="text" placeholder="Width" value="100" />
+          </label>
+          <label>Mutation range: </label>
+          <p class="description"> The impact of the mutation</p>
+          <input type="text" placeholder="Height" value="100" />
+        </div>
       </div>
     </div>
+    <div>
+      <div class="description-container">
+        <div class="description">
+          <h2>
+            Description
+          </h2>
+          <p>
+             What is this? Blob Darwinism is a machine learning project that simulates an ecosystem of small beings called blobs. Blobs
+            seek to maximize their survival by moving and eating food or other blobs. The behavior of each blob is governed by a unique
+            neural network which is initially random. After a generation of blobs is simulated, a subsequent generation is created by
+            selectively inheriting genetics from the best performers of the previous generation. In this way blobs naturally evolve optimal
+            behavior. Users are encouraged to experiment with various simulation settings. By changing rules of the simulation or features
+            of the neural networks many unique patterns can arise. For more information, please visit our README page at ...github.io.
+          </p>
+        </div>
+        <div class="contributors">
+          <p>Julien Gurunlian</p>
+          <p>Brandt Sheets</p>
+          <p>Garrett Tongue</p>
+        </div>
+      </div>
+      <button class="start">Start Simulation</button>
+    </div>
+  </div>
   </div>
 </body>
 </html>

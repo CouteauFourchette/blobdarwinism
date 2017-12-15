@@ -21,8 +21,8 @@ class Blob {
     if (Math.abs(this.velocity[1]) > Config.MAX_SPEED) {
       this.velocity[1] = Config.MAX_SPEED * Math.sign(this.velocity[1]);
     }
-    this.position[0] += this.velocity[0]*deltaTime*4;
-    this.position[1] += this.velocity[1]*deltaTime*4;
+    this.position[0] += this.velocity[0];
+    this.position[1] += this.velocity[1];
   }
 
   eat(blob) {

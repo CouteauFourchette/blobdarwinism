@@ -31,6 +31,7 @@ input[type="password"],
 input[type="email"],
 input[type="text"],
 input[type="submit"],
+input[type='range'],
 textarea,
 button {
   -webkit-appearance: none;
@@ -44,4 +45,11 @@ input
 button,
 input[type="submit"] {
   cursor: pointer;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+}
+input[type='range']::-moz-range-thumb {
+  -moz-appearance: none;
 }
