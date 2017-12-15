@@ -33,6 +33,17 @@ module.exports = {
           // use style-loader in development
           fallback: "style-loader",
         })
+      },
+      {
+        test: /\.(png|jpg|gif)$/,
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              limit: 99999999999
+            }
+          }
+        ]
       }
     ],
   },
