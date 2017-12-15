@@ -1,5 +1,6 @@
 import * as Config from '../config';
 import BlobBrains from './blob_brains';
+import * as SimulationUtil from '../simulation/simulation_util';
 import Network from './network';
 import { debug } from 'util';
 
@@ -22,7 +23,10 @@ class Genetic {
         brain.color = newColor;
       }
 
-      if (Math.random() < Config.NEW_ENTITIES) newWeights = undefined;
+      if (Math.random() < Config.NEW_ENTITIES) {
+        newWeights = undefined;
+        brain.color = SimulationUtil.randomColor();
+      }
 
       brain.setNetwork(
         new Network(...Config.NETWORK_DIMENSIONS, newWeights, newBias)
