@@ -11,7 +11,12 @@ varying vec2 v_TexCoord;
 
 void main() {
   vec4 texture_Color = texture2D(u_Sampler, v_TexCoord);
-  gl_FragColor = vec4((u_Color.xyz + texture_Color.xyz)/2.0, texture_Color.w);
+  if(texture_Color.xyz == vec3(0.0, 0.0, 0.0) || texture_Color.xyz == vec3(1.0,1.0,1.0) || texture_Color.w == 0.0)
+  {
+    gl_FragColor = texture_Color;
+  }else{
+    gl_FragColor = u_Color;
+  }
 }
 `;
 
