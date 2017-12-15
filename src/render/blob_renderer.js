@@ -1,10 +1,14 @@
 import vertexSouce from './blob_vs';
 import fragmentSource from './blob_fs';
 import normalVertexSource from './normal_vs';
+import backgroundVertexSource from './background_vs';
+import backgroundFragmentSource from './background_fs';
 import BlobRenderable from './blob_renderable';
+import backgroundURL from './sprites/grid.jpg';
 import * as Config from '../config';
 import * as SimulationUtil from '../simulation/simulation_util';
 import * as Physics from '../simulation/physics';
+import * as RenderUtil from './render_util';
 
 import { mat4 } from 'gl-matrix';
 
@@ -24,8 +28,12 @@ export default class BlobRenderer {
     let vertexShader = this.loadShader(vertexSouce, GL.VERTEX_SHADER);
     let fragmentShader = this.loadShader(fragmentSource, GL.FRAGMENT_SHADER);
     let normalVertexShader = this.loadShader(normalVertexSource, GL.VERTEX_SHADER);
+    let backgroundVertexShader = this.loadShader(backgroundVertexSource, GL.VERTEX_SHADER);
+    let backgroundFragmentShader = this.loadShader(backgroundFragmentSource, GL.FRAGMENT_SHADER);
+
     this.blobProgram = this.initProgram(vertexShader, fragmentShader);
     this.lineProgram = this.initProgram(normalVertexShader, fragmentShader);
+    this.backgroundProgram = this.initProgram(backgroundVertexShader, backgroundFragmentShader);
 
     this.aPosition = this.GL.getAttribLocation(this.blobProgram, "a_Position");
     this.uColor = this.GL.getUniformLocation(this.blobProgram, "u_Color");
@@ -38,10 +46,20 @@ export default class BlobRenderer {
     this.uOrthographicLines = this.GL.getUniformLocation(this.lineProgram, "u_OrthographicMatrix");
     this.uModelLines = this.GL.getUniformLocation(this.lineProgram, "u_ModelMatrix");
 
+    this.aPositionBackground = this.GL.getAttribLocation(this.backgroundProgram, "a_Position");
+    this.aTexCoordBackground = this.GL.getAttribLocation(this.backgroundProgram, "a_TexCoord");
+    this.uSamplerBackground = this.GL.getUniformLocation(this.backgroundProgram, "u_Sampler");
+
     this.initBuffers();
+    this.initTexture();
+
     this.orthographicMatrix = mat4.create();
     this.createOrthographicMatrix();
     this.render();
+  }
+
+  initTexture(){
+    this.backgroundTexture = RenderUtil.loadTexture(this.GL, backgroundURL);
   }
 
   initBuffers(){
@@ -58,12 +76,16 @@ export default class BlobRenderer {
 
     this.lineBuffer = this.GL.createBuffer();
 
+    this.backgroundBuffer = this.GL.createBuffer();
+    this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.backgroundBuffer);
+    this.GL.bufferData(this.GL.ARRAY_BUFFER, new Float32Array([
+      -1, 1, -1, -1, 1, -1,
+      -1, 1, 1, -1, 1, 1]), this.GL.STATIC_DRAW);
   }
 
   renderLine(color, from, to){
     this.GL.bufferData(this.GL.ARRAY_BUFFER, new Float32Array(from.concat(to)), this.GL.STATIC_DRAW);
     this.GL.uniform4fv(this.uColorLines, color);   
-    // this.GL.vertexAttribPointer(this.aPositionLines, 2, this.GL.FLOAT, false, 0, 0);    
     this.GL.drawArrays(this.GL.LINES, 0, 2); 
   }
 
@@ -122,6 +144,7 @@ export default class BlobRenderer {
 
   render(totalTime){
     this.prepare();
+    this.renderBackground();
     this.start(totalTime);
     let blobKeys = Object.keys(this.blobs);
     let blobArray = [];
@@ -132,6 +155,21 @@ export default class BlobRenderer {
     });
     this.stop();
     this.renderLines();
+  }
+
+  renderBackground(){
+    this.GL.useProgram(this.backgroundProgram);
+
+    this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.backgroundBuffer);
+    this.GL.enableVertexAttribArray(this.aPositionBackground);
+    this.GL.vertexAttribPointer(this.aPositionBackground, 2, this.GL.FLOAT, false, 0, 0);
+    
+    this.GL.activeTexture(this.GL.TEXTURE0);
+    this.GL.bindTexture(this.GL.TEXTURE_2D, this.backgroundTexture);
+    this.GL.uniform1i(this.uSamplerBackground, 0);
+
+    this.GL.drawArrays(this.GL.TRIANGLE_STRIP, 0, 6);
+    this.GL.disableVertexAttribArray(this.aPositionBackground);
   }
 
   renderLines(){
@@ -211,8 +249,8 @@ export default class BlobRenderer {
 
   createOrthographicMatrix(){
     this.GL.canvas.width = 1600;
-    this.GL.canvas.height = 1200;
-    this.GL.viewport(0,0,1600,1200);        
+    this.GL.canvas.height = 1600;
+    this.GL.viewport(0,0,1600,1600);
     mat4.ortho(this.orthographicMatrix, 0, Config.WIDTH, Config.HEIGHT, 0, 0, 100);
   }
 }
