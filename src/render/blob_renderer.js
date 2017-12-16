@@ -99,7 +99,7 @@ export default class BlobRenderer {
   }
 
   prepare(){
-    this.GL.clearColor(0,0,0,1);
+    this.GL.clearColor(0,0,0,0);
     this.GL.clear(this.GL.COLOR_BUFFER_BIT);
   }
 
@@ -153,7 +153,7 @@ export default class BlobRenderer {
 
   render(totalTime){
     this.prepare();
-    this.renderBackground();
+    // this.renderBackground();
     this.start(totalTime);
     let blobKeys = Object.keys(this.blobs);
     let blobArray = [];
