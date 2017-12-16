@@ -1,10 +1,13 @@
 import vertexSouce from './blob_vs';
 import fragmentSource from './blob_fs';
 import normalVertexSource from './normal_vs';
+import normalFragmentSource from './normal_fs';
 import backgroundVertexSource from './background_vs';
 import backgroundFragmentSource from './background_fs';
 import BlobRenderable from './blob_renderable';
 import backgroundURL from './sprites/grid.jpg';
+import blobURL from './sprites/circle.png';
+
 import * as Config from '../config';
 import * as SimulationUtil from '../simulation/simulation_util';
 import * as Physics from '../simulation/physics';
@@ -18,8 +21,8 @@ export default class BlobRenderer {
    */
   constructor(GL, blobs = [], food = []){
     this.GL = GL;
-    this.GL.enable(this.GL.SAMPLE_ALPHA_TO_COVERAGE);
-    this.GL.sampleCoverage(.5, false);
+    this.GL.enable(this.GL.BLEND);
+    this.GL.blendFunc(this.GL.SRC_ALPHA, this.GL.ONE_MINUS_SRC_ALPHA);
     this.blobs = {};
     this.food = {};
     
@@ -28,11 +31,12 @@ export default class BlobRenderer {
     let vertexShader = this.loadShader(vertexSouce, GL.VERTEX_SHADER);
     let fragmentShader = this.loadShader(fragmentSource, GL.FRAGMENT_SHADER);
     let normalVertexShader = this.loadShader(normalVertexSource, GL.VERTEX_SHADER);
+    let normalFragmentShader = this.loadShader(normalFragmentSource, GL.FRAGMENT_SHADER);
     let backgroundVertexShader = this.loadShader(backgroundVertexSource, GL.VERTEX_SHADER);
     let backgroundFragmentShader = this.loadShader(backgroundFragmentSource, GL.FRAGMENT_SHADER);
 
     this.blobProgram = this.initProgram(vertexShader, fragmentShader);
-    this.lineProgram = this.initProgram(normalVertexShader, fragmentShader);
+    this.lineProgram = this.initProgram(normalVertexShader, normalFragmentShader);
     this.backgroundProgram = this.initProgram(backgroundVertexShader, backgroundFragmentShader);
 
     this.aPosition = this.GL.getAttribLocation(this.blobProgram, "a_Position");
@@ -40,6 +44,7 @@ export default class BlobRenderer {
     this.uOrthographic = this.GL.getUniformLocation(this.blobProgram, "u_OrthographicMatrix");
     this.uModel = this.GL.getUniformLocation(this.blobProgram, "u_ModelMatrix");
     this.uTime = this.GL.getUniformLocation(this.blobProgram, "u_Time");
+    this.uSampler = this.GL.getUniformLocation(this.blobProgram, "u_Sampler");
 
     this.aPositionLines = this.GL.getAttribLocation(this.lineProgram, "a_Position");
     this.uColorLines = this.GL.getUniformLocation(this.lineProgram, "u_Color");
@@ -60,6 +65,7 @@ export default class BlobRenderer {
 
   initTexture(){
     this.backgroundTexture = RenderUtil.loadTexture(this.GL, backgroundURL);
+    this.blobTexture = RenderUtil.loadTexture(this.GL, blobURL);
   }
 
   initBuffers(){
@@ -70,6 +76,9 @@ export default class BlobRenderer {
         this.circleVerts[j++] =  Math.cos(angle); 
         this.circleVerts[j++] =  Math.sin(angle); 
     }
+    this.circleVerts = new Float32Array([ -1, 1, -1, -1, 1, -1,
+      -1, 1, 1, -1, 1, 1]);
+
     this.vertexBuffer = this.GL.createBuffer();
     this.GL.bindBuffer(this.GL.ARRAY_BUFFER, this.vertexBuffer);
     this.GL.bufferData(this.GL.ARRAY_BUFFER, new Float32Array(this.circleVerts), this.GL.STATIC_DRAW);
@@ -90,7 +99,7 @@ export default class BlobRenderer {
   }
 
   prepare(){
-    this.GL.clearColor(0,0,0,1);
+    this.GL.clearColor(0,0,0,0);
     this.GL.clear(this.GL.COLOR_BUFFER_BIT);
   }
 
@@ -144,7 +153,7 @@ export default class BlobRenderer {
 
   render(totalTime){
     this.prepare();
-    this.renderBackground();
+    // this.renderBackground();
     this.start(totalTime);
     let blobKeys = Object.keys(this.blobs);
     let blobArray = [];
@@ -226,7 +235,12 @@ export default class BlobRenderer {
     this.GL.bufferData(this.GL.ARRAY_BUFFER, this.circleVerts, this.GL.STATIC_DRAW);
     this.GL.enableVertexAttribArray(this.aPosition);
     this.GL.vertexAttribPointer(this.aPosition, 2, this.GL.FLOAT, false, 0, 0);
-    this.GL.uniform1f(this.uTime, totalTime);
+    // this.GL.uniform1f(this.uTime, totalTime);
+
+    this.GL.activeTexture(this.GL.TEXTURE0);
+    this.GL.bindTexture(this.GL.TEXTURE_2D, this.blobTexture);
+    this.GL.uniform1i(this.uSampler, 0);
+
     this.GL.uniformMatrix4fv(this.uOrthographic, false, this.orthographicMatrix);    
   }
 
@@ -248,9 +262,9 @@ export default class BlobRenderer {
   }
 
   createOrthographicMatrix(){
-    this.GL.canvas.width = 1600;
-    this.GL.canvas.height = 1600;
-    this.GL.viewport(0,0,1600,1600);
+    this.GL.canvas.width = 1000;
+    this.GL.canvas.height = 1000;
+    this.GL.viewport(0,0,1000,1000);
     mat4.ortho(this.orthographicMatrix, 0, Config.WIDTH, Config.HEIGHT, 0, 0, 100);
   }
 }

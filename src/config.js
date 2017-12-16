@@ -1,8 +1,8 @@
 // Simulation constants
 export const NUM_BLOBS = 50;
-export const NUM_FOOD = 100;
-export const WIDTH = 1000;
-export const HEIGHT = 1000;
+export const NUM_FOOD = 201;
+export const WIDTH = 2000;
+export const HEIGHT = 2000;
 export const MAX_SPEED = 5;
 export const FOOD_SIZE = 5;
 export const INITIAL_BLOB_SIZE = 10;
@@ -17,8 +17,8 @@ export const DEPTH_THRESHOLD = 1000;
 
 // Network constants
 // possible inputs: SIZE, POS, VEL, CONS, PRED, FOOD, BLOB
-export const INPUTS = ["SIZE", "POS", "VEL", "FOOD", "BLOB"];
-export const NETWORK_DIMENSIONS = [10, [6, 6], 2];
+export const INPUTS = ["SIZE", "POS", "VEL", "FOOD"];
+export const NETWORK_DIMENSIONS = [7, [16, 16, 16, 16], 2];
 
 // Fitness factors
 export const SIZE_FACTOR = 1;
