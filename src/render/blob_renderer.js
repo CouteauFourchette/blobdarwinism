@@ -21,8 +21,8 @@ export default class BlobRenderer {
    */
   constructor(GL, blobs = [], food = []){
     this.GL = GL;
-    this.GL.enable(this.GL.SAMPLE_ALPHA_TO_COVERAGE);
-    this.GL.sampleCoverage(.5, false);
+    this.GL.enable(this.GL.BLEND);
+    this.GL.blendFunc(this.GL.SRC_ALPHA, this.GL.ONE_MINUS_SRC_ALPHA);
     this.blobs = {};
     this.food = {};
     
@@ -262,9 +262,9 @@ export default class BlobRenderer {
   }
 
   createOrthographicMatrix(){
-    this.GL.canvas.width = 1600;
-    this.GL.canvas.height = 1600;
-    this.GL.viewport(0,0,1600,1600);
+    this.GL.canvas.width = 1000;
+    this.GL.canvas.height = 1000;
+    this.GL.viewport(0,0,1000,1000);
     mat4.ortho(this.orthographicMatrix, 0, Config.WIDTH, Config.HEIGHT, 0, 0, 100);
   }
 }
