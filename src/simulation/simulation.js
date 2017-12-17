@@ -118,24 +118,24 @@ class Simulation {
   }
 
   eat() {
-    //Blobs
-    // for (let i = this.blobs.length - 1; i >= 0; i -= 1) {
-    //   for (let j = (i - 1); j >= 0; j -= 1) {
-    //     if (this.blobs[i] && checkCollisionWithEntity(this.blobs[i], this.blobs[j])) {
-    //       if (this.blobs[i].size > this.blobs[j].size) {
-    //         this.blobs[i].eat(this.blobs[j]);
-    //         this.blobRenderer.removeBlob(this.blobs[j].id);
-    //         this.blobBrains.blobBrains[this.blobs[j].id].fitness /= 2;
-    //         this.blobs.splice(j, 1);
-    //       } else if (this.blobs[i].size < this.blobs[j].size) {
-    //         this.blobs[j].eat(this.blobs[i]);
-    //         this.blobRenderer.removeBlob(this.blobs[i].id);
-    //         this.blobBrains.blobBrains[this.blobs[i].id].fitness /= 2;
-    //         this.blobs.splice(i, 1);
-    //       }
-    //     }
-    //   }
-    // }
+    // Blobs
+    for (let i = this.blobs.length - 1; i >= 0; i -= 1) {
+      for (let j = (i - 1); j >= 0; j -= 1) {
+        if (this.blobs[i] && checkCollisionWithEntity(this.blobs[i], this.blobs[j])) {
+          if (this.blobs[i].size > this.blobs[j].size) {
+            this.blobs[i].eat(this.blobs[j]);
+            this.blobRenderer.removeBlob(this.blobs[j].id);
+            this.blobBrains.blobBrains[this.blobs[j].id].fitness /= 2;
+            this.blobs.splice(j, 1);
+          } else if (this.blobs[i].size < this.blobs[j].size) {
+            this.blobs[j].eat(this.blobs[i]);
+            this.blobRenderer.removeBlob(this.blobs[i].id);
+            this.blobBrains.blobBrains[this.blobs[i].id].fitness /= 2;
+            this.blobs.splice(i, 1);
+          }
+        }
+      }
+    }
     //Food
     for (let i = this.blobs.length - 1; i >= 0; i -= 1) {
       for (let j = this.food.length - 1; j >= 0; j -= 1) {

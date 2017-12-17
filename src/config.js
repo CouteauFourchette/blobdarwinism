@@ -17,8 +17,8 @@ export const DEPTH_THRESHOLD = 1000;
 
 // Network constants
 // possible inputs: SIZE, POS, VEL, CONS, PRED, FOOD, BLOB
-export const INPUTS = ["SIZE", "POS", "VEL", "FOOD"];
-export const NETWORK_DIMENSIONS = [7, [16, 16, 16, 16], 2];
+export const INPUTS = ["SIZE", "POS", "VEL", "FOOD", "BLOB", "PRED"];
+export const NETWORK_DIMENSIONS = [13, [16, 16, 16, 16], 2];
 
 // Fitness factors
 export const SIZE_FACTOR = 1;

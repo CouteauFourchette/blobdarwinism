@@ -27,7 +27,13 @@
   }
 }
 
-.start {
+.end-condition-inside {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#start {
   margin: 10px auto;
   background-color: rgb(99, 180, 44);
   text-align: center;

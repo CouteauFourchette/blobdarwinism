@@ -7,10 +7,20 @@
   <link href="https://fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet">  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="dist/style.css">
-  <script src="./src/index.js"></script>
+  <script src="dist/bundle.js"></script>
   <title>Blob Darwinism</title>
 </head>
-<body class="index">
+<body>
+  <div id="simulation">
+      <canvas id="canvas"></canvas>
+      <footer id="simulation-footer">
+        <a id="back-link" href="./index.html">Back</a>
+        <button id="reset-button" type="button">Reset</button>
+        <button id="save-button" type="button">Save</button>
+        <a id="download-link"></a>
+      </footer>
+      </div>
+  <div id="index">
   <div class="header">
     <div class="title">
       <h1>Blob Darwinism</h1>
@@ -26,35 +36,43 @@
 
       <div class="map-size">
         <p>Map Size</p>
+        <div class="map-size-inside">
         <label>Width:
           <input type="text" placeholder="Width" value="100" />
         </label>
         <label> Height:
           <input type="text" placeholder="Height" value="100" />
         </label>
+        </div>
       </div>
       <p>End Conditions</p>
       <div class="end-conditions">
         <div class="end-condition">
           <p>Time</p>
+          <div class="end-condition-inside">
           <p class="description"> The simulation will create the next generation after 30 seconds</p>
           <button class='activated'>
             <i class="fa fa-clock-o" aria-hidden="true"></i>
           </button>
+          </div>
         </div>
         <div class="end-condition">
           <p>Quantity</p>
-          <p class="description"> The simulation will create the next generation when there are no blobs left</p>
-          <button class='activated'>
-            <i class="fa fa-arrow-circle-down" aria-hidden="true"></i>
-          </button>
+          <div class="end-condition-inside">
+            <p class="description"> The simulation will create the next generation when there are no blobs left</p>
+            <button class='activated'>
+              <i class="fa fa-arrow-circle-down" aria-hidden="true"></i>
+            </button>
+          </div>
         </div>
         <div class="end-condition">
           <p>Size</p>
+          <div class="end-condition-inside">
           <p class="description"> The simulation will create the next generation when a blob is at size 45</p>
           <button class='not-activated'>
             <i class="fa fa-arrows-alt" aria-hidden="true"></i>
           </button>
+          </div>
         </div>
       </div>
       <p>Blobs: </p>
@@ -118,7 +136,8 @@
           <p>Garrett Tongue</p>
         </div>
       </div>
-      <button class="start">Start Simulation</button>
+      <button id="start">Start Simulation</button>
+      </div>
     </div>
   </div>
   </div>

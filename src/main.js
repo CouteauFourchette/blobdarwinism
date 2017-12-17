@@ -1,8 +1,27 @@
 require('../style/app.scss');
 import Simulation from './simulation/simulation';
 import Genetic from './AI/genetics';
+import * as Index from './index';
 
 document.addEventListener('DOMContentLoaded', (event) => {
+
+  const index = document.getElementById('index');
+  const simulationA = document.getElementById('simulation');
+  // simulationA.style.display = 'block';
+  // index.style.display = 'none';
+
+  const startButton = document.getElementById('start');
+  startButton.addEventListener('click', (e)  => {
+    simulationA.style.display = 'block';
+    index.style.display = 'none';
+  });
+
+  const backButton = document.getElementById('back-link');
+  backButton.addEventListener('click', (e) => {
+    index.style.display = 'block';
+    simulationA.style.display = 'none';
+  });
+
   const canvas = document.getElementById('canvas');
   const GL = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
 
@@ -30,4 +49,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
       downloadLink.click();
     });
   }
+
+  Index.setUpIndex();
+
 });

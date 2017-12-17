@@ -1,3 +1,16 @@
+#simulation {
+  display: none;
+}
+
+canvas {
+  width: 100%;
+}
+
+#canvas {
+  background-image: url("../images/black_thread_@2x.png");
+}
+
+
 #simulation-footer {
   padding: 20px;
   background-color: lightgrey;

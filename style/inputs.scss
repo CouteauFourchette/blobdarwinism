@@ -44,11 +44,18 @@ input[type='range']::-ms-thumb {
 input[type='text'] {
   background-color: white;
   border: 1px solid #ccc;
-  width: 200px;
+  // width: 200px;
   margin: 5px;
 }
 
 label {
   width: 100%;
   display: block;
+}
+
+.map-size-inside {
+  display: flex;
+  input {
+    width: 60px;
+  }
 }
