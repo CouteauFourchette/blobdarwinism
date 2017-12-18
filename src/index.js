@@ -78,7 +78,6 @@ export function setUpIndex() {
   //   Config.WIDTH = 3700 * e.target.value;
   //   Config.HEIGHT = 2000 * e.target.value;
   // });
-
   const mutationField = document.getElementById('mutation');
 
   mutationField.addEventListener('change', (e) => {
