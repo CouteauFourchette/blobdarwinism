@@ -4,13 +4,16 @@
     background: #eee;
     color: black;
     font-size: 30px;
+    border: 2px solid #eee;
     &.activated {
       color: white;
       background-color: rgb(99, 180, 44);
+      border: 2px solid rgb(99, 180, 44);
     }
     &:hover {
-      color: white;
-      background-color: rgb(99, 180, 44);
+      border: 2px solid rgb(99, 180, 44);
+      // color: white;
+      // background-color: rgb(99, 180, 44);
     }
     padding: 5px 10px;
   }

@@ -1,18 +1,18 @@
 // Simulation constants
-export const NUM_BLOBS = 50;
-export const NUM_FOOD = 201;
-export const WIDTH = 2000;
-export const HEIGHT = 2000;
+export let NUM_BLOBS = 50;
+export let NUM_FOOD = 201;
+export let WIDTH = 2000;
+export let HEIGHT = 2000;
 export const MAX_SPEED = 5;
 export const FOOD_SIZE = 5;
 export const INITIAL_BLOB_SIZE = 10;
 
 // Simulation end conditions
 // possible end conditions: TIME, NUM, SIZE, DEPTH, NONE (default)
-export const END_CONDITIONS = ["TIME", "NUM"];
+export let END_CONDITIONS = ["TIME", "NUM"];
 export const TIME_THRESHOLD = 15;
 export const NUM_THRESHOLD = 1;
-export const SIZE_THRESHOLD = 50;
+export const SIZE_THRESHOLD = 80;
 export const DEPTH_THRESHOLD = 1000;
 
 // Network constants

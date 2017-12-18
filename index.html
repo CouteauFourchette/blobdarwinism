@@ -37,11 +37,8 @@
       <div class="map-size">
         <p>Map Size</p>
         <div class="map-size-inside">
-        <label>Width:
-          <input type="text" placeholder="Width" value="100" />
-        </label>
-        <label> Height:
-          <input type="text" placeholder="Height" value="100" />
+        <label> Multiplier:
+          <input id="multiplier" type="text" placeholder="Multiplier" value="2" />
         </label>
         </div>
       </div>
@@ -51,7 +48,7 @@
           <p>Time</p>
           <div class="end-condition-inside">
           <p class="description"> The simulation will create the next generation after 30 seconds</p>
-          <button class='activated'>
+          <button id="time-button" class="activated">
             <i class="fa fa-clock-o" aria-hidden="true"></i>
           </button>
           </div>
@@ -60,7 +57,7 @@
           <p>Quantity</p>
           <div class="end-condition-inside">
             <p class="description"> The simulation will create the next generation when there are no blobs left</p>
-            <button class='activated'>
+            <button id="quantity-button" class="activated">
               <i class="fa fa-arrow-circle-down" aria-hidden="true"></i>
             </button>
           </div>
@@ -68,8 +65,8 @@
         <div class="end-condition">
           <p>Size</p>
           <div class="end-condition-inside">
-          <p class="description"> The simulation will create the next generation when a blob is at size 45</p>
-          <button class='not-activated'>
+          <p class="description"> The simulation will create the next generation when a blob is at size 80</p>
+          <button id="size-button">
             <i class="fa fa-arrows-alt" aria-hidden="true"></i>
           </button>
           </div>
