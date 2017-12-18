@@ -1,4 +1,5 @@
 import * as Config from './config';
+import { MUTATION_RATE } from './config';
 
 export function setUpIndex() {
 
@@ -7,7 +8,7 @@ export function setUpIndex() {
   const blobNumber = document.getElementById('blobs-number');
   const blobCtx = blobCanvas.getContext('2d');
   blobCanvas.width = 1250;
-  blobCanvas.height = 200;
+  blobCanvas.height = 100;
   const blobImg = new Image();
   blobImg.onload = () => drawGrid(blobCanvas, blobImg, blobCtx, blobNumber.value);
   Config.NUM_BLOBS = blobNumber.value;
@@ -23,9 +24,9 @@ export function setUpIndex() {
   const foodNumber = document.getElementById('food-number');
   const foodCtx = foodCanvas.getContext('2d');
   foodCanvas.width = 1250;
-  foodCanvas.height = 1200;
+  foodCanvas.height = 1000;
   const foodImg = new Image();
-  foodImg.onload = () => drawGrid(foodCanvas, foodImg, foodCtx, blobNumber.value);
+  foodImg.onload = () => drawGrid(foodCanvas, foodImg, foodCtx, foodNumber.value);
   foodImg.src = "./images/food.png";
   foodNumber.addEventListener('input', (e) => {
     Config.NUM_FOOD = e.target.value;
@@ -36,7 +37,7 @@ export function setUpIndex() {
   // Choose the end setting
   const timeButton = document.getElementById('time-button');
   timeButton.addEventListener('click', (e) => {
-    clickEndConditions('TIME', timeButton);
+    clickEndConditions('DEPTH', timeButton);
   });
 
   const quantityButton = document.getElementById('quantity-button');
@@ -49,12 +50,45 @@ export function setUpIndex() {
     clickEndConditions('SIZE', sizeButton);
   });
 
-  // Map size
-  const multiplierField = document.getElementById('multiplier');
+  // Neural network
+  const layersField = document.getElementById('layers');
+  const neuronsField = document.getElementById('neurons');
 
-  multiplierField.addEventListener('change', (e) => {
-    Config.WIDTH = 1000 * e.target.value;
-    Config.HEIGHT = 1000 * e.target.value;
+  // export const NETWORK_DIMENSIONS = [10, [16, 16], 2];
+  layersField.addEventListener('change', () => {
+    const hidden = [];
+    for (let i = 0; i < layersField.value; i += 1) {
+      hidden.push(Number(neuronsField.value));
+    }
+    Config.NETWORK_DIMENSIONS = [10, hidden, 2];
+  });
+
+  neuronsField.addEventListener('change', () => {
+    const hidden = [];
+    for (let i = 0; i < layersField.value; i += 1) {
+      hidden.push(Number(neuronsField.value));
+    }
+    Config.NETWORK_DIMENSIONS = [10, hidden, 2];
+  });
+
+  // Map size
+  // const multiplierField = document.getElementById('multiplier');
+
+  // multiplierField.addEventListener('change', (e) => {
+  //   Config.WIDTH = 3700 * e.target.value;
+  //   Config.HEIGHT = 2000 * e.target.value;
+  // });
+
+  const mutationField = document.getElementById('mutation');
+
+  mutationField.addEventListener('change', (e) => {
+    Config.MUTATION_RATE = Number(e.target.value);
+  });
+
+  const rangeField = document.getElementById('range');
+
+  rangeField.addEventListener('change', (e) => {
+    Config.MUTATION_RANGE = Number(e.target.value);
   });
 
 

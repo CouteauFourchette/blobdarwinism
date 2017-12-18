@@ -8,17 +8,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
   const index = document.getElementById('index');
   const simulationA = document.getElementById('simulation');
   
-  const backButton = document.getElementById('back-link');
-  backButton.addEventListener('click', (e) => {
-    index.style.display = 'block';
-    simulationA.style.display = 'none';
-  });
+
 
   const canvas = document.getElementById('canvas');
   const GL = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 
-  
-  
     const startButton = document.getElementById('start');
     startButton.addEventListener('click', (e)  => {
       simulationA.style.display = 'block';
@@ -27,9 +23,9 @@ document.addEventListener('DOMContentLoaded', (event) => {
       if (!GL) {
         alert('This browser does not support WebGL');
       } else {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+
         let simulation = new Simulation(GL);
+        
         simulation.run();
 
 
@@ -40,12 +36,20 @@ document.addEventListener('DOMContentLoaded', (event) => {
           simulation.run();
         });
 
-        const saveButton = document.getElementById('save-button');
-        saveButton.addEventListener('click', () => {
-          const downloadLink = document.getElementById('download-link');
-          downloadLink.setAttribute("href", Genetic.saveGeneration(simulation.blobBrains));
-          downloadLink.setAttribute("download", "blobDarwinSave.json");
-          downloadLink.click();
+        // const saveButton = document.getElementById('save-button');
+        // saveButton.addEventListener('click', () => {
+        //   const downloadLink = document.getElementById('download-link');
+        //   downloadLink.setAttribute("href", Genetic.saveGeneration(simulation.blobBrains));
+        //   downloadLink.setAttribute("download", "blobDarwinSave.json");
+        //   downloadLink.click();
+        // });
+
+        const backButton = document.getElementById('back-link');
+        backButton.addEventListener('click', () => {
+          index.style.display = 'block';
+          simulationA.style.display = 'none';
+          simulation.stop();
+          simulation = undefined;
         });
       }
 

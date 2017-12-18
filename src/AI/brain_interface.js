@@ -5,8 +5,6 @@ class BrainInterface {
     this.fitness = 0;
     if (network) {
       this.network = network;
-    } else {
-      // Generate network with random weights and given dimensions
     }
   }
 

@@ -217,7 +217,7 @@ class Simulation {
         this.blobRenderer.render(this.totalTime);
       }
       this.updateGenerationStatus(Config.END_CONDITIONS);
-      setTimeout(this.simulate.bind(this), 0);
+      setTimeout(this.simulate.bind(this), 2);
     } catch (e) {
       // Forgive me father for I have sinned.
       console.log(e);

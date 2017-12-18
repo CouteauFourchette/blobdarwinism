@@ -16,7 +16,7 @@
       <footer id="simulation-footer">
         <a id="back-link" href="./index.html">Back</a>
         <button id="reset-button" type="button">Reset</button>
-        <button id="save-button" type="button">Save</button>
+        <!-- <button id="save-button" type="button">Save</button> -->
         <a id="download-link"></a>
       </footer>
       </div>
@@ -33,21 +33,21 @@
   <div class="content">
     <div class="simulation-setting">
       <h1>Simulation Settings</h1>
-
+<!-- 
       <div class="map-size">
         <p>Map Size</p>
         <div class="map-size-inside">
         <label> Multiplier:
-          <input id="multiplier" type="text" placeholder="Multiplier" value="2" />
+          <input id="multiplier" type="text" placeholder="Multiplier" value="1" /> <p class="description">(Between 1 and 2)</p>
         </label>
         </div>
-      </div>
+      </div> -->
       <p>End Conditions</p>
       <div class="end-conditions">
         <div class="end-condition">
-          <p>Time</p>
+          <p>Depth</p>
           <div class="end-condition-inside">
-          <p class="description"> The simulation will create the next generation after 30 seconds</p>
+          <p class="description"> The simulation will create the next generation after 1000 frames</p>
           <button id="time-button" class="activated">
             <i class="fa fa-clock-o" aria-hidden="true"></i>
           </button>
@@ -74,7 +74,7 @@
       </div>
       <p>Blobs: </p>
       <div class="slider-container">
-        <input id="blobs-number" type="range" min="1" max="250" value="20" />
+        <input id="blobs-number" type="range" min="1" max="100" value="20" />
         <canvas id="blobs"></canvas>
       </div>
       <p>Food: </p>
@@ -87,37 +87,29 @@
     <div class="bottom-settings">
       <div class="nn-setting">
         <h1>Neural Network Settings</h1>
-        <div class="mutation">
-          <p>Layers</p>
-          <p class="description"> The percentage chance a gene will mutate</p>
-          <label>Mutation rate:
-            <input type="text" placeholder="Width" value="100" />
-          </label>
-          <label>Mutation range: </label>
-          <p class="description"> The impact of the mutation</p>
-          <input type="text" placeholder="Height" value="100" />
+        <div class="layer">
+          <label>Hidden Layers: </label>
+          <p class="description"> The number of hidden layers in the network</p>
+          <input id="layers" type="text" placeholder="Layers" value="2" />
+          <label>Neurons: </label>
+          <p class="description"> The number of neurons per layer</p>
+          <input id="neurons" type="text" placeholder="Neurons" value="16" />
         </div>
       </div>
       <div class="genetics-setting">
         <h1>Genetic Settings</h1>
-        <div class="mutation">
-          <p>Mutation</p>
+        <div class="mutations">
+          <label>Mutation Rate: </label>
           <p class="description"> The percentage chance a gene will mutate</p>
-          <label>Mutation rate:
-            <input type="text" placeholder="Width" value="100" />
-          </label>
+          <input id="mutation" type="text" placeholder="Mutation Rate" value="0.01" />
           <label>Mutation range: </label>
           <p class="description"> The impact of the mutation</p>
-          <input type="text" placeholder="Height" value="100" />
+          <input id="range" type="text" placeholder="Mutation Range" value="0.2" />
         </div>
       </div>
     </div>
     <div>
       <div class="description-container">
-        <div class="description">
-          <h2>
-            Description
-          </h2>
           <p>
              What is this? Blob Darwinism is a machine learning project that simulates an ecosystem of small beings called blobs. Blobs
             seek to maximize their survival by moving and eating food or other blobs. The behavior of each blob is governed by a unique
@@ -126,7 +118,6 @@
             behavior. Users are encouraged to experiment with various simulation settings. By changing rules of the simulation or features
             of the neural networks many unique patterns can arise. For more information, please visit our README page at ...github.io.
           </p>
-        </div>
         <div class="contributors">
           <p>Julien Gurunlian</p>
           <p>Brandt Sheets</p>
