@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 161);
+/******/ 	return __webpack_require__(__webpack_require__.s = 164);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -200,10 +200,10 @@ module.exports = function deepMap(array, callback, skipZeros) {
 var number = __webpack_require__(3);
 var string = __webpack_require__(9);
 var object = __webpack_require__(5);
-var types = __webpack_require__(62);
+var types = __webpack_require__(63);
 
-var DimensionError = __webpack_require__(10);
-var IndexError = __webpack_require__(54);
+var DimensionError = __webpack_require__(11);
+var IndexError = __webpack_require__(56);
 
 /**
  * Calculate the size of a multi dimensional array.
@@ -1790,7 +1790,7 @@ exports.factory = factory;
 
 
 var util = __webpack_require__(25);
-var DimensionError = __webpack_require__(10);
+var DimensionError = __webpack_require__(11);
 
 var string = util.string,
     isString = string.isString;
@@ -1901,7 +1901,7 @@ exports.factory = factory;
 
 
 var formatNumber = __webpack_require__(3).format;
-var formatBigNumber = __webpack_require__(197).format;
+var formatBigNumber = __webpack_require__(200).format;
 var isBigNumber = __webpack_require__(76);
 
 /**
@@ -2117,50 +2117,8 @@ function looksLikeFraction (value) {
 "use strict";
 
 
-/**
- * Create a range error with the message:
- *     'Dimension mismatch (<actual size> != <expected size>)'
- * @param {number | number[]} actual        The actual size
- * @param {number | number[]} expected      The expected size
- * @param {string} [relation='!=']          Optional relation between actual
- *                                          and expected size: '!=', '<', etc.
- * @extends RangeError
- */
-function DimensionError(actual, expected, relation) {
-  if (!(this instanceof DimensionError)) {
-    throw new SyntaxError('Constructor must be called with the new operator');
-  }
-
-  this.actual   = actual;
-  this.expected = expected;
-  this.relation = relation;
-
-  this.message = 'Dimension mismatch (' +
-      (Array.isArray(actual) ? ('[' + actual.join(', ') + ']') : actual) +
-      ' ' + (this.relation || '!=') + ' ' +
-      (Array.isArray(expected) ? ('[' + expected.join(', ') + ']') : expected) +
-      ')';
-
-  this.stack = (new Error()).stack;
-}
-
-DimensionError.prototype = new RangeError();
-DimensionError.prototype.constructor = RangeError;
-DimensionError.prototype.name = 'DimensionError';
-DimensionError.prototype.isDimensionError = true;
-
-module.exports = DimensionError;
-
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
 var nearlyEqual = __webpack_require__(3).nearlyEqual;
-var bigNearlyEqual = __webpack_require__(37);
+var bigNearlyEqual = __webpack_require__(39);
 
 function factory (type, config, load, typed) {
   
@@ -2213,6 +2171,48 @@ exports.factory = factory;
 
 
 /***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Create a range error with the message:
+ *     'Dimension mismatch (<actual size> != <expected size>)'
+ * @param {number | number[]} actual        The actual size
+ * @param {number | number[]} expected      The expected size
+ * @param {string} [relation='!=']          Optional relation between actual
+ *                                          and expected size: '!=', '<', etc.
+ * @extends RangeError
+ */
+function DimensionError(actual, expected, relation) {
+  if (!(this instanceof DimensionError)) {
+    throw new SyntaxError('Constructor must be called with the new operator');
+  }
+
+  this.actual   = actual;
+  this.expected = expected;
+  this.relation = relation;
+
+  this.message = 'Dimension mismatch (' +
+      (Array.isArray(actual) ? ('[' + actual.join(', ') + ']') : actual) +
+      ' ' + (this.relation || '!=') + ' ' +
+      (Array.isArray(expected) ? ('[' + expected.join(', ') + ']') : expected) +
+      ')';
+
+  this.stack = (new Error()).stack;
+}
+
+DimensionError.prototype = new RangeError();
+DimensionError.prototype.constructor = RangeError;
+DimensionError.prototype.name = 'DimensionError';
+DimensionError.prototype.isDimensionError = true;
+
+module.exports = DimensionError;
+
+
+/***/ }),
 /* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -2226,11 +2226,11 @@ function factory (type, config, load, typed) {
   var latex = __webpack_require__(4);
 
   var matrix = load(__webpack_require__(0));
-  var addScalar = load(__webpack_require__(20));
-  var multiplyScalar = load(__webpack_require__(23));
-  var equalScalar = load(__webpack_require__(11));
+  var addScalar = load(__webpack_require__(16));
+  var multiplyScalar = load(__webpack_require__(22));
+  var equalScalar = load(__webpack_require__(10));
 
-  var algorithm11 = load(__webpack_require__(17));
+  var algorithm11 = load(__webpack_require__(19));
   var algorithm14 = load(__webpack_require__(6));
   
   var DenseMatrix = type.DenseMatrix;
@@ -3357,6 +3357,72 @@ exports.isPlainObject = isPlainObject;
 "use strict";
 
 
+function factory(type, config, load, typed) {
+  var multiplyScalar = load(__webpack_require__(22));
+
+  /**
+   * Divide two scalar values, `x / y`.
+   * This function is meant for internal use: it is used by the public functions
+   * `divide` and `inv`.
+   *
+   * This function does not support collections (Array or Matrix), and does
+   * not validate the number of of inputs.
+   *
+   * @param  {number | BigNumber | Fraction | Complex | Unit} x   Numerator
+   * @param  {number | BigNumber | Fraction | Complex} y          Denominator
+   * @return {number | BigNumber | Fraction | Complex | Unit}                      Quotient, `x / y`
+   * @private
+   */
+  var divideScalar = typed('divide', {
+    'number, number': function (x, y) {
+      return x / y;
+    },
+
+    'Complex, Complex': function (x, y) {
+      return x.div(y);
+    },
+
+    'BigNumber, BigNumber': function (x, y) {
+      return x.div(y);
+    },
+
+    'Fraction, Fraction': function (x, y) {
+      return x.div(y);
+    },
+
+    'Unit, number | Fraction | BigNumber': function (x, y) {
+      var res = x.clone();
+      // TODO: move the divide function to Unit.js, it uses internals of Unit
+      res.value = divideScalar(((res.value === null) ? res._normalize(1) : res.value), y);
+      return res;
+    },
+
+    'number | Fraction | BigNumber, Unit': function (x, y) {
+      var res = y.pow(-1);
+      // TODO: move the divide function to Unit.js, it uses internals of Unit
+      res.value = multiplyScalar(((res.value === null) ? res._normalize(1) : res.value), x);
+      return res;
+    },
+
+    'Unit, Unit': function (x, y) {
+      return x.divide(y);
+    }
+
+  });
+
+  return divideScalar;
+}
+
+exports.factory = factory;
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 var keywords = __webpack_require__(82);
 var deepEqual= __webpack_require__(5).deepEqual;
 var hasOwnProperty = __webpack_require__(5).hasOwnProperty;
@@ -3762,13 +3828,71 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var DimensionError = __webpack_require__(10);
+function factory(type, config, load, typed) {
+
+  /**
+   * Add two scalar values, `x + y`.
+   * This function is meant for internal use: it is used by the public function
+   * `add`
+   *
+   * This function does not support collections (Array or Matrix), and does
+   * not validate the number of of inputs.
+   *
+   * @param  {number | BigNumber | Fraction | Complex | Unit} x   First value to add
+   * @param  {number | BigNumber | Fraction | Complex} y          Second value to add
+   * @return {number | BigNumber | Fraction | Complex | Unit}                      Sum of `x` and `y`
+   * @private
+   */
+  var add = typed('add', {
+
+    'number, number': function (x, y) {
+      return x + y;
+    },
+
+    'Complex, Complex': function (x, y) {
+      return x.add(y);
+    },
+
+    'BigNumber, BigNumber': function (x, y) {
+      return x.plus(y);
+    },
+
+    'Fraction, Fraction': function (x, y) {
+      return x.add(y);
+    },
+
+    'Unit, Unit': function (x, y) {
+      if (x.value == null) throw new Error('Parameter x contains a unit with undefined value');
+      if (y.value == null) throw new Error('Parameter y contains a unit with undefined value');
+      if (!x.equalBase(y)) throw new Error('Units do not match');
+
+      var res = x.clone();
+      res.value = add(res.value, y.value);
+      res.fixPrefix = false;
+      return res;
+    }
+  });
+
+  return add;
+}
+
+exports.factory = factory;
+
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var DimensionError = __webpack_require__(11);
 
 function factory (type, config, load, typed) {
 
@@ -3894,7 +4018,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 16 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4011,7 +4135,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 17 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4019,7 +4143,7 @@ exports.factory = factory;
 
 function factory (type, config, load, typed) {
 
-  var equalScalar = load(__webpack_require__(11));
+  var equalScalar = load(__webpack_require__(10));
 
   var SparseMatrix = type.SparseMatrix;
 
@@ -4127,7 +4251,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 18 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4138,12 +4262,12 @@ var extend = __webpack_require__(5).extend;
 function factory (type, config, load, typed) {
 
   var matrix = load(__webpack_require__(0));
-  var addScalar = load(__webpack_require__(20));
+  var addScalar = load(__webpack_require__(16));
   var latex = __webpack_require__(4);
   
   var algorithm01 = load(__webpack_require__(35));
   var algorithm04 = load(__webpack_require__(78));
-  var algorithm10 = load(__webpack_require__(38));
+  var algorithm10 = load(__webpack_require__(40));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
 
@@ -4298,149 +4422,25 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-function factory(type, config, load, typed) {
-  var multiplyScalar = load(__webpack_require__(23));
-
-  /**
-   * Divide two scalar values, `x / y`.
-   * This function is meant for internal use: it is used by the public functions
-   * `divide` and `inv`.
-   *
-   * This function does not support collections (Array or Matrix), and does
-   * not validate the number of of inputs.
-   *
-   * @param  {number | BigNumber | Fraction | Complex | Unit} x   Numerator
-   * @param  {number | BigNumber | Fraction | Complex} y          Denominator
-   * @return {number | BigNumber | Fraction | Complex | Unit}                      Quotient, `x / y`
-   * @private
-   */
-  var divideScalar = typed('divide', {
-    'number, number': function (x, y) {
-      return x / y;
-    },
-
-    'Complex, Complex': function (x, y) {
-      return x.div(y);
-    },
-
-    'BigNumber, BigNumber': function (x, y) {
-      return x.div(y);
-    },
-
-    'Fraction, Fraction': function (x, y) {
-      return x.div(y);
-    },
-
-    'Unit, number | Fraction | BigNumber': function (x, y) {
-      var res = x.clone();
-      // TODO: move the divide function to Unit.js, it uses internals of Unit
-      res.value = divideScalar(((res.value === null) ? res._normalize(1) : res.value), y);
-      return res;
-    },
-
-    'number | Fraction | BigNumber, Unit': function (x, y) {
-      var res = y.pow(-1);
-      // TODO: move the divide function to Unit.js, it uses internals of Unit
-      res.value = multiplyScalar(((res.value === null) ? res._normalize(1) : res.value), x);
-      return res;
-    },
-
-    'Unit, Unit': function (x, y) {
-      return x.divide(y);
-    }
-
-  });
-
-  return divideScalar;
-}
-
-exports.factory = factory;
-
-
-/***/ }),
-/* 20 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-function factory(type, config, load, typed) {
-
-  /**
-   * Add two scalar values, `x + y`.
-   * This function is meant for internal use: it is used by the public function
-   * `add`
-   *
-   * This function does not support collections (Array or Matrix), and does
-   * not validate the number of of inputs.
-   *
-   * @param  {number | BigNumber | Fraction | Complex | Unit} x   First value to add
-   * @param  {number | BigNumber | Fraction | Complex} y          Second value to add
-   * @return {number | BigNumber | Fraction | Complex | Unit}                      Sum of `x` and `y`
-   * @private
-   */
-  var add = typed('add', {
-
-    'number, number': function (x, y) {
-      return x + y;
-    },
-
-    'Complex, Complex': function (x, y) {
-      return x.add(y);
-    },
-
-    'BigNumber, BigNumber': function (x, y) {
-      return x.plus(y);
-    },
-
-    'Fraction, Fraction': function (x, y) {
-      return x.add(y);
-    },
-
-    'Unit, Unit': function (x, y) {
-      if (x.value == null) throw new Error('Parameter x contains a unit with undefined value');
-      if (y.value == null) throw new Error('Parameter y contains a unit with undefined value');
-      if (!x.equalBase(y)) throw new Error('Units do not match');
-
-      var res = x.clone();
-      res.value = add(res.value, y.value);
-      res.fixPrefix = false;
-      return res;
-    }
-  });
-
-  return add;
-}
-
-exports.factory = factory;
-
-
-/***/ }),
 /* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var DimensionError = __webpack_require__(10);
+var DimensionError = __webpack_require__(11);
 
 function factory (type, config, load, typed) {
   var latex = __webpack_require__(4);
 
   var matrix = load(__webpack_require__(0));
-  var addScalar = load(__webpack_require__(20));
-  var unaryMinus = load(__webpack_require__(39));
+  var addScalar = load(__webpack_require__(16));
+  var unaryMinus = load(__webpack_require__(37));
 
   var algorithm01 = load(__webpack_require__(35));
-  var algorithm03 = load(__webpack_require__(15));
-  var algorithm05 = load(__webpack_require__(63));
-  var algorithm10 = load(__webpack_require__(38));
+  var algorithm03 = load(__webpack_require__(17));
+  var algorithm05 = load(__webpack_require__(64));
+  var algorithm10 = load(__webpack_require__(40));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
 
@@ -4634,11 +4634,75 @@ exports.factory = factory;
 "use strict";
 
 
+function factory(type, config, load, typed) {
+  
+  /**
+   * Multiply two scalar values, `x * y`.
+   * This function is meant for internal use: it is used by the public function
+   * `multiply`
+   *
+   * This function does not support collections (Array or Matrix), and does
+   * not validate the number of of inputs.
+   *
+   * @param  {number | BigNumber | Fraction | Complex | Unit} x   First value to multiply
+   * @param  {number | BigNumber | Fraction | Complex} y          Second value to multiply
+   * @return {number | BigNumber | Fraction | Complex | Unit}                      Multiplication of `x` and `y`
+   * @private
+   */
+  var multiplyScalar = typed('multiplyScalar', {
+
+    'number, number': function (x, y) {
+      return x * y;
+    },
+
+    'Complex, Complex': function (x, y) {
+      return x.mul(y);
+    },
+
+    'BigNumber, BigNumber': function (x, y) {
+      return x.times(y);
+    },
+
+    'Fraction, Fraction': function (x, y) {
+      return x.mul(y);
+    },
+
+    'number | Fraction | BigNumber | Complex, Unit': function (x, y) {
+      var res = y.clone();
+      res.value = (res.value === null) ? res._normalize(x) : multiplyScalar(res.value, x);
+      return res;
+    },
+
+    'Unit, number | Fraction | BigNumber | Complex': function (x, y) {
+      var res = x.clone();
+      res.value = (res.value === null) ? res._normalize(y) : multiplyScalar(res.value, y);
+      return res;
+    },
+
+    'Unit, Unit': function (x, y) {
+      return x.multiply(y);
+    }
+
+  });
+
+  return multiplyScalar;
+}
+
+exports.factory = factory;
+
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 var clone = __webpack_require__(5).clone;
 var validateIndex = __webpack_require__(2).validateIndex;
 var getSafeProperty = __webpack_require__(13).getSafeProperty;
 var setSafeProperty = __webpack_require__(13).setSafeProperty;
-var DimensionError = __webpack_require__(10);
+var DimensionError = __webpack_require__(11);
 
 function factory (type, config, load, typed) {
   var matrix = load(__webpack_require__(0));
@@ -4868,81 +4932,17 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 23 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-function factory(type, config, load, typed) {
-  
-  /**
-   * Multiply two scalar values, `x * y`.
-   * This function is meant for internal use: it is used by the public function
-   * `multiply`
-   *
-   * This function does not support collections (Array or Matrix), and does
-   * not validate the number of of inputs.
-   *
-   * @param  {number | BigNumber | Fraction | Complex | Unit} x   First value to multiply
-   * @param  {number | BigNumber | Fraction | Complex} y          Second value to multiply
-   * @return {number | BigNumber | Fraction | Complex | Unit}                      Multiplication of `x` and `y`
-   * @private
-   */
-  var multiplyScalar = typed('multiplyScalar', {
-
-    'number, number': function (x, y) {
-      return x * y;
-    },
-
-    'Complex, Complex': function (x, y) {
-      return x.mul(y);
-    },
-
-    'BigNumber, BigNumber': function (x, y) {
-      return x.times(y);
-    },
-
-    'Fraction, Fraction': function (x, y) {
-      return x.mul(y);
-    },
-
-    'number | Fraction | BigNumber | Complex, Unit': function (x, y) {
-      var res = y.clone();
-      res.value = (res.value === null) ? res._normalize(x) : multiplyScalar(res.value, x);
-      return res;
-    },
-
-    'Unit, number | Fraction | BigNumber | Complex': function (x, y) {
-      var res = x.clone();
-      res.value = (res.value === null) ? res._normalize(y) : multiplyScalar(res.value, y);
-      return res;
-    },
-
-    'Unit, Unit': function (x, y) {
-      return x.multiply(y);
-    }
-
-  });
-
-  return multiplyScalar;
-}
-
-exports.factory = factory;
-
-
-/***/ }),
 /* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var DimensionError = __webpack_require__(10);
+var DimensionError = __webpack_require__(11);
 
 function factory (type, config, load, typed) {
 
-  var equalScalar = load(__webpack_require__(11));
+  var equalScalar = load(__webpack_require__(10));
 
   var SparseMatrix = type.SparseMatrix;
 
@@ -5065,13 +5065,13 @@ exports.factory = factory;
 
 
 exports.array = __webpack_require__(2);
-exports['boolean'] = __webpack_require__(206);
+exports['boolean'] = __webpack_require__(209);
 exports['function'] = __webpack_require__(34);
 exports.number = __webpack_require__(3);
 exports.object = __webpack_require__(5);
 exports.string = __webpack_require__(9);
-exports.types = __webpack_require__(62);
-exports.emitter = __webpack_require__(102);
+exports.types = __webpack_require__(63);
+exports.emitter = __webpack_require__(103);
 
 
 /***/ }),
@@ -5081,7 +5081,7 @@ exports.emitter = __webpack_require__(102);
 "use strict";
 
 
-var DimensionError = __webpack_require__(10);
+var DimensionError = __webpack_require__(11);
 
 function factory (type, config, load, typed) {
 
@@ -5502,6 +5502,74 @@ exports.factory = factory;
 "use strict";
 
 
+var deepMap = __webpack_require__(1);
+
+function factory (type, config, load, typed) {
+  /**
+   * Calculate the absolute value of a number. For matrices, the function is
+   * evaluated element wise.
+   *
+   * Syntax:
+   *
+   *    math.abs(x)
+   *
+   * Examples:
+   *
+   *    math.abs(3.5);                // returns number 3.5
+   *    math.abs(-4.2);               // returns number 4.2
+   *
+   *    math.abs([3, -5, -1, 0, 2]);  // returns Array [3, 5, 1, 0, 2]
+   *
+   * See also:
+   *
+   *    sign
+   *
+   * @param  {number | BigNumber | Fraction | Complex | Array | Matrix | Unit} x
+   *            A number or matrix for which to get the absolute value
+   * @return {number | BigNumber | Fraction | Complex | Array | Matrix | Unit}
+   *            Absolute value of `x`
+   */
+  var abs = typed('abs', {
+    'number': Math.abs,
+
+    'Complex': function (x) {
+      return x.abs();
+    },
+
+    'BigNumber': function (x) {
+      return x.abs();
+    },
+
+    'Fraction': function (x) {
+      return x.abs();
+    },
+
+    'Array | Matrix': function (x) {
+      // deep map collection, skip zeros since abs(0) = 0
+      return deepMap(x, abs, true);
+    },
+
+    'Unit': function(x) {
+      return x.abs();
+    }
+  });
+
+  abs.toTex = {1: '\\left|${args[0]}\\right|'};
+
+  return abs;
+}
+
+exports.name = 'abs';
+exports.factory = factory;
+
+
+/***/ }),
+/* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 var array = __webpack_require__(2);
 
 function factory (type, config, load, typed) {
@@ -5558,7 +5626,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5570,8 +5638,8 @@ Object.defineProperty(exports, "__esModule", {
 // Simulation constants
 var NUM_BLOBS = exports.NUM_BLOBS = 20;
 var NUM_FOOD = exports.NUM_FOOD = 200;
-var WIDTH = exports.WIDTH = 3200;
-var HEIGHT = exports.HEIGHT = 1700;
+var WIDTH = exports.WIDTH = 3840;
+var HEIGHT = exports.HEIGHT = 2160;
 var MAX_SPEED = exports.MAX_SPEED = 2;
 var FOOD_SIZE = exports.FOOD_SIZE = 5;
 var INITIAL_BLOB_SIZE = exports.INITIAL_BLOB_SIZE = 10;
@@ -5602,7 +5670,7 @@ var ELITISM = exports.ELITISM = 0.02; // The entities that are preserved as is f
 var NEW_ENTITIES = exports.NEW_ENTITIES = 0.05; // Entirely new random entities
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5680,74 +5748,6 @@ function equals(a, b) {
 
 
 /***/ }),
-/* 31 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var deepMap = __webpack_require__(1);
-
-function factory (type, config, load, typed) {
-  /**
-   * Calculate the absolute value of a number. For matrices, the function is
-   * evaluated element wise.
-   *
-   * Syntax:
-   *
-   *    math.abs(x)
-   *
-   * Examples:
-   *
-   *    math.abs(3.5);                // returns number 3.5
-   *    math.abs(-4.2);               // returns number 4.2
-   *
-   *    math.abs([3, -5, -1, 0, 2]);  // returns Array [3, 5, 1, 0, 2]
-   *
-   * See also:
-   *
-   *    sign
-   *
-   * @param  {number | BigNumber | Fraction | Complex | Array | Matrix | Unit} x
-   *            A number or matrix for which to get the absolute value
-   * @return {number | BigNumber | Fraction | Complex | Array | Matrix | Unit}
-   *            Absolute value of `x`
-   */
-  var abs = typed('abs', {
-    'number': Math.abs,
-
-    'Complex': function (x) {
-      return x.abs();
-    },
-
-    'BigNumber': function (x) {
-      return x.abs();
-    },
-
-    'Fraction': function (x) {
-      return x.abs();
-    },
-
-    'Array | Matrix': function (x) {
-      // deep map collection, skip zeros since abs(0) = 0
-      return deepMap(x, abs, true);
-    },
-
-    'Unit': function(x) {
-      return x.abs();
-    }
-  });
-
-  abs.toTex = {1: '\\left|${args[0]}\\right|'};
-
-  return abs;
-}
-
-exports.name = 'abs';
-exports.factory = factory;
-
-
-/***/ }),
 /* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -5757,11 +5757,11 @@ exports.factory = factory;
 function factory (type, config, load, typed) {
   
   var matrix = load(__webpack_require__(0));
-  var equalScalar = load(__webpack_require__(11));
+  var equalScalar = load(__webpack_require__(10));
 
-  var algorithm03 = load(__webpack_require__(15));
+  var algorithm03 = load(__webpack_require__(17));
   var algorithm07 = load(__webpack_require__(26));
-  var algorithm12 = load(__webpack_require__(16));
+  var algorithm12 = load(__webpack_require__(18));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
 
@@ -5930,12 +5930,12 @@ exports.factory = factory;
 "use strict";
 
 
-var naturalSort = __webpack_require__(515);
+var naturalSort = __webpack_require__(517);
 
 function factory (type, config, load, typed) {
   var getTypeOf = load(__webpack_require__(81));
   var matrix = load(__webpack_require__(0));
-  var compare = load(__webpack_require__(51));
+  var compare = load(__webpack_require__(54));
 
   var compareBooleans = compare.signatures['boolean,boolean']
 
@@ -6268,7 +6268,7 @@ exports.callWithRightArgumentCount = function (fn, args, argCount) {
 "use strict";
 
 
-var DimensionError = __webpack_require__(10);
+var DimensionError = __webpack_require__(11);
 
 function factory (type, config, load, typed) {
 
@@ -6390,15 +6390,15 @@ exports.factory = factory;
 
 
 var nearlyEqual = __webpack_require__(3).nearlyEqual;
-var bigNearlyEqual = __webpack_require__(37);
+var bigNearlyEqual = __webpack_require__(39);
 
 function factory (type, config, load, typed) {
   
   var matrix = load(__webpack_require__(0));
 
-  var algorithm03 = load(__webpack_require__(15));
+  var algorithm03 = load(__webpack_require__(17));
   var algorithm07 = load(__webpack_require__(26));
-  var algorithm12 = load(__webpack_require__(16));
+  var algorithm12 = load(__webpack_require__(18));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
 
@@ -6575,6 +6575,288 @@ exports.factory = factory;
 "use strict";
 
 
+var deepMap = __webpack_require__(1);
+
+function factory (type, config, load, typed) {
+  var latex = __webpack_require__(4);
+
+  /**
+   * Inverse the sign of a value, apply a unary minus operation.
+   *
+   * For matrices, the function is evaluated element wise. Boolean values and
+   * strings will be converted to a number. For complex numbers, both real and
+   * complex value are inverted.
+   *
+   * Syntax:
+   *
+   *    math.unaryMinus(x)
+   *
+   * Examples:
+   *
+   *    math.unaryMinus(3.5);      // returns -3.5
+   *    math.unaryMinus(-4.2);     // returns 4.2
+   *
+   * See also:
+   *
+   *    add, subtract, unaryPlus
+   *
+   * @param  {number | BigNumber | Fraction | Complex | Unit | Array | Matrix} x Number to be inverted.
+   * @return {number | BigNumber | Fraction | Complex | Unit | Array | Matrix} Returns the value with inverted sign.
+   */
+  var unaryMinus = typed('unaryMinus', {
+    'number': function (x) {
+      return -x;
+    },
+
+    'Complex': function (x) {
+      return x.neg();
+    },
+
+    'BigNumber': function (x) {
+      return x.neg();
+    },
+
+    'Fraction': function (x) {
+      return x.neg();
+    },
+
+    'Unit': function (x) {
+      var res = x.clone();
+      res.value = unaryMinus(x.value);
+      return res;
+    },
+
+    'Array | Matrix': function (x) {
+      // deep map collection, skip zeros since unaryMinus(0) = 0
+      return deepMap(x, unaryMinus, true);
+    }
+
+    // TODO: add support for string
+  });
+
+  unaryMinus.toTex = {
+    1: latex.operators['unaryMinus'] + '\\left(${args[0]}\\right)'
+  };
+
+  return unaryMinus;
+}
+
+exports.name = 'unaryMinus';
+exports.factory = factory;
+
+
+/***/ }),
+/* 38 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var latex = __webpack_require__(4);
+var stringify = __webpack_require__(9).stringify;
+var escape = __webpack_require__(9).escape;
+var hasOwnProperty = __webpack_require__(5).hasOwnProperty;
+var getSafeProperty = __webpack_require__(13).getSafeProperty;
+
+function factory (type, config, load, typed, math) {
+  var register = load(__webpack_require__(7)).register;
+  var compile = load(__webpack_require__(7)).compile;
+  var Node = load(__webpack_require__(15));
+
+  /**
+   * Check whether some name is a valueless unit like "inch".
+   * @param {string} name
+   * @return {boolean}
+   */
+  function isValuelessUnit (name) {
+    return type.Unit ? type.Unit.isValuelessUnit(name) : false;
+  }
+
+  /**
+   * @constructor SymbolNode
+   * @extends {Node}
+   * A symbol node can hold and resolve a symbol
+   * @param {string} name
+   * @extends {Node}
+   */
+  function SymbolNode(name) {
+    if (!(this instanceof SymbolNode)) {
+      throw new SyntaxError('Constructor must be called with the new operator');
+    }
+
+    // validate input
+    if (typeof name !== 'string')  throw new TypeError('String expected for parameter "name"');
+
+    this.name = name;
+  }
+
+  SymbolNode.prototype = new Node();
+
+  SymbolNode.prototype.type = 'SymbolNode';
+
+  SymbolNode.prototype.isSymbolNode = true;
+
+  /**
+   * Compile the node to javascript code
+   * @param {SymbolNode} node The node to be compiled
+   * @param {Object} defs     Object which can be used to define functions
+   *                          or constants globally available for the compiled
+   *                          expression
+   * @param {Object} args     Object with local function arguments, the key is
+   *                          the name of the argument, and the value is `true`.
+   *                          The object may not be mutated, but must be
+   *                          extended instead.
+   * @return {string} js
+   * @private
+   */
+  function compileSymbolNode(node, defs, args) {
+    if (!(node instanceof SymbolNode)) {
+      throw new TypeError('No valid SymbolNode')
+    }
+
+    // add a function to the definitions
+    defs['undef'] = undef;
+    defs['Unit'] = type.Unit;
+    defs.getSafeProperty = getSafeProperty;
+    defs.hasOwnProperty = hasOwnProperty;
+
+    var jsName = stringify(node.name); // escaped node name inside double quotes
+
+    if (hasOwnProperty(args, node.name)) {
+      // this is a FunctionAssignment argument
+      // (like an x when inside the expression of a function assignment `f(x) = ...`)
+      return args[node.name];
+    }
+    else if (node.name in defs.math) {
+      return '(' + jsName + ' in scope ' +
+          '? getSafeProperty(scope, ' + jsName + ') ' +
+          ': getSafeProperty(math, ' + jsName + '))';
+    }
+    else {
+      return '(' +
+          jsName + ' in scope ' +
+          '? getSafeProperty(scope, ' + jsName + ') ' +
+          ': ' + (isValuelessUnit(node.name)
+              ? 'new Unit(null, ' + jsName + ')'
+              : 'undef(' + jsName + ')') +
+          ')';
+    }
+  }
+
+  // register the compile function
+  register(SymbolNode.prototype.type, compileSymbolNode);
+
+  /**
+   * Execute a callback for each of the child nodes of this node
+   * @param {function(child: Node, path: string, parent: Node)} callback
+   */
+  SymbolNode.prototype.forEach = function (callback) {
+    // nothing to do, we don't have childs
+  };
+
+  /**
+   * Create a new SymbolNode having it's childs be the results of calling
+   * the provided callback function for each of the childs of the original node.
+   * @param {function(child: Node, path: string, parent: Node) : Node} callback
+   * @returns {SymbolNode} Returns a clone of the node
+   */
+  SymbolNode.prototype.map = function (callback) {
+    return this.clone();
+  };
+
+  /**
+   * Throws an error 'Undefined symbol {name}'
+   * @param {string} name
+   */
+  function undef (name) {
+    throw new Error('Undefined symbol ' + name);
+  }
+
+  /**
+   * Create a clone of this node, a shallow copy
+   * @return {SymbolNode}
+   */
+  SymbolNode.prototype.clone = function() {
+    return new SymbolNode(this.name);
+  };
+
+  /**
+   * Get string representation
+   * @param {Object} options
+   * @return {string} str
+   * @override
+   */
+  SymbolNode.prototype._toString = function(options) {
+    return this.name;
+  };
+
+  /**
+   * Get HTML representation
+   * @param {Object} options
+   * @return {string} str
+   * @override
+   */
+  SymbolNode.prototype.toHTML = function(options) {
+	var name = escape(this.name);
+	
+    if (name == "true" || name == "false") {
+	  return '<span class="math-symbol math-boolean">' + name + '</span>';
+	}
+	else if (name == "i") {
+	  return '<span class="math-symbol math-imaginary-symbol">' + name + '</span>';
+	}
+	else if (name == "Infinity") {
+	  return '<span class="math-symbol math-infinity-symbol">' + name + '</span>';
+	}
+	else if (name == "NaN") {
+	  return '<span class="math-symbol math-nan-symbol">' + name + '</span>';
+	}
+	else if (name == "null") {
+	  return '<span class="math-symbol math-null-symbol">' + name + '</span>';
+	}
+	else if (name == "uninitialized") {
+	  return '<span class="math-symbol math-uninitialized-symbol">' + name + '</span>';
+	}
+	
+	return '<span class="math-symbol">' + name + '</span>';
+  };
+
+  /**
+   * Get LaTeX representation
+   * @param {Object} options
+   * @return {string} str
+   * @override
+   */
+  SymbolNode.prototype._toTex = function(options) {
+    var isUnit = false;
+    if ((typeof math[this.name] === 'undefined') && isValuelessUnit(this.name)) {
+      isUnit = true;
+    }
+    var symbol = latex.toSymbol(this.name, isUnit);
+    if (symbol[0] === '\\') {
+      //no space needed if the symbol starts with '\'
+      return symbol;
+    }
+    //the space prevents symbols from breaking stuff like '\cdot' if it's written right before the symbol
+    return ' ' + symbol;
+  };
+
+  return SymbolNode;
+}
+
+exports.name = 'SymbolNode';
+exports.path = 'expression.node';
+exports.math = true; // request access to the math namespace as 5th argument of the factory function
+exports.factory = factory;
+
+
+/***/ }),
+/* 39 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 /**
  * Compares two BigNumbers.
  * @param {BigNumber} x       First value to compare
@@ -6621,7 +6903,7 @@ module.exports = function nearlyEqual(x, y, epsilon) {
 
 
 /***/ }),
-/* 38 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6738,84 +7020,193 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 39 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var deepMap = __webpack_require__(1);
+var nearlyEqual = __webpack_require__(3).nearlyEqual;
+var bigNearlyEqual = __webpack_require__(39);
 
 function factory (type, config, load, typed) {
+
+  var matrix = load(__webpack_require__(0));
+
+  var algorithm03 = load(__webpack_require__(17));
+  var algorithm07 = load(__webpack_require__(26));
+  var algorithm12 = load(__webpack_require__(18));
+  var algorithm13 = load(__webpack_require__(8));
+  var algorithm14 = load(__webpack_require__(6));
+
   var latex = __webpack_require__(4);
 
   /**
-   * Inverse the sign of a value, apply a unary minus operation.
+   * Test whether value x is smaller than y.
    *
-   * For matrices, the function is evaluated element wise. Boolean values and
-   * strings will be converted to a number. For complex numbers, both real and
-   * complex value are inverted.
+   * The function returns true when x is smaller than y and the relative
+   * difference between x and y is smaller than the configured epsilon. The
+   * function cannot be used to compare values smaller than approximately 2.22e-16.
+   *
+   * For matrices, the function is evaluated element wise.
    *
    * Syntax:
    *
-   *    math.unaryMinus(x)
+   *    math.smaller(x, y)
    *
    * Examples:
    *
-   *    math.unaryMinus(3.5);      // returns -3.5
-   *    math.unaryMinus(-4.2);     // returns 4.2
+   *    math.smaller(2, 3);            // returns true
+   *    math.smaller(5, 2 * 2);        // returns false
+   *
+   *    var a = math.unit('5 cm');
+   *    var b = math.unit('2 inch');
+   *    math.smaller(a, b);            // returns true
    *
    * See also:
    *
-   *    add, subtract, unaryPlus
+   *    equal, unequal, smallerEq, smaller, smallerEq, compare
    *
-   * @param  {number | BigNumber | Fraction | Complex | Unit | Array | Matrix} x Number to be inverted.
-   * @return {number | BigNumber | Fraction | Complex | Unit | Array | Matrix} Returns the value with inverted sign.
+   * @param  {number | BigNumber | Fraction | boolean | Unit | string | Array | Matrix} x First value to compare
+   * @param  {number | BigNumber | Fraction | boolean | Unit | string | Array | Matrix} y Second value to compare
+   * @return {boolean | Array | Matrix} Returns true when the x is smaller than y, else returns false
    */
-  var unaryMinus = typed('unaryMinus', {
-    'number': function (x) {
-      return -x;
+  var smaller = typed('smaller', {
+
+    'boolean, boolean': function (x, y) {
+      return x < y;
     },
 
-    'Complex': function (x) {
-      return x.neg();
+    'number, number': function (x, y) {
+      return x < y && !nearlyEqual(x, y, config.epsilon);
     },
 
-    'BigNumber': function (x) {
-      return x.neg();
+    'BigNumber, BigNumber': function (x, y) {
+      return x.lt(y) && !bigNearlyEqual(x, y, config.epsilon);
     },
 
-    'Fraction': function (x) {
-      return x.neg();
+    'Fraction, Fraction': function (x, y) {
+      return x.compare(y) === -1;
     },
 
-    'Unit': function (x) {
-      var res = x.clone();
-      res.value = unaryMinus(x.value);
-      return res;
+    'Complex, Complex': function (x, y) {
+      throw new TypeError('No ordering relation is defined for complex numbers');
     },
 
-    'Array | Matrix': function (x) {
-      // deep map collection, skip zeros since unaryMinus(0) = 0
-      return deepMap(x, unaryMinus, true);
+    'Unit, Unit': function (x, y) {
+      if (!x.equalBase(y)) {
+        throw new Error('Cannot compare units with different base');
+      }
+      return smaller(x.value, y.value);
+    },
+
+    'string, string': function (x, y) {
+      return x < y;
+    },
+
+    'Matrix, Matrix': function (x, y) {
+      // result
+      var c;
+
+      // process matrix storage
+      switch (x.storage()) {
+        case 'sparse':
+          switch (y.storage()) {
+            case 'sparse':
+              // sparse + sparse
+              c = algorithm07(x, y, smaller);
+              break;
+            default:
+              // sparse + dense
+              c = algorithm03(y, x, smaller, true);
+              break;
+          }
+          break;
+        default:
+          switch (y.storage()) {
+            case 'sparse':
+              // dense + sparse
+              c = algorithm03(x, y, smaller, false);
+              break;
+            default:
+              // dense + dense
+              c = algorithm13(x, y, smaller);
+              break;
+          }
+          break;
+      }
+      return c;
+    },
+
+    'Array, Array': function (x, y) {
+      // use matrix implementation
+      return smaller(matrix(x), matrix(y)).valueOf();
+    },
+
+    'Array, Matrix': function (x, y) {
+      // use matrix implementation
+      return smaller(matrix(x), y);
+    },
+
+    'Matrix, Array': function (x, y) {
+      // use matrix implementation
+      return smaller(x, matrix(y));
+    },
+
+    'Matrix, any': function (x, y) {
+      // result
+      var c;
+      // check storage format
+      switch (x.storage()) {
+        case 'sparse':
+          c = algorithm12(x, y, smaller, false);
+          break;
+        default:
+          c = algorithm14(x, y, smaller, false);
+          break;
+      }
+      return c;
+    },
+
+    'any, Matrix': function (x, y) {
+      // result
+      var c;
+      // check storage format
+      switch (y.storage()) {
+        case 'sparse':
+          c = algorithm12(y, x, smaller, true);
+          break;
+        default:
+          c = algorithm14(y, x, smaller, true);
+          break;
+      }
+      return c;
+    },
+
+    'Array, any': function (x, y) {
+      // use matrix implementation
+      return algorithm14(matrix(x), y, smaller, false).valueOf();
+    },
+
+    'any, Array': function (x, y) {
+      // use matrix implementation
+      return algorithm14(matrix(y), x, smaller, true).valueOf();
     }
-
-    // TODO: add support for string
   });
 
-  unaryMinus.toTex = {
-    1: latex.operators['unaryMinus'] + '\\left(${args[0]}\\right)'
+  smaller.toTex = {
+    2: '\\left(${args[0]}' + latex.operators['smaller'] + '${args[1]}\\right)'
   };
 
-  return unaryMinus;
+  return smaller;
 }
 
-exports.name = 'unaryMinus';
+exports.name = 'smaller';
 exports.factory = factory;
 
 
 /***/ }),
-/* 40 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6956,30 +7347,30 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 41 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var ArgumentsError = __webpack_require__(53);
+var ArgumentsError = __webpack_require__(46);
 var deepMap = __webpack_require__(1);
 
 function factory (type, config, load, typed) {
-  var AccessorNode            = load(__webpack_require__(114));
+  var AccessorNode            = load(__webpack_require__(115));
   var ArrayNode               = load(__webpack_require__(85));
-  var AssignmentNode          = load(__webpack_require__(116));
-  var BlockNode               = load(__webpack_require__(117));
-  var ConditionalNode         = load(__webpack_require__(118));
-  var ConstantNode            = load(__webpack_require__(56));
-  var FunctionAssignmentNode  = load(__webpack_require__(119));
+  var AssignmentNode          = load(__webpack_require__(117));
+  var BlockNode               = load(__webpack_require__(118));
+  var ConditionalNode         = load(__webpack_require__(119));
+  var ConstantNode            = load(__webpack_require__(49));
+  var FunctionAssignmentNode  = load(__webpack_require__(120));
   var IndexNode               = load(__webpack_require__(83));
-  var ObjectNode              = load(__webpack_require__(121));
-  var OperatorNode            = load(__webpack_require__(65));
+  var ObjectNode              = load(__webpack_require__(122));
+  var OperatorNode            = load(__webpack_require__(58));
   var ParenthesisNode         = load(__webpack_require__(66));
-  var FunctionNode            = load(__webpack_require__(57));
+  var FunctionNode            = load(__webpack_require__(59));
   var RangeNode               = load(__webpack_require__(84));
-  var SymbolNode              = load(__webpack_require__(42));
+  var SymbolNode              = load(__webpack_require__(38));
 
 
   /**
@@ -8516,215 +8907,10 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 42 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-
-
-var latex = __webpack_require__(4);
-var stringify = __webpack_require__(9).stringify;
-var escape = __webpack_require__(9).escape;
-var hasOwnProperty = __webpack_require__(5).hasOwnProperty;
-var getSafeProperty = __webpack_require__(13).getSafeProperty;
-
-function factory (type, config, load, typed, math) {
-  var register = load(__webpack_require__(7)).register;
-  var compile = load(__webpack_require__(7)).compile;
-  var Node = load(__webpack_require__(14));
-
-  /**
-   * Check whether some name is a valueless unit like "inch".
-   * @param {string} name
-   * @return {boolean}
-   */
-  function isValuelessUnit (name) {
-    return type.Unit ? type.Unit.isValuelessUnit(name) : false;
-  }
-
-  /**
-   * @constructor SymbolNode
-   * @extends {Node}
-   * A symbol node can hold and resolve a symbol
-   * @param {string} name
-   * @extends {Node}
-   */
-  function SymbolNode(name) {
-    if (!(this instanceof SymbolNode)) {
-      throw new SyntaxError('Constructor must be called with the new operator');
-    }
-
-    // validate input
-    if (typeof name !== 'string')  throw new TypeError('String expected for parameter "name"');
-
-    this.name = name;
-  }
-
-  SymbolNode.prototype = new Node();
-
-  SymbolNode.prototype.type = 'SymbolNode';
-
-  SymbolNode.prototype.isSymbolNode = true;
-
-  /**
-   * Compile the node to javascript code
-   * @param {SymbolNode} node The node to be compiled
-   * @param {Object} defs     Object which can be used to define functions
-   *                          or constants globally available for the compiled
-   *                          expression
-   * @param {Object} args     Object with local function arguments, the key is
-   *                          the name of the argument, and the value is `true`.
-   *                          The object may not be mutated, but must be
-   *                          extended instead.
-   * @return {string} js
-   * @private
-   */
-  function compileSymbolNode(node, defs, args) {
-    if (!(node instanceof SymbolNode)) {
-      throw new TypeError('No valid SymbolNode')
-    }
-
-    // add a function to the definitions
-    defs['undef'] = undef;
-    defs['Unit'] = type.Unit;
-    defs.getSafeProperty = getSafeProperty;
-    defs.hasOwnProperty = hasOwnProperty;
-
-    var jsName = stringify(node.name); // escaped node name inside double quotes
-
-    if (hasOwnProperty(args, node.name)) {
-      // this is a FunctionAssignment argument
-      // (like an x when inside the expression of a function assignment `f(x) = ...`)
-      return args[node.name];
-    }
-    else if (node.name in defs.math) {
-      return '(' + jsName + ' in scope ' +
-          '? getSafeProperty(scope, ' + jsName + ') ' +
-          ': getSafeProperty(math, ' + jsName + '))';
-    }
-    else {
-      return '(' +
-          jsName + ' in scope ' +
-          '? getSafeProperty(scope, ' + jsName + ') ' +
-          ': ' + (isValuelessUnit(node.name)
-              ? 'new Unit(null, ' + jsName + ')'
-              : 'undef(' + jsName + ')') +
-          ')';
-    }
-  }
-
-  // register the compile function
-  register(SymbolNode.prototype.type, compileSymbolNode);
-
-  /**
-   * Execute a callback for each of the child nodes of this node
-   * @param {function(child: Node, path: string, parent: Node)} callback
-   */
-  SymbolNode.prototype.forEach = function (callback) {
-    // nothing to do, we don't have childs
-  };
-
-  /**
-   * Create a new SymbolNode having it's childs be the results of calling
-   * the provided callback function for each of the childs of the original node.
-   * @param {function(child: Node, path: string, parent: Node) : Node} callback
-   * @returns {SymbolNode} Returns a clone of the node
-   */
-  SymbolNode.prototype.map = function (callback) {
-    return this.clone();
-  };
-
-  /**
-   * Throws an error 'Undefined symbol {name}'
-   * @param {string} name
-   */
-  function undef (name) {
-    throw new Error('Undefined symbol ' + name);
-  }
-
-  /**
-   * Create a clone of this node, a shallow copy
-   * @return {SymbolNode}
-   */
-  SymbolNode.prototype.clone = function() {
-    return new SymbolNode(this.name);
-  };
-
-  /**
-   * Get string representation
-   * @param {Object} options
-   * @return {string} str
-   * @override
-   */
-  SymbolNode.prototype._toString = function(options) {
-    return this.name;
-  };
-
-  /**
-   * Get HTML representation
-   * @param {Object} options
-   * @return {string} str
-   * @override
-   */
-  SymbolNode.prototype.toHTML = function(options) {
-	var name = escape(this.name);
-	
-    if (name == "true" || name == "false") {
-	  return '<span class="math-symbol math-boolean">' + name + '</span>';
-	}
-	else if (name == "i") {
-	  return '<span class="math-symbol math-imaginary-symbol">' + name + '</span>';
-	}
-	else if (name == "Infinity") {
-	  return '<span class="math-symbol math-infinity-symbol">' + name + '</span>';
-	}
-	else if (name == "NaN") {
-	  return '<span class="math-symbol math-nan-symbol">' + name + '</span>';
-	}
-	else if (name == "null") {
-	  return '<span class="math-symbol math-null-symbol">' + name + '</span>';
-	}
-	else if (name == "uninitialized") {
-	  return '<span class="math-symbol math-uninitialized-symbol">' + name + '</span>';
-	}
-	
-	return '<span class="math-symbol">' + name + '</span>';
-  };
-
-  /**
-   * Get LaTeX representation
-   * @param {Object} options
-   * @return {string} str
-   * @override
-   */
-  SymbolNode.prototype._toTex = function(options) {
-    var isUnit = false;
-    if ((typeof math[this.name] === 'undefined') && isValuelessUnit(this.name)) {
-      isUnit = true;
-    }
-    var symbol = latex.toSymbol(this.name, isUnit);
-    if (symbol[0] === '\\') {
-      //no space needed if the symbol starts with '\'
-      return symbol;
-    }
-    //the space prevents symbols from breaking stuff like '\cdot' if it's written right before the symbol
-    return ' ' + symbol;
-  };
-
-  return SymbolNode;
-}
-
-exports.name = 'SymbolNode';
-exports.path = 'expression.node';
-exports.math = true; // request access to the math namespace as 5th argument of the factory function
-exports.factory = factory;
-
-
-/***/ }),
-/* 43 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var IndexError = __webpack_require__(54);
+var IndexError = __webpack_require__(56);
 
 /**
  * Transform zero-based indices to one-based indices in errors
@@ -8744,13 +8930,13 @@ exports.transform = function (err) {
 
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var isMatrix = __webpack_require__(61);
+var isMatrix = __webpack_require__(62);
 
 /**
  * Recursively loop over all elements in a given multi dimensional array
@@ -8778,14 +8964,55 @@ module.exports = function deepForEach (array, callback) {
 
 
 /***/ }),
-/* 45 */
+/* 46 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Create a syntax error with the message:
+ *     'Wrong number of arguments in function <fn> (<count> provided, <min>-<max> expected)'
+ * @param {string} fn     Function name
+ * @param {number} count  Actual argument count
+ * @param {number} min    Minimum required argument count
+ * @param {number} [max]  Maximum required argument count
+ * @extends Error
+ */
+function ArgumentsError(fn, count, min, max) {
+  if (!(this instanceof ArgumentsError)) {
+    throw new SyntaxError('Constructor must be called with the new operator');
+  }
+
+  this.fn = fn;
+  this.count = count;
+  this.min = min;
+  this.max = max;
+
+  this.message = 'Wrong number of arguments in function ' + fn +
+      ' (' + count + ' provided, ' +
+      min + ((max != undefined) ? ('-' + max) : '') + ' expected)';
+
+  this.stack = (new Error()).stack;
+}
+
+ArgumentsError.prototype = new Error();
+ArgumentsError.prototype.constructor = Error;
+ArgumentsError.prototype.name = 'ArgumentsError';
+ArgumentsError.prototype.isArgumentsError = true;
+
+module.exports = ArgumentsError;
+
+
+/***/ }),
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var util = __webpack_require__(25);
-var DimensionError = __webpack_require__(10);
+var DimensionError = __webpack_require__(11);
 var getSafeProperty = __webpack_require__(13).getSafeProperty;
 var setSafeProperty = __webpack_require__(13).setSafeProperty;
 
@@ -9669,193 +9896,7 @@ exports.lazy = false;  // no lazy loading, as we alter type.Matrix._storage
 
 
 /***/ }),
-/* 46 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var nearlyEqual = __webpack_require__(3).nearlyEqual;
-var bigNearlyEqual = __webpack_require__(37);
-
-function factory (type, config, load, typed) {
-
-  var matrix = load(__webpack_require__(0));
-
-  var algorithm03 = load(__webpack_require__(15));
-  var algorithm07 = load(__webpack_require__(26));
-  var algorithm12 = load(__webpack_require__(16));
-  var algorithm13 = load(__webpack_require__(8));
-  var algorithm14 = load(__webpack_require__(6));
-
-  var latex = __webpack_require__(4);
-
-  /**
-   * Test whether value x is smaller than y.
-   *
-   * The function returns true when x is smaller than y and the relative
-   * difference between x and y is smaller than the configured epsilon. The
-   * function cannot be used to compare values smaller than approximately 2.22e-16.
-   *
-   * For matrices, the function is evaluated element wise.
-   *
-   * Syntax:
-   *
-   *    math.smaller(x, y)
-   *
-   * Examples:
-   *
-   *    math.smaller(2, 3);            // returns true
-   *    math.smaller(5, 2 * 2);        // returns false
-   *
-   *    var a = math.unit('5 cm');
-   *    var b = math.unit('2 inch');
-   *    math.smaller(a, b);            // returns true
-   *
-   * See also:
-   *
-   *    equal, unequal, smallerEq, smaller, smallerEq, compare
-   *
-   * @param  {number | BigNumber | Fraction | boolean | Unit | string | Array | Matrix} x First value to compare
-   * @param  {number | BigNumber | Fraction | boolean | Unit | string | Array | Matrix} y Second value to compare
-   * @return {boolean | Array | Matrix} Returns true when the x is smaller than y, else returns false
-   */
-  var smaller = typed('smaller', {
-
-    'boolean, boolean': function (x, y) {
-      return x < y;
-    },
-
-    'number, number': function (x, y) {
-      return x < y && !nearlyEqual(x, y, config.epsilon);
-    },
-
-    'BigNumber, BigNumber': function (x, y) {
-      return x.lt(y) && !bigNearlyEqual(x, y, config.epsilon);
-    },
-
-    'Fraction, Fraction': function (x, y) {
-      return x.compare(y) === -1;
-    },
-
-    'Complex, Complex': function (x, y) {
-      throw new TypeError('No ordering relation is defined for complex numbers');
-    },
-
-    'Unit, Unit': function (x, y) {
-      if (!x.equalBase(y)) {
-        throw new Error('Cannot compare units with different base');
-      }
-      return smaller(x.value, y.value);
-    },
-
-    'string, string': function (x, y) {
-      return x < y;
-    },
-
-    'Matrix, Matrix': function (x, y) {
-      // result
-      var c;
-
-      // process matrix storage
-      switch (x.storage()) {
-        case 'sparse':
-          switch (y.storage()) {
-            case 'sparse':
-              // sparse + sparse
-              c = algorithm07(x, y, smaller);
-              break;
-            default:
-              // sparse + dense
-              c = algorithm03(y, x, smaller, true);
-              break;
-          }
-          break;
-        default:
-          switch (y.storage()) {
-            case 'sparse':
-              // dense + sparse
-              c = algorithm03(x, y, smaller, false);
-              break;
-            default:
-              // dense + dense
-              c = algorithm13(x, y, smaller);
-              break;
-          }
-          break;
-      }
-      return c;
-    },
-
-    'Array, Array': function (x, y) {
-      // use matrix implementation
-      return smaller(matrix(x), matrix(y)).valueOf();
-    },
-
-    'Array, Matrix': function (x, y) {
-      // use matrix implementation
-      return smaller(matrix(x), y);
-    },
-
-    'Matrix, Array': function (x, y) {
-      // use matrix implementation
-      return smaller(x, matrix(y));
-    },
-
-    'Matrix, any': function (x, y) {
-      // result
-      var c;
-      // check storage format
-      switch (x.storage()) {
-        case 'sparse':
-          c = algorithm12(x, y, smaller, false);
-          break;
-        default:
-          c = algorithm14(x, y, smaller, false);
-          break;
-      }
-      return c;
-    },
-
-    'any, Matrix': function (x, y) {
-      // result
-      var c;
-      // check storage format
-      switch (y.storage()) {
-        case 'sparse':
-          c = algorithm12(y, x, smaller, true);
-          break;
-        default:
-          c = algorithm14(y, x, smaller, true);
-          break;
-      }
-      return c;
-    },
-
-    'Array, any': function (x, y) {
-      // use matrix implementation
-      return algorithm14(matrix(x), y, smaller, false).valueOf();
-    },
-
-    'any, Array': function (x, y) {
-      // use matrix implementation
-      return algorithm14(matrix(y), x, smaller, true).valueOf();
-    }
-  });
-
-  smaller.toTex = {
-    2: '\\left(${args[0]}' + latex.operators['smaller'] + '${args[1]}\\right)'
-  };
-
-  return smaller;
-}
-
-exports.name = 'smaller';
-exports.factory = factory;
-
-
-/***/ }),
-/* 47 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9866,10 +9907,10 @@ var size = __webpack_require__(2).size;
 
 function factory (type, config, load, typed) {
   var latex = __webpack_require__(4);
-  var eye = load(__webpack_require__(64));
+  var eye = load(__webpack_require__(65));
   var multiply = load(__webpack_require__(12));
   var matrix = load(__webpack_require__(0));
-  var fraction = load(__webpack_require__(104));
+  var fraction = load(__webpack_require__(105));
   var number = load(__webpack_require__(79));
 
   /**
@@ -10063,13 +10104,269 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 48 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var isMatrix = __webpack_require__(61);
+var getType = __webpack_require__(63).type;
+var stringify = __webpack_require__(9).stringify;
+var escape = __webpack_require__(9).escape;
+
+function factory (type, config, load, typed) {
+  var register = load(__webpack_require__(7)).register;
+  var compile = load(__webpack_require__(7)).compile;
+  var Node = load(__webpack_require__(15));
+
+  /**
+   * A ConstantNode holds a constant value like a number or string. A ConstantNode
+   * stores a stringified version of the value and uses this to compile to
+   * JavaScript.
+   *
+   * In case of a stringified number as input, this may be compiled to a BigNumber
+   * when the math instance is configured for BigNumbers.
+   *
+   * Usage:
+   *
+   *     // stringified values with type
+   *     new ConstantNode('2.3', 'number');
+   *     new ConstantNode('true', 'boolean');
+   *     new ConstantNode('hello', 'string');
+   *
+   *     // non-stringified values, type will be automatically detected
+   *     new ConstantNode(2.3);
+   *     new ConstantNode('hello');
+   *
+   * @param {string | number | boolean | null | undefined} value
+   *                            When valueType is provided, value must contain
+   *                            an uninterpreted string representing the value.
+   *                            When valueType is undefined, value can be a
+   *                            number, string, boolean, null, or undefined, and
+   *                            the type will be determined automatically.
+   * @param {string} [valueType]  The type of value. Choose from 'number', 'string',
+   *                              'boolean', 'undefined', 'null'
+   * @constructor ConstantNode
+   * @extends {Node}
+   */
+  function ConstantNode(value, valueType) {
+    if (!(this instanceof ConstantNode)) {
+      throw new SyntaxError('Constructor must be called with the new operator');
+    }
+
+    if (valueType) {
+      if (typeof valueType !== 'string') {
+        throw new TypeError('String expected for parameter "valueType"');
+      }
+      if (typeof value !== 'string') {
+        throw new TypeError('String expected for parameter "value"');
+      }
+
+      this.value = value;
+      this.valueType = valueType;
+    }
+    else {
+      // stringify the value and determine the type
+      this.value = value + '';
+      this.valueType = getType(value);
+    }
+
+    if (!SUPPORTED_TYPES[this.valueType]) {
+      throw new TypeError('Unsupported type of value "' + this.valueType + '"');
+    }
+  }
+
+  var SUPPORTED_TYPES = {
+    'number': true,
+    'string': true,
+    'boolean': true,
+    'undefined': true,
+    'null': true
+  };
+
+  ConstantNode.prototype = new Node();
+
+  ConstantNode.prototype.type = 'ConstantNode';
+
+  ConstantNode.prototype.isConstantNode = true;
+
+  /**
+   * Compile the node to javascript code
+   * @param {ConstantNode} node The node to be compiled
+   * @param {Object} defs     Object which can be used to define functions
+   *                          or constants globally available for the compiled
+   *                          expression
+   * @param {Object} args     Object with local function arguments, the key is
+   *                          the name of the argument, and the value is `true`.
+   *                          The object may not be mutated, but must be
+   *                          extended instead.
+   * @return {string} js
+   * @private
+   */
+  function compileConstantNode(node, defs, args) {
+    if (!(node instanceof ConstantNode)) {
+      throw new TypeError('No valid ConstantNode')
+    }
+
+    switch (node.valueType) {
+      case 'number':
+        if (config.number === 'BigNumber') {
+          return 'math.bignumber(' + stringify(node.value) + ')';
+        }
+        else if (config.number === 'Fraction') {
+          return 'math.fraction(' + stringify(node.value) + ')';
+        }
+        else {
+          // remove leading zeros like '003.2' which are not allowed by JavaScript
+          validateNumericValue(node.value);
+          return node.value.replace(/^(0*)[0-9]/, function (match, zeros) {
+            return match.substring(zeros.length);
+          });
+        }
+
+      case 'string':
+        // Important to escape unescaped double quotes in the string
+        return stringify(node.value);
+
+      case 'boolean':
+        // prevent invalid values
+        return String(node.value) === 'true' ? 'true' : 'false';
+
+      case 'undefined':
+        return 'undefined';
+
+      case 'null':
+        return 'null';
+
+      default:
+        // TODO: move this error to the constructor?
+        throw new TypeError('Unsupported type of constant "' + node.valueType + '"');
+    }
+  }
+
+  /**
+   * Test whether value is a string containing a numeric value
+   * @param {String} value
+   * @return {boolean} Returns true when ok
+   */
+  function validateNumericValue (value) {
+    // The following regexp is relatively permissive
+    if (typeof value !== 'string' ||
+        !/^[\-+]?((\d+\.?\d*)|(\d*\.?\d+))([eE][+\-]?\d+)?$/.test(value)) {
+      throw new Error('Invalid numeric value "' + value + '"');
+    }
+  }
+
+  // register the compile function
+  register(ConstantNode.prototype.type, compileConstantNode);
+
+  /**
+   * Execute a callback for each of the child nodes of this node
+   * @param {function(child: Node, path: string, parent: Node)} callback
+   */
+  ConstantNode.prototype.forEach = function (callback) {
+    // nothing to do, we don't have childs
+  };
+
+
+  /**
+   * Create a new ConstantNode having it's childs be the results of calling
+   * the provided callback function for each of the childs of the original node.
+   * @param {function(child: Node, path: string, parent: Node) : Node} callback
+   * @returns {ConstantNode} Returns a clone of the node
+   */
+  ConstantNode.prototype.map = function (callback) {
+    return this.clone();
+  };
+
+  /**
+   * Create a clone of this node, a shallow copy
+   * @return {ConstantNode}
+   */
+  ConstantNode.prototype.clone = function () {
+    return new ConstantNode(this.value, this.valueType);
+  };
+
+  /**
+   * Get string representation
+   * @param {Object} options
+   * @return {string} str
+   */
+  ConstantNode.prototype._toString = function (options) {
+    switch (this.valueType) {
+      case 'string':
+        return stringify(this.value);
+
+      default:
+        return this.value;
+    }
+  };
+
+  /**
+   * Get HTML representation
+   * @param {Object} options
+   * @return {string} str
+   */
+  ConstantNode.prototype.toHTML = function (options) {
+	var value = escape(this.value);
+    switch (this.valueType) {
+	  case 'number':
+	    return '<span class="math-number">' + value + '</span>';
+      case 'string':
+	    return '<span class="math-string">' + value + '</span>';
+      case 'boolean':
+	    return '<span class="math-boolean">' + value + '</span>';
+      case 'null':
+	    return '<span class="math-null-symbol">' + value + '</span>';
+      case 'undefined':
+	    return '<span class="math-undefined">' + value + '</span>';
+
+      default:
+        return '<span class="math-symbol">' + value + '</span>';
+    }
+  };
+
+  /**
+   * Get LaTeX representation
+   * @param {Object} options
+   * @return {string} str
+   */
+  ConstantNode.prototype._toTex = function (options) {
+    var value = this.value,
+        index;
+    switch (this.valueType) {
+      case 'string':
+        return '\\mathtt{' + stringify(value) + '}';
+
+      case 'number':
+        index = value.toLowerCase().indexOf('e');
+        if (index !== -1) {
+          return value.substring(0, index) + '\\cdot10^{' +
+              value.substring(index + 1) + '}';
+        }
+        return value;
+
+      default:
+        return value;
+    }
+  };
+
+  return ConstantNode;
+}
+
+exports.name = 'ConstantNode';
+exports.path = 'expression.node';
+exports.factory = factory;
+
+
+/***/ }),
+/* 50 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var isMatrix = __webpack_require__(62);
 
 /**
  * Test whether a value is a collection: an Array or Matrix
@@ -10082,7 +10379,7 @@ module.exports = function isCollection (x) {
 
 
 /***/ }),
-/* 49 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10092,12 +10389,12 @@ var extend = __webpack_require__(5).extend;
 
 function factory (type, config, load, typed) {
 
-  var divideScalar = load(__webpack_require__(19));
+  var divideScalar = load(__webpack_require__(14));
   var multiply     = load(__webpack_require__(12));
-  var inv          = load(__webpack_require__(126));
+  var inv          = load(__webpack_require__(128));
   var matrix       = load(__webpack_require__(0));
 
-  var algorithm11 = load(__webpack_require__(17));
+  var algorithm11 = load(__webpack_require__(19));
   var algorithm14 = load(__webpack_require__(6));
   
   /**
@@ -10178,7 +10475,94 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 50 */
+/* 52 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var deepMap = __webpack_require__(1);
+
+function factory (type, config, load, typed) {
+  /**
+   * Calculate the square root of a value.
+   *
+   * For matrices, the function is evaluated element wise.
+   *
+   * Syntax:
+   *
+   *    math.sqrt(x)
+   *
+   * Examples:
+   *
+   *    math.sqrt(25);                // returns 5
+   *    math.square(5);               // returns 25
+   *    math.sqrt(-4);                // returns Complex 2i
+   *
+   * See also:
+   *
+   *    square, multiply, cube, cbrt
+   *
+   * @param {number | BigNumber | Complex | Array | Matrix | Unit} x
+   *            Value for which to calculate the square root.
+   * @return {number | BigNumber | Complex | Array | Matrix | Unit}
+   *            Returns the square root of `x`
+   */
+  var sqrt = typed('sqrt', {
+    'number': _sqrtNumber,
+
+    'Complex': function (x) {
+        return x.sqrt();
+    },
+
+    'BigNumber': function (x) {
+      if (!x.isNegative() || config.predictable) {
+        return x.sqrt();
+      }
+      else {
+        // negative value -> downgrade to number to do complex value computation
+        return _sqrtNumber(x.toNumber());
+      }
+    },
+
+    'Array | Matrix': function (x) {
+      // deep map collection, skip zeros since sqrt(0) = 0
+      return deepMap(x, sqrt, true);
+    },
+
+    'Unit': function (x) {
+      // Someday will work for complex units when they are implemented
+      return x.pow(0.5);
+    }
+
+  });
+
+  /**
+   * Calculate sqrt for a number
+   * @param {number} x
+   * @returns {number | Complex} Returns the square root of x
+   * @private
+   */
+  function _sqrtNumber(x) {
+    if (x >= 0 || config.predictable) {
+      return Math.sqrt(x);
+    }
+    else {
+      return new type.Complex(x, 0).sqrt();
+    }
+  }
+
+  sqrt.toTex = {1: '\\sqrt{${args[0]}}'};
+
+  return sqrt;
+}
+
+exports.name = 'sqrt';
+exports.factory = factory;
+
+
+/***/ }),
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10241,22 +10625,22 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 51 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var nearlyEqual = __webpack_require__(3).nearlyEqual;
-var bigNearlyEqual = __webpack_require__(37);
+var bigNearlyEqual = __webpack_require__(39);
 
 function factory (type, config, load, typed) {
 
   var matrix = load(__webpack_require__(0));
 
-  var algorithm03 = load(__webpack_require__(15));
-  var algorithm05 = load(__webpack_require__(63));
-  var algorithm12 = load(__webpack_require__(16));
+  var algorithm03 = load(__webpack_require__(17));
+  var algorithm05 = load(__webpack_require__(64));
+  var algorithm12 = load(__webpack_require__(18));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
   
@@ -10430,7 +10814,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 52 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10448,7 +10832,7 @@ exports.closestPredator = closestPredator;
 exports.closestBlob = closestBlob;
 exports.closestFood = closestFood;
 
-var _config = __webpack_require__(29);
+var _config = __webpack_require__(30);
 
 var Config = _interopRequireWildcard(_config);
 
@@ -10544,48 +10928,7 @@ function closestFood(blob, foods) {
 }
 
 /***/ }),
-/* 53 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-/**
- * Create a syntax error with the message:
- *     'Wrong number of arguments in function <fn> (<count> provided, <min>-<max> expected)'
- * @param {string} fn     Function name
- * @param {number} count  Actual argument count
- * @param {number} min    Minimum required argument count
- * @param {number} [max]  Maximum required argument count
- * @extends Error
- */
-function ArgumentsError(fn, count, min, max) {
-  if (!(this instanceof ArgumentsError)) {
-    throw new SyntaxError('Constructor must be called with the new operator');
-  }
-
-  this.fn = fn;
-  this.count = count;
-  this.min = min;
-  this.max = max;
-
-  this.message = 'Wrong number of arguments in function ' + fn +
-      ' (' + count + ' provided, ' +
-      min + ((max != undefined) ? ('-' + max) : '') + ' expected)';
-
-  this.stack = (new Error()).stack;
-}
-
-ArgumentsError.prototype = new Error();
-ArgumentsError.prototype.constructor = Error;
-ArgumentsError.prototype.name = 'ArgumentsError';
-ArgumentsError.prototype.isArgumentsError = true;
-
-module.exports = ArgumentsError;
-
-
-/***/ }),
-/* 54 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10638,7 +10981,7 @@ module.exports = IndexError;
 
 
 /***/ }),
-/* 55 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -10961,1338 +11304,7 @@ module.exports.isAssociativeWith = isAssociativeWith;
 
 
 /***/ }),
-/* 56 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var getType = __webpack_require__(62).type;
-var stringify = __webpack_require__(9).stringify;
-var escape = __webpack_require__(9).escape;
-
-function factory (type, config, load, typed) {
-  var register = load(__webpack_require__(7)).register;
-  var compile = load(__webpack_require__(7)).compile;
-  var Node = load(__webpack_require__(14));
-
-  /**
-   * A ConstantNode holds a constant value like a number or string. A ConstantNode
-   * stores a stringified version of the value and uses this to compile to
-   * JavaScript.
-   *
-   * In case of a stringified number as input, this may be compiled to a BigNumber
-   * when the math instance is configured for BigNumbers.
-   *
-   * Usage:
-   *
-   *     // stringified values with type
-   *     new ConstantNode('2.3', 'number');
-   *     new ConstantNode('true', 'boolean');
-   *     new ConstantNode('hello', 'string');
-   *
-   *     // non-stringified values, type will be automatically detected
-   *     new ConstantNode(2.3);
-   *     new ConstantNode('hello');
-   *
-   * @param {string | number | boolean | null | undefined} value
-   *                            When valueType is provided, value must contain
-   *                            an uninterpreted string representing the value.
-   *                            When valueType is undefined, value can be a
-   *                            number, string, boolean, null, or undefined, and
-   *                            the type will be determined automatically.
-   * @param {string} [valueType]  The type of value. Choose from 'number', 'string',
-   *                              'boolean', 'undefined', 'null'
-   * @constructor ConstantNode
-   * @extends {Node}
-   */
-  function ConstantNode(value, valueType) {
-    if (!(this instanceof ConstantNode)) {
-      throw new SyntaxError('Constructor must be called with the new operator');
-    }
-
-    if (valueType) {
-      if (typeof valueType !== 'string') {
-        throw new TypeError('String expected for parameter "valueType"');
-      }
-      if (typeof value !== 'string') {
-        throw new TypeError('String expected for parameter "value"');
-      }
-
-      this.value = value;
-      this.valueType = valueType;
-    }
-    else {
-      // stringify the value and determine the type
-      this.value = value + '';
-      this.valueType = getType(value);
-    }
-
-    if (!SUPPORTED_TYPES[this.valueType]) {
-      throw new TypeError('Unsupported type of value "' + this.valueType + '"');
-    }
-  }
-
-  var SUPPORTED_TYPES = {
-    'number': true,
-    'string': true,
-    'boolean': true,
-    'undefined': true,
-    'null': true
-  };
-
-  ConstantNode.prototype = new Node();
-
-  ConstantNode.prototype.type = 'ConstantNode';
-
-  ConstantNode.prototype.isConstantNode = true;
-
-  /**
-   * Compile the node to javascript code
-   * @param {ConstantNode} node The node to be compiled
-   * @param {Object} defs     Object which can be used to define functions
-   *                          or constants globally available for the compiled
-   *                          expression
-   * @param {Object} args     Object with local function arguments, the key is
-   *                          the name of the argument, and the value is `true`.
-   *                          The object may not be mutated, but must be
-   *                          extended instead.
-   * @return {string} js
-   * @private
-   */
-  function compileConstantNode(node, defs, args) {
-    if (!(node instanceof ConstantNode)) {
-      throw new TypeError('No valid ConstantNode')
-    }
-
-    switch (node.valueType) {
-      case 'number':
-        if (config.number === 'BigNumber') {
-          return 'math.bignumber(' + stringify(node.value) + ')';
-        }
-        else if (config.number === 'Fraction') {
-          return 'math.fraction(' + stringify(node.value) + ')';
-        }
-        else {
-          // remove leading zeros like '003.2' which are not allowed by JavaScript
-          validateNumericValue(node.value);
-          return node.value.replace(/^(0*)[0-9]/, function (match, zeros) {
-            return match.substring(zeros.length);
-          });
-        }
-
-      case 'string':
-        // Important to escape unescaped double quotes in the string
-        return stringify(node.value);
-
-      case 'boolean':
-        // prevent invalid values
-        return String(node.value) === 'true' ? 'true' : 'false';
-
-      case 'undefined':
-        return 'undefined';
-
-      case 'null':
-        return 'null';
-
-      default:
-        // TODO: move this error to the constructor?
-        throw new TypeError('Unsupported type of constant "' + node.valueType + '"');
-    }
-  }
-
-  /**
-   * Test whether value is a string containing a numeric value
-   * @param {String} value
-   * @return {boolean} Returns true when ok
-   */
-  function validateNumericValue (value) {
-    // The following regexp is relatively permissive
-    if (typeof value !== 'string' ||
-        !/^[\-+]?((\d+\.?\d*)|(\d*\.?\d+))([eE][+\-]?\d+)?$/.test(value)) {
-      throw new Error('Invalid numeric value "' + value + '"');
-    }
-  }
-
-  // register the compile function
-  register(ConstantNode.prototype.type, compileConstantNode);
-
-  /**
-   * Execute a callback for each of the child nodes of this node
-   * @param {function(child: Node, path: string, parent: Node)} callback
-   */
-  ConstantNode.prototype.forEach = function (callback) {
-    // nothing to do, we don't have childs
-  };
-
-
-  /**
-   * Create a new ConstantNode having it's childs be the results of calling
-   * the provided callback function for each of the childs of the original node.
-   * @param {function(child: Node, path: string, parent: Node) : Node} callback
-   * @returns {ConstantNode} Returns a clone of the node
-   */
-  ConstantNode.prototype.map = function (callback) {
-    return this.clone();
-  };
-
-  /**
-   * Create a clone of this node, a shallow copy
-   * @return {ConstantNode}
-   */
-  ConstantNode.prototype.clone = function () {
-    return new ConstantNode(this.value, this.valueType);
-  };
-
-  /**
-   * Get string representation
-   * @param {Object} options
-   * @return {string} str
-   */
-  ConstantNode.prototype._toString = function (options) {
-    switch (this.valueType) {
-      case 'string':
-        return stringify(this.value);
-
-      default:
-        return this.value;
-    }
-  };
-
-  /**
-   * Get HTML representation
-   * @param {Object} options
-   * @return {string} str
-   */
-  ConstantNode.prototype.toHTML = function (options) {
-	var value = escape(this.value);
-    switch (this.valueType) {
-	  case 'number':
-	    return '<span class="math-number">' + value + '</span>';
-      case 'string':
-	    return '<span class="math-string">' + value + '</span>';
-      case 'boolean':
-	    return '<span class="math-boolean">' + value + '</span>';
-      case 'null':
-	    return '<span class="math-null-symbol">' + value + '</span>';
-      case 'undefined':
-	    return '<span class="math-undefined">' + value + '</span>';
-
-      default:
-        return '<span class="math-symbol">' + value + '</span>';
-    }
-  };
-
-  /**
-   * Get LaTeX representation
-   * @param {Object} options
-   * @return {string} str
-   */
-  ConstantNode.prototype._toTex = function (options) {
-    var value = this.value,
-        index;
-    switch (this.valueType) {
-      case 'string':
-        return '\\mathtt{' + stringify(value) + '}';
-
-      case 'number':
-        index = value.toLowerCase().indexOf('e');
-        if (index !== -1) {
-          return value.substring(0, index) + '\\cdot10^{' +
-              value.substring(index + 1) + '}';
-        }
-        return value;
-
-      default:
-        return value;
-    }
-  };
-
-  return ConstantNode;
-}
-
-exports.name = 'ConstantNode';
-exports.path = 'expression.node';
-exports.factory = factory;
-
-
-/***/ }),
-/* 57 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var latex = __webpack_require__(4);
-var stringify = __webpack_require__(9).stringify;
-var escape = __webpack_require__(9).escape;
-var extend = __webpack_require__(5).extend;
-var hasOwnProperty = __webpack_require__(5).hasOwnProperty;
-var map = __webpack_require__(2).map;
-var join = __webpack_require__(2).join;
-var validateSafeMethod = __webpack_require__(13).validateSafeMethod;
-var getUniqueArgumentName = __webpack_require__(120);
-
-function factory (type, config, load, typed, math) {
-  var register = load(__webpack_require__(7)).register;
-  var compile = load(__webpack_require__(7)).compile;
-  var Node = load(__webpack_require__(14));
-  var SymbolNode = load(__webpack_require__(42));
-
-  /**
-   * @constructor FunctionNode
-   * @extends {./Node}
-   * invoke a list with arguments on a node
-   * @param {./Node | string} fn Node resolving with a function on which to invoke
-   *                             the arguments, typically a SymboNode or AccessorNode
-   * @param {./Node[]} args
-   */
-  function FunctionNode(fn, args) {
-    if (!(this instanceof FunctionNode)) {
-      throw new SyntaxError('Constructor must be called with the new operator');
-    }
-
-    if (typeof fn === 'string') {
-      fn = new SymbolNode(fn);
-    }
-
-    // validate input
-    if (!type.isNode(fn)) throw new TypeError('Node expected as parameter "fn"');
-    if (!Array.isArray(args) || !args.every(type.isNode)) {
-      throw new TypeError('Array containing Nodes expected for parameter "args"');
-    }
-
-    this.fn = fn;
-    this.args = args || [];
-
-    // readonly property name
-    Object.defineProperty(this, 'name', {
-      get: function () {
-        return this.fn.name || '';
-      }.bind(this),
-      set: function () {
-        throw new Error('Cannot assign a new name, name is read-only');
-      }
-    });
-
-    // TODO: deprecated since v3, remove some day
-    var deprecated = function () {
-      throw new Error('Property `FunctionNode.object` is deprecated, use `FunctionNode.fn` instead');
-    };
-    Object.defineProperty(this, 'object', { get: deprecated, set: deprecated });
-  }
-
-  FunctionNode.prototype = new Node();
-
-  FunctionNode.prototype.type = 'FunctionNode';
-
-  FunctionNode.prototype.isFunctionNode = true;
-
-  /**
-   * Compile the node to javascript code
-   * @param {FunctionNode} node The node to be compiled
-   * @param {Object} defs     Object which can be used to define functions
-   *                          or constants globally available for the compiled
-   *                          expression
-   * @param {Object} args     Object with local function arguments, the key is
-   *                          the name of the argument, and the value is `true`.
-   *                          The object may not be mutated, but must be
-   *                          extended instead.
-   * @return {string} js
-   * @private
-   */
-  function compileFunctionNode(node, defs, args) {
-    if (!(node instanceof FunctionNode)) {
-      throw new TypeError('No valid FunctionNode')
-    }
-
-    // compile fn and arguments
-    var jsFn = compile(node.fn, defs, args);
-    var jsArgs = map(node.args, function (arg) {
-      return compile(arg, defs, args);
-    });
-    var jsScope = compileScope(defs, args);
-    var argsName;
-
-    if (type.isSymbolNode(node.fn)) {
-      // we can statically determine whether the function has an rawArgs property
-      var name = node.fn.name;
-      var fn = hasOwnProperty(defs.math, name) ? defs.math[name] : undefined;
-      var isRaw = (typeof fn === 'function') && (fn.rawArgs == true);
-
-      if (isRaw) {
-        // pass unevaluated parameters (nodes) to the function
-        argsName = getUniqueArgumentName(defs);
-        defs[argsName] = node.args;
-
-        return jsFn + '(' + argsName + ', math, ' + jsScope + ')'; // "raw" evaluation
-      }
-      else {
-        return jsFn + '(' + join(jsArgs, ', ') + ')';              // "regular" evaluation
-      }
-    }
-    else if (type.isAccessorNode(node.fn) &&
-        type.isIndexNode(node.fn.index) && node.fn.index.isObjectProperty()) {
-      // execute the function with the right context: the object of the AccessorNode
-      argsName = getUniqueArgumentName(defs);
-      defs[argsName] = node.args;
-      defs.validateSafeMethod = validateSafeMethod
-
-      var jsObject = compile(node.fn.object, defs, args);
-      var jsProp = stringify(node.fn.index.getObjectProperty());
-
-      return '(function () {' +
-          'var object = ' + jsObject + ';' +
-          'validateSafeMethod(object, ' + jsProp + ');' +
-          'return (object[' + jsProp + '] && object[' + jsProp + '].rawArgs) ' +
-          ' ? object[' + jsProp + '](' + argsName + ', math, ' + jsScope + ')' + // "raw" evaluation
-          ' : object[' + jsProp + '](' + join(jsArgs, ', ') + ')' +              // "regular" evaluation
-          '})()';
-    }
-    else { // node.fn.isAccessorNode && !node.fn.index.isObjectProperty()
-      // we have to dynamically determine whether the function has a rawArgs property
-      argsName = getUniqueArgumentName(defs);
-      defs[argsName] = node.args;
-
-      return '(function () {' +
-          'var fn = ' + jsFn + ';' +
-          'return (fn && fn.rawArgs) ' +
-          ' ? fn(' + argsName + ', math, ' + jsScope + ')' +  // "raw" evaluation
-          ' : fn(' + join(jsArgs, ', ') + ')' +               // "regular" evaluation
-          '})()';
-    }
-  }
-
-  // register the compile function
-  register(FunctionNode.prototype.type, compileFunctionNode);
-
-  /**
-   * Merge function arguments into scope before passing to the actual function.
-   * This is needed when the function has `rawArgs=true`. In that case we have
-   * to pass the `scope` as third argument, including any variables of
-   * enclosing functions.
-   * @param {Object} defs     Object which can be used to define functions
-   *                          or constants globally available for the compiled
-   *                          expression
-   * @param {Object} args     Object with local function arguments, the key is
-   *                          the name of the argument, and the value is `true`.
-   *                          The object may not be mutated, but must be
-   *                          extended instead.
-   * @return {string} js
-   * @private
-   */
-  function compileScope (defs, args) {
-    var names = Object.keys(args)
-        // .map(function (arg) {
-        //   return args[arg];
-        // });
-    if (names.length === 0) {
-      return 'scope';
-    }
-    else {
-      // merge arguments into scope
-      defs.extend = extend;
-
-      var jsArgs = map(names, function (name) {
-        return stringify(name) + ': ' + args[name];
-      });
-
-      return 'extend(extend({}, scope), {' + join(jsArgs, ', ') + '})';
-    }
-  }
-
-  /**
-   * Execute a callback for each of the child nodes of this node
-   * @param {function(child: Node, path: string, parent: Node)} callback
-   */
-  FunctionNode.prototype.forEach = function (callback) {
-    for (var i = 0; i < this.args.length; i++) {
-      callback(this.args[i], 'args[' + i + ']', this);
-    }
-  };
-
-  /**
-   * Create a new FunctionNode having it's childs be the results of calling
-   * the provided callback function for each of the childs of the original node.
-   * @param {function(child: Node, path: string, parent: Node): Node} callback
-   * @returns {FunctionNode} Returns a transformed copy of the node
-   */
-  FunctionNode.prototype.map = function (callback) {
-    var fn = this.fn.map(callback);
-    var args = [];
-    for (var i = 0; i < this.args.length; i++) {
-      args[i] = this._ifNode(callback(this.args[i], 'args[' + i + ']', this));
-    }
-    return new FunctionNode(fn, args);
-  };
-
-  /**
-   * Create a clone of this node, a shallow copy
-   * @return {FunctionNode}
-   */
-  FunctionNode.prototype.clone = function () {
-    return new FunctionNode(this.fn, this.args.slice(0));
-  };
-
-  //backup Node's toString function
-  //@private
-  var nodeToString = FunctionNode.prototype.toString;
-
-  /**
-   * Get string representation. (wrapper function)
-   * This overrides parts of Node's toString function.
-   * If callback is an object containing callbacks, it
-   * calls the correct callback for the current node,
-   * otherwise it falls back to calling Node's toString
-   * function.
-   *
-   * @param {Object} options
-   * @return {string} str
-   * @override
-   */
-  FunctionNode.prototype.toString = function (options) {
-    var customString;
-    var name = this.fn.toString(options);
-    if (options && (typeof options.handler === 'object') && hasOwnProperty(options.handler, name)) {
-      //callback is a map of callback functions
-      customString = options.handler[name](this, options);
-    }
-
-    if (typeof customString !== 'undefined') {
-      return customString;
-    }
-
-    //fall back to Node's toString
-    return nodeToString.call(this, options);
-  };
-
-  /**
-   * Get string representation
-   * @param {Object} options
-   * @return {string} str
-   */
-  FunctionNode.prototype._toString = function (options) {
-    var args = this.args.map(function (arg) {
-      return arg.toString(options);
-    });
-
-    var fn = type.isFunctionAssignmentNode(this.fn)
-        ? ('(' + this.fn.toString(options) + ')')
-        : this.fn.toString(options)
-
-    // format the arguments like "add(2, 4.2)"
-    return fn + '(' + args.join(', ') + ')';
-  };
-  
-  /**
-   * Get HTML representation
-   * @param {Object} options
-   * @return {string} str
-   */
-  FunctionNode.prototype.toHTML = function (options) {
-    var args = this.args.map(function (arg) {
-      return arg.toHTML(options);
-    });
-
-    // format the arguments like "add(2, 4.2)"
-    return '<span class="math-function">' + escape(this.fn) + '</span><span class="math-paranthesis math-round-parenthesis">(</span>' + args.join('<span class="math-separator">,</span>') + '<span class="math-paranthesis math-round-parenthesis">)</span>';
-  };
-
-  /*
-   * Expand a LaTeX template
-   *
-   * @param {string} template
-   * @param {Node} node
-   * @param {Object} options
-   * @private
-   **/
-  function expandTemplate(template, node, options) {
-    var latex = '';
-
-    // Match everything of the form ${identifier} or ${identifier[2]} or $$
-    // while submatching identifier and 2 (in the second case)
-    var regex = new RegExp('\\$(?:\\{([a-z_][a-z_0-9]*)(?:\\[([0-9]+)\\])?\\}|\\$)', 'ig');
-
-    var inputPos = 0;   //position in the input string
-    var match;
-    while ((match = regex.exec(template)) !== null) {   //go through all matches
-      // add everything in front of the match to the LaTeX string
-      latex += template.substring(inputPos, match.index);
-      inputPos = match.index;
-
-      if (match[0] === '$$') { // escaped dollar sign
-        latex += '$';
-        inputPos++;
-      }
-      else { // template parameter
-        inputPos += match[0].length;
-        var property = node[match[1]];
-        if (!property) {
-          throw new ReferenceError('Template: Property ' + match[1] + ' does not exist.');
-        }
-        if (match[2] === undefined) { //no square brackets
-          switch (typeof property) {
-            case 'string':
-              latex += property;
-              break;
-            case 'object':
-              if (type.isNode(property)) {
-                latex += property.toTex(options);
-              }
-              else if (Array.isArray(property)) {
-                //make array of Nodes into comma separated list
-                latex += property.map(function (arg, index) {
-                  if (type.isNode(arg)) {
-                    return arg.toTex(options);
-                  }
-                  throw new TypeError('Template: ' + match[1] + '[' + index + '] is not a Node.');
-                }).join(',');
-              }
-              else {
-                throw new TypeError('Template: ' + match[1] + ' has to be a Node, String or array of Nodes');
-              }
-              break;
-            default:
-              throw new TypeError('Template: ' + match[1] + ' has to be a Node, String or array of Nodes');
-          }
-        }
-        else { //with square brackets
-          if (type.isNode(property[match[2]] && property[match[2]])) {
-            latex += property[match[2]].toTex(options);
-          }
-          else {
-            throw new TypeError('Template: ' + match[1] + '[' + match[2] + '] is not a Node.');
-          }
-        }
-      }
-    }
-    latex += template.slice(inputPos);  //append rest of the template
-
-    return latex;
-  }
-
-  //backup Node's toTex function
-  //@private
-  var nodeToTex = FunctionNode.prototype.toTex;
-
-  /**
-   * Get LaTeX representation. (wrapper function)
-   * This overrides parts of Node's toTex function.
-   * If callback is an object containing callbacks, it
-   * calls the correct callback for the current node,
-   * otherwise it falls back to calling Node's toTex
-   * function.
-   *
-   * @param {Object} options
-   * @return {string}
-   */
-  FunctionNode.prototype.toTex = function (options) {
-    var customTex;
-    if (options && (typeof options.handler === 'object') && hasOwnProperty(options.handler, this.name)) {
-      //callback is a map of callback functions
-      customTex = options.handler[this.name](this, options);
-    }
-
-    if (typeof customTex !== 'undefined') {
-      return customTex;
-    }
-
-    //fall back to Node's toTex
-    return nodeToTex.call(this, options);
-  };
-
-  /**
-   * Get LaTeX representation
-   * @param {Object} options
-   * @return {string} str
-   */
-  FunctionNode.prototype._toTex = function (options) {
-    var args = this.args.map(function (arg) { //get LaTeX of the arguments
-      return arg.toTex(options);
-    });
-
-    var latexConverter;
-
-    if (math[this.name] && ((typeof math[this.name].toTex === 'function') || (typeof math[this.name].toTex === 'object') || (typeof math[this.name].toTex === 'string'))) {
-      //.toTex is a callback function
-      latexConverter = math[this.name].toTex;
-    }
-
-    var customToTex;
-    switch (typeof latexConverter) {
-      case 'function': //a callback function
-        customToTex = latexConverter(this, options);
-        break;
-      case 'string': //a template string
-        customToTex = expandTemplate(latexConverter, this, options);
-        break;
-      case 'object': //an object with different "converters" for different numbers of arguments
-        switch (typeof latexConverter[args.length]) {
-          case 'function':
-            customToTex = latexConverter[args.length](this, options);
-            break;
-          case 'string':
-            customToTex = expandTemplate(latexConverter[args.length], this, options);
-            break;
-        }
-    }
-
-    if (typeof customToTex !== 'undefined') {
-      return customToTex;
-    }
-
-    return expandTemplate(latex.defaultTemplate, this, options);
-  };
-
-  /**
-   * Get identifier.
-   * @return {string}
-   */
-  FunctionNode.prototype.getIdentifier = function () {
-    return this.type + ':' + this.name;
-  };
-
-  return FunctionNode;
-}
-
-exports.name = 'FunctionNode';
-exports.path = 'expression.node';
-exports.math = true; // request access to the math namespace as 5th argument of the factory function
-exports.factory = factory;
-
-
-/***/ }),
 /* 58 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var deepMap = __webpack_require__(1);
-var number = __webpack_require__(3);
-
-function factory (type, config, load, typed) {
-  /**
-   * Test whether a value is positive: larger than zero.
-   * The function supports types `number`, `BigNumber`, `Fraction`, and `Unit`.
-   *
-   * The function is evaluated element-wise in case of Array or Matrix input.
-   *
-   * Syntax:
-   *
-   *     math.isPositive(x)
-   *
-   * Examples:
-   *
-   *    math.isPositive(3);                     // returns true
-   *    math.isPositive(-2);                    // returns false
-   *    math.isPositive(0);                     // returns false
-   *    math.isPositive(-0);                    // returns false
-   *    math.isPositive(0.5);                   // returns true
-   *    math.isPositive(math.bignumber(2));     // returns true
-   *    math.isPositive(math.fraction(-2, 5));  // returns false
-   *    math.isPositive(math.fraction(1,3));    // returns false
-   *    math.isPositive('2');                   // returns true
-   *    math.isPositive([2, 0, -3]');           // returns [true, false, false]
-   *
-   * See also:
-   *
-   *    isNumeric, isZero, isNegative, isInteger
-   *
-   * @param {number | BigNumber | Fraction | Unit | Array | Matrix} x  Value to be tested
-   * @return {boolean}  Returns true when `x` is larger than zero.
-   *                    Throws an error in case of an unknown data type.
-   */
-  var isPositive = typed('isPositive', {
-    'number': function (x) {
-      return x > 0;
-    },
-
-    'BigNumber': function (x) {
-      return !x.isNeg() && !x.isZero() && !x.isNaN();
-    },
-
-    'Fraction': function (x) {
-      return x.s > 0 && x.n > 0;
-    },
-
-    'Unit': function (x) {
-      return isPositive(x.value);
-    },
-
-    'Array | Matrix': function (x) {
-      return deepMap(x, isPositive);
-    }
-  });
-
-  return isPositive;
-}
-
-exports.name = 'isPositive';
-exports.factory = factory;
-
-
-/***/ }),
-/* 59 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var deepMap = __webpack_require__(1);
-
-function factory (type, config, load, typed) {
-  /**
-   * Calculate the square root of a value.
-   *
-   * For matrices, the function is evaluated element wise.
-   *
-   * Syntax:
-   *
-   *    math.sqrt(x)
-   *
-   * Examples:
-   *
-   *    math.sqrt(25);                // returns 5
-   *    math.square(5);               // returns 25
-   *    math.sqrt(-4);                // returns Complex 2i
-   *
-   * See also:
-   *
-   *    square, multiply, cube, cbrt
-   *
-   * @param {number | BigNumber | Complex | Array | Matrix | Unit} x
-   *            Value for which to calculate the square root.
-   * @return {number | BigNumber | Complex | Array | Matrix | Unit}
-   *            Returns the square root of `x`
-   */
-  var sqrt = typed('sqrt', {
-    'number': _sqrtNumber,
-
-    'Complex': function (x) {
-        return x.sqrt();
-    },
-
-    'BigNumber': function (x) {
-      if (!x.isNegative() || config.predictable) {
-        return x.sqrt();
-      }
-      else {
-        // negative value -> downgrade to number to do complex value computation
-        return _sqrtNumber(x.toNumber());
-      }
-    },
-
-    'Array | Matrix': function (x) {
-      // deep map collection, skip zeros since sqrt(0) = 0
-      return deepMap(x, sqrt, true);
-    },
-
-    'Unit': function (x) {
-      // Someday will work for complex units when they are implemented
-      return x.pow(0.5);
-    }
-
-  });
-
-  /**
-   * Calculate sqrt for a number
-   * @param {number} x
-   * @returns {number | Complex} Returns the square root of x
-   * @private
-   */
-  function _sqrtNumber(x) {
-    if (x >= 0 || config.predictable) {
-      return Math.sqrt(x);
-    }
-    else {
-      return new type.Complex(x, 0).sqrt();
-    }
-  }
-
-  sqrt.toTex = {1: '\\sqrt{${args[0]}}'};
-
-  return sqrt;
-}
-
-exports.name = 'sqrt';
-exports.factory = factory;
-
-
-/***/ }),
-/* 60 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var deepMap = __webpack_require__(1);
-var number = __webpack_require__(3);
-
-function factory (type, config, load, typed) {
-  /**
-   * Test whether a value is negative: smaller than zero.
-   * The function supports types `number`, `BigNumber`, `Fraction`, and `Unit`.
-   *
-   * The function is evaluated element-wise in case of Array or Matrix input.
-   *
-   * Syntax:
-   *
-   *     math.isNegative(x)
-   *
-   * Examples:
-   *
-   *    math.isNegative(3);                     // returns false
-   *    math.isNegative(-2);                    // returns true
-   *    math.isNegative(0);                     // returns false
-   *    math.isNegative(-0);                    // returns false
-   *    math.isNegative(math.bignumber(2));     // returns false
-   *    math.isNegative(math.fraction(-2, 5));  // returns true
-   *    math.isNegative('-2');                  // returns true
-   *    math.isNegative([2, 0, -3]');           // returns [false, false, true]
-   *
-   * See also:
-   *
-   *    isNumeric, isPositive, isZero, isInteger
-   *
-   * @param {number | BigNumber | Fraction | Unit | Array | Matrix} x  Value to be tested
-   * @return {boolean}  Returns true when `x` is larger than zero.
-   *                    Throws an error in case of an unknown data type.
-   */
-  var isNegative = typed('isNegative', {
-    'number': function (x) {
-      return x < 0;
-    },
-
-    'BigNumber': function (x) {
-      return x.isNeg() && !x.isZero() && !x.isNaN();
-    },
-
-    'Fraction': function (x) {
-      return x.s < 0; // It's enough to decide on the sign
-    },
-
-    'Unit': function (x) {
-      return isNegative(x.value);
-    },
-
-    'Array | Matrix': function (x) {
-      return deepMap(x, isNegative);
-    }
-  });
-
-  return isNegative;
-}
-
-exports.name = 'isNegative';
-exports.factory = factory;
-
-
-/***/ }),
-/* 61 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-/**
- * Test whether a value is a Matrix
- * @param {*} x
- * @returns {boolean} returns true with input is a Matrix
- *                    (like a DenseMatrix or SparseMatrix)
- */
-module.exports = function isMatrix (x) {
-  return x && x.constructor.prototype.isMatrix || false;
-};
-
-
-/***/ }),
-/* 62 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-/**
- * Determine the type of a variable
- *
- *     type(x)
- *
- * The following types are recognized:
- *
- *     'undefined'
- *     'null'
- *     'boolean'
- *     'number'
- *     'string'
- *     'Array'
- *     'Function'
- *     'Date'
- *     'RegExp'
- *     'Object'
- *
- * @param {*} x
- * @return {string} Returns the name of the type. Primitive types are lower case,
- *                  non-primitive types are upper-camel-case.
- *                  For example 'number', 'string', 'Array', 'Date'.
- */
-exports.type = function(x) {
-  var type = typeof x;
-
-  if (type === 'object') {
-    if (x === null)           return 'null';
-    if (Array.isArray(x))     return 'Array';
-    if (x instanceof Date)    return 'Date';
-    if (x instanceof RegExp)  return 'RegExp';
-    if (x instanceof Boolean) return 'boolean';
-    if (x instanceof Number)  return 'number';
-    if (x instanceof String)  return 'string';
-
-    return 'Object';
-  }
-
-  if (type === 'function')    return 'Function';
-
-  return type;
-};
-
-
-/***/ }),
-/* 63 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var DimensionError = __webpack_require__(10);
-
-function factory (type, config, load, typed) {
-
-  var equalScalar = load(__webpack_require__(11));
-  
-  var SparseMatrix = type.SparseMatrix;
-
-  /**
-   * Iterates over SparseMatrix A and SparseMatrix B nonzero items and invokes the callback function f(Aij, Bij). 
-   * Callback function invoked MAX(NNZA, NNZB) times
-   *
-   *
-   *          ┌  f(Aij, Bij)  ; A(i,j) !== 0 || B(i,j) !== 0
-   * C(i,j) = ┤  
-   *          └  0            ; otherwise
-   *
-   *
-   * @param {Matrix}   a                 The SparseMatrix instance (A)
-   * @param {Matrix}   b                 The SparseMatrix instance (B)
-   * @param {Function} callback          The f(Aij,Bij) operation to invoke
-   *
-   * @return {Matrix}                    SparseMatrix (C)
-   *
-   * see https://github.com/josdejong/mathjs/pull/346#issuecomment-97620294
-   */
-  var algorithm05 = function (a, b, callback) {
-    // sparse matrix arrays
-    var avalues = a._values;
-    var aindex = a._index;
-    var aptr = a._ptr;
-    var asize = a._size;
-    var adt = a._datatype;
-    // sparse matrix arrays
-    var bvalues = b._values;
-    var bindex = b._index;
-    var bptr = b._ptr;
-    var bsize = b._size;
-    var bdt = b._datatype;
-
-    // validate dimensions
-    if (asize.length !== bsize.length)
-      throw new DimensionError(asize.length, bsize.length);
-
-    // check rows & columns
-    if (asize[0] !== bsize[0] || asize[1] !== bsize[1])
-      throw new RangeError('Dimension mismatch. Matrix A (' + asize + ') must match Matrix B (' + bsize + ')');
-
-    // rows & columns
-    var rows = asize[0];
-    var columns = asize[1];
-
-    // datatype
-    var dt;
-    // equal signature to use
-    var eq = equalScalar;
-    // zero value
-    var zero = 0;
-    // callback signature to use
-    var cf = callback;
-
-    // process data types
-    if (typeof adt === 'string' && adt === bdt) {
-      // datatype
-      dt = adt;
-      // find signature that matches (dt, dt)
-      eq = typed.find(equalScalar, [dt, dt]);
-      // convert 0 to the same datatype
-      zero = typed.convert(0, dt);
-      // callback
-      cf = typed.find(callback, [dt, dt]);
-    }
-
-    // result arrays
-    var cvalues = avalues && bvalues ? [] : undefined;
-    var cindex = [];
-    var cptr = [];
-    // matrix
-    var c = new SparseMatrix({
-      values: cvalues,
-      index: cindex,
-      ptr: cptr,
-      size: [rows, columns],
-      datatype: dt
-    });
-
-    // workspaces
-    var xa = cvalues ? [] : undefined;
-    var xb = cvalues ? [] : undefined;
-    // marks indicating we have a value in x for a given column
-    var wa = [];
-    var wb = [];
-
-    // vars
-    var i, j, k, k1;
-    
-    // loop columns
-    for (j = 0; j < columns; j++) {
-      // update cptr
-      cptr[j] = cindex.length;
-      // columns mark
-      var mark = j + 1;
-      // loop values A(:,j)
-      for (k = aptr[j], k1 = aptr[j + 1]; k < k1; k++) {
-        // row
-        i = aindex[k];
-        // push index
-        cindex.push(i);
-        // update workspace
-        wa[i] = mark;
-        // check we need to process values
-        if (xa)
-          xa[i] = avalues[k];
-      }
-      // loop values B(:,j)
-      for (k = bptr[j], k1 = bptr[j + 1]; k < k1; k++) {
-        // row
-        i = bindex[k];
-        // check row existed in A
-        if (wa[i] !== mark) {
-          // push index
-          cindex.push(i);
-        }
-        // update workspace
-        wb[i] = mark;
-        // check we need to process values
-        if (xb)
-          xb[i] = bvalues[k];
-      }
-      // check we need to process values (non pattern matrix)
-      if (cvalues) {
-        // initialize first index in j
-        k = cptr[j];
-        // loop index in j
-        while (k < cindex.length) {
-          // row
-          i = cindex[k];
-          // marks
-          var wai = wa[i];
-          var wbi = wb[i];
-          // check Aij or Bij are nonzero
-          if (wai === mark || wbi === mark) {
-            // matrix values @ i,j
-            var va = wai === mark ? xa[i] : zero;
-            var vb = wbi === mark ? xb[i] : zero;
-            // Cij
-            var vc = cf(va, vb);
-            // check for zero
-            if (!eq(vc, zero)) {
-              // push value
-              cvalues.push(vc);
-              // increment pointer
-              k++;
-            }
-            else {
-              // remove value @ i, do not increment pointer
-              cindex.splice(k, 1);
-            }
-          }
-        }
-      }
-    }
-    // update cptr
-    cptr[columns] = cindex.length;
-
-    // return sparse matrix
-    return c;
-  };
-
-  return algorithm05;
-}
-
-exports.name = 'algorithm05';
-exports.factory = factory;
-
-
-/***/ }),
-/* 64 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var array = __webpack_require__(2);
-var isInteger = __webpack_require__(3).isInteger;
-
-function factory (type, config, load, typed) {
-  
-  var matrix = load(__webpack_require__(0));
-  
-  /**
-   * Create a 2-dimensional identity matrix with size m x n or n x n.
-   * The matrix has ones on the diagonal and zeros elsewhere.
-   *
-   * Syntax:
-   *
-   *    math.eye(n)
-   *    math.eye(n, format)
-   *    math.eye(m, n)
-   *    math.eye(m, n, format)
-   *    math.eye([m, n])
-   *    math.eye([m, n], format)
-   *
-   * Examples:
-   *
-   *    math.eye(3);                    // returns [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-   *    math.eye(3, 2);                 // returns [[1, 0], [0, 1], [0, 0]]
-   *
-   *    var A = [[1, 2, 3], [4, 5, 6]];
-   *    math.eye(math.size(A));         // returns [[1, 0, 0], [0, 1, 0]]
-   *
-   * See also:
-   *
-   *    diag, ones, zeros, size, range
-   *
-   * @param {...number | Matrix | Array} size   The size for the matrix
-   * @param {string} [format]                   The Matrix storage format
-   *
-   * @return {Matrix | Array | number} A matrix with ones on the diagonal.
-   */
-  var eye = typed('eye', {
-    '': function () {
-      return (config.matrix === 'Matrix') ? matrix([]) : [];
-    },
-
-    'string': function (format) {
-      return matrix(format);
-    },
-
-    'number | BigNumber': function (rows) {
-      return _eye(rows, rows, config.matrix === 'Matrix' ? 'default' : undefined);
-    },
-    
-    'number | BigNumber, string': function (rows, format) {
-      return _eye(rows, rows, format);
-    },
-
-    'number | BigNumber, number | BigNumber': function (rows, cols) {
-      return _eye(rows, cols, config.matrix === 'Matrix' ? 'default' : undefined);
-    },
-    
-    'number | BigNumber, number | BigNumber, string': function (rows, cols, format) {
-      return _eye(rows, cols, format);
-    },
-
-    'Array':  function (size) {
-      return _eyeVector(size);
-    },
-    
-    'Array, string':  function (size, format) {
-      return _eyeVector(size, format);
-    },
-
-    'Matrix': function (size) {
-      return _eyeVector(size.valueOf(), size.storage());
-    },
-    
-    'Matrix, string': function (size, format) {
-      return _eyeVector(size.valueOf(), format);
-    }
-  });
-
-  eye.toTex = undefined; // use default template
-
-  return eye;
-
-  function _eyeVector (size, format) {
-    switch (size.length) {
-      case 0: return format ? matrix(format) : [];
-      case 1: return _eye(size[0], size[0], format);
-      case 2: return _eye(size[0], size[1], format);
-      default: throw new Error('Vector containing two values expected');
-    }
-  }
-
-  /**
-   * Create an identity matrix
-   * @param {number | BigNumber} rows
-   * @param {number | BigNumber} cols
-   * @param {string} [format]
-   * @returns {Matrix}
-   * @private
-   */
-  function _eye (rows, cols, format) {
-    // BigNumber constructor with the right precision
-    var Big = (type.isBigNumber(rows) || type.isBigNumber(cols))
-            ? type.BigNumber
-            : null;
-
-    if (type.isBigNumber(rows)) rows = rows.toNumber();
-    if (type.isBigNumber(cols)) cols = cols.toNumber();
-
-    if (!isInteger(rows) || rows < 1) {
-      throw new Error('Parameters in function eye must be positive integers');
-    }
-    if (!isInteger(cols) || cols < 1) {
-      throw new Error('Parameters in function eye must be positive integers');
-    }
-    
-    var one = Big ? new type.BigNumber(1) : 1;
-    var defaultValue = Big ? new Big(0) : 0;
-    var size = [rows, cols];
-    
-    // check we need to return a matrix
-    if (format) {
-      // get matrix storage constructor
-      var F = type.Matrix.storage(format);
-      // create diagonal matrix (use optimized implementation for storage format)
-      return F.diagonal(size, one, 0, defaultValue);
-    }
-    
-    // create and resize array
-    var res = array.resize([], size, defaultValue);
-    // fill in ones on the diagonal
-    var minimum = rows < cols ? rows : cols;
-    // fill diagonal
-    for (var d = 0; d < minimum; d++) {
-      res[d][d] = one;
-    }
-    return res;
-  }
-}
-
-exports.name = 'eye';
-exports.factory = factory;
-
-
-/***/ }),
-/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12304,15 +11316,15 @@ var join = __webpack_require__(2).join;
 var stringify = __webpack_require__(9).stringify;
 var escape = __webpack_require__(9).escape;
 var isSafeMethod = __webpack_require__(13).isSafeMethod;
-var operators = __webpack_require__(55);
+var operators = __webpack_require__(57);
 
 function factory (type, config, load, typed) {
   var register = load(__webpack_require__(7)).register;
   var compile = load(__webpack_require__(7)).compile;
-  var Node         = load(__webpack_require__(14));
-  var ConstantNode = load(__webpack_require__(56));
-  var SymbolNode   = load(__webpack_require__(42));
-  var FunctionNode = load(__webpack_require__(57));
+  var Node         = load(__webpack_require__(15));
+  var ConstantNode = load(__webpack_require__(49));
+  var SymbolNode   = load(__webpack_require__(38));
+  var FunctionNode = load(__webpack_require__(59));
 
   /**
    * @constructor OperatorNode
@@ -12878,6 +11890,994 @@ exports.factory = factory;
 
 
 /***/ }),
+/* 59 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var latex = __webpack_require__(4);
+var stringify = __webpack_require__(9).stringify;
+var escape = __webpack_require__(9).escape;
+var extend = __webpack_require__(5).extend;
+var hasOwnProperty = __webpack_require__(5).hasOwnProperty;
+var map = __webpack_require__(2).map;
+var join = __webpack_require__(2).join;
+var validateSafeMethod = __webpack_require__(13).validateSafeMethod;
+var getUniqueArgumentName = __webpack_require__(121);
+
+function factory (type, config, load, typed, math) {
+  var register = load(__webpack_require__(7)).register;
+  var compile = load(__webpack_require__(7)).compile;
+  var Node = load(__webpack_require__(15));
+  var SymbolNode = load(__webpack_require__(38));
+
+  /**
+   * @constructor FunctionNode
+   * @extends {./Node}
+   * invoke a list with arguments on a node
+   * @param {./Node | string} fn Node resolving with a function on which to invoke
+   *                             the arguments, typically a SymboNode or AccessorNode
+   * @param {./Node[]} args
+   */
+  function FunctionNode(fn, args) {
+    if (!(this instanceof FunctionNode)) {
+      throw new SyntaxError('Constructor must be called with the new operator');
+    }
+
+    if (typeof fn === 'string') {
+      fn = new SymbolNode(fn);
+    }
+
+    // validate input
+    if (!type.isNode(fn)) throw new TypeError('Node expected as parameter "fn"');
+    if (!Array.isArray(args) || !args.every(type.isNode)) {
+      throw new TypeError('Array containing Nodes expected for parameter "args"');
+    }
+
+    this.fn = fn;
+    this.args = args || [];
+
+    // readonly property name
+    Object.defineProperty(this, 'name', {
+      get: function () {
+        return this.fn.name || '';
+      }.bind(this),
+      set: function () {
+        throw new Error('Cannot assign a new name, name is read-only');
+      }
+    });
+
+    // TODO: deprecated since v3, remove some day
+    var deprecated = function () {
+      throw new Error('Property `FunctionNode.object` is deprecated, use `FunctionNode.fn` instead');
+    };
+    Object.defineProperty(this, 'object', { get: deprecated, set: deprecated });
+  }
+
+  FunctionNode.prototype = new Node();
+
+  FunctionNode.prototype.type = 'FunctionNode';
+
+  FunctionNode.prototype.isFunctionNode = true;
+
+  /**
+   * Compile the node to javascript code
+   * @param {FunctionNode} node The node to be compiled
+   * @param {Object} defs     Object which can be used to define functions
+   *                          or constants globally available for the compiled
+   *                          expression
+   * @param {Object} args     Object with local function arguments, the key is
+   *                          the name of the argument, and the value is `true`.
+   *                          The object may not be mutated, but must be
+   *                          extended instead.
+   * @return {string} js
+   * @private
+   */
+  function compileFunctionNode(node, defs, args) {
+    if (!(node instanceof FunctionNode)) {
+      throw new TypeError('No valid FunctionNode')
+    }
+
+    // compile fn and arguments
+    var jsFn = compile(node.fn, defs, args);
+    var jsArgs = map(node.args, function (arg) {
+      return compile(arg, defs, args);
+    });
+    var jsScope = compileScope(defs, args);
+    var argsName;
+
+    if (type.isSymbolNode(node.fn)) {
+      // we can statically determine whether the function has an rawArgs property
+      var name = node.fn.name;
+      var fn = hasOwnProperty(defs.math, name) ? defs.math[name] : undefined;
+      var isRaw = (typeof fn === 'function') && (fn.rawArgs == true);
+
+      if (isRaw) {
+        // pass unevaluated parameters (nodes) to the function
+        argsName = getUniqueArgumentName(defs);
+        defs[argsName] = node.args;
+
+        return jsFn + '(' + argsName + ', math, ' + jsScope + ')'; // "raw" evaluation
+      }
+      else {
+        return jsFn + '(' + join(jsArgs, ', ') + ')';              // "regular" evaluation
+      }
+    }
+    else if (type.isAccessorNode(node.fn) &&
+        type.isIndexNode(node.fn.index) && node.fn.index.isObjectProperty()) {
+      // execute the function with the right context: the object of the AccessorNode
+      argsName = getUniqueArgumentName(defs);
+      defs[argsName] = node.args;
+      defs.validateSafeMethod = validateSafeMethod
+
+      var jsObject = compile(node.fn.object, defs, args);
+      var jsProp = stringify(node.fn.index.getObjectProperty());
+
+      return '(function () {' +
+          'var object = ' + jsObject + ';' +
+          'validateSafeMethod(object, ' + jsProp + ');' +
+          'return (object[' + jsProp + '] && object[' + jsProp + '].rawArgs) ' +
+          ' ? object[' + jsProp + '](' + argsName + ', math, ' + jsScope + ')' + // "raw" evaluation
+          ' : object[' + jsProp + '](' + join(jsArgs, ', ') + ')' +              // "regular" evaluation
+          '})()';
+    }
+    else { // node.fn.isAccessorNode && !node.fn.index.isObjectProperty()
+      // we have to dynamically determine whether the function has a rawArgs property
+      argsName = getUniqueArgumentName(defs);
+      defs[argsName] = node.args;
+
+      return '(function () {' +
+          'var fn = ' + jsFn + ';' +
+          'return (fn && fn.rawArgs) ' +
+          ' ? fn(' + argsName + ', math, ' + jsScope + ')' +  // "raw" evaluation
+          ' : fn(' + join(jsArgs, ', ') + ')' +               // "regular" evaluation
+          '})()';
+    }
+  }
+
+  // register the compile function
+  register(FunctionNode.prototype.type, compileFunctionNode);
+
+  /**
+   * Merge function arguments into scope before passing to the actual function.
+   * This is needed when the function has `rawArgs=true`. In that case we have
+   * to pass the `scope` as third argument, including any variables of
+   * enclosing functions.
+   * @param {Object} defs     Object which can be used to define functions
+   *                          or constants globally available for the compiled
+   *                          expression
+   * @param {Object} args     Object with local function arguments, the key is
+   *                          the name of the argument, and the value is `true`.
+   *                          The object may not be mutated, but must be
+   *                          extended instead.
+   * @return {string} js
+   * @private
+   */
+  function compileScope (defs, args) {
+    var names = Object.keys(args)
+        // .map(function (arg) {
+        //   return args[arg];
+        // });
+    if (names.length === 0) {
+      return 'scope';
+    }
+    else {
+      // merge arguments into scope
+      defs.extend = extend;
+
+      var jsArgs = map(names, function (name) {
+        return stringify(name) + ': ' + args[name];
+      });
+
+      return 'extend(extend({}, scope), {' + join(jsArgs, ', ') + '})';
+    }
+  }
+
+  /**
+   * Execute a callback for each of the child nodes of this node
+   * @param {function(child: Node, path: string, parent: Node)} callback
+   */
+  FunctionNode.prototype.forEach = function (callback) {
+    for (var i = 0; i < this.args.length; i++) {
+      callback(this.args[i], 'args[' + i + ']', this);
+    }
+  };
+
+  /**
+   * Create a new FunctionNode having it's childs be the results of calling
+   * the provided callback function for each of the childs of the original node.
+   * @param {function(child: Node, path: string, parent: Node): Node} callback
+   * @returns {FunctionNode} Returns a transformed copy of the node
+   */
+  FunctionNode.prototype.map = function (callback) {
+    var fn = this.fn.map(callback);
+    var args = [];
+    for (var i = 0; i < this.args.length; i++) {
+      args[i] = this._ifNode(callback(this.args[i], 'args[' + i + ']', this));
+    }
+    return new FunctionNode(fn, args);
+  };
+
+  /**
+   * Create a clone of this node, a shallow copy
+   * @return {FunctionNode}
+   */
+  FunctionNode.prototype.clone = function () {
+    return new FunctionNode(this.fn, this.args.slice(0));
+  };
+
+  //backup Node's toString function
+  //@private
+  var nodeToString = FunctionNode.prototype.toString;
+
+  /**
+   * Get string representation. (wrapper function)
+   * This overrides parts of Node's toString function.
+   * If callback is an object containing callbacks, it
+   * calls the correct callback for the current node,
+   * otherwise it falls back to calling Node's toString
+   * function.
+   *
+   * @param {Object} options
+   * @return {string} str
+   * @override
+   */
+  FunctionNode.prototype.toString = function (options) {
+    var customString;
+    var name = this.fn.toString(options);
+    if (options && (typeof options.handler === 'object') && hasOwnProperty(options.handler, name)) {
+      //callback is a map of callback functions
+      customString = options.handler[name](this, options);
+    }
+
+    if (typeof customString !== 'undefined') {
+      return customString;
+    }
+
+    //fall back to Node's toString
+    return nodeToString.call(this, options);
+  };
+
+  /**
+   * Get string representation
+   * @param {Object} options
+   * @return {string} str
+   */
+  FunctionNode.prototype._toString = function (options) {
+    var args = this.args.map(function (arg) {
+      return arg.toString(options);
+    });
+
+    var fn = type.isFunctionAssignmentNode(this.fn)
+        ? ('(' + this.fn.toString(options) + ')')
+        : this.fn.toString(options)
+
+    // format the arguments like "add(2, 4.2)"
+    return fn + '(' + args.join(', ') + ')';
+  };
+  
+  /**
+   * Get HTML representation
+   * @param {Object} options
+   * @return {string} str
+   */
+  FunctionNode.prototype.toHTML = function (options) {
+    var args = this.args.map(function (arg) {
+      return arg.toHTML(options);
+    });
+
+    // format the arguments like "add(2, 4.2)"
+    return '<span class="math-function">' + escape(this.fn) + '</span><span class="math-paranthesis math-round-parenthesis">(</span>' + args.join('<span class="math-separator">,</span>') + '<span class="math-paranthesis math-round-parenthesis">)</span>';
+  };
+
+  /*
+   * Expand a LaTeX template
+   *
+   * @param {string} template
+   * @param {Node} node
+   * @param {Object} options
+   * @private
+   **/
+  function expandTemplate(template, node, options) {
+    var latex = '';
+
+    // Match everything of the form ${identifier} or ${identifier[2]} or $$
+    // while submatching identifier and 2 (in the second case)
+    var regex = new RegExp('\\$(?:\\{([a-z_][a-z_0-9]*)(?:\\[([0-9]+)\\])?\\}|\\$)', 'ig');
+
+    var inputPos = 0;   //position in the input string
+    var match;
+    while ((match = regex.exec(template)) !== null) {   //go through all matches
+      // add everything in front of the match to the LaTeX string
+      latex += template.substring(inputPos, match.index);
+      inputPos = match.index;
+
+      if (match[0] === '$$') { // escaped dollar sign
+        latex += '$';
+        inputPos++;
+      }
+      else { // template parameter
+        inputPos += match[0].length;
+        var property = node[match[1]];
+        if (!property) {
+          throw new ReferenceError('Template: Property ' + match[1] + ' does not exist.');
+        }
+        if (match[2] === undefined) { //no square brackets
+          switch (typeof property) {
+            case 'string':
+              latex += property;
+              break;
+            case 'object':
+              if (type.isNode(property)) {
+                latex += property.toTex(options);
+              }
+              else if (Array.isArray(property)) {
+                //make array of Nodes into comma separated list
+                latex += property.map(function (arg, index) {
+                  if (type.isNode(arg)) {
+                    return arg.toTex(options);
+                  }
+                  throw new TypeError('Template: ' + match[1] + '[' + index + '] is not a Node.');
+                }).join(',');
+              }
+              else {
+                throw new TypeError('Template: ' + match[1] + ' has to be a Node, String or array of Nodes');
+              }
+              break;
+            default:
+              throw new TypeError('Template: ' + match[1] + ' has to be a Node, String or array of Nodes');
+          }
+        }
+        else { //with square brackets
+          if (type.isNode(property[match[2]] && property[match[2]])) {
+            latex += property[match[2]].toTex(options);
+          }
+          else {
+            throw new TypeError('Template: ' + match[1] + '[' + match[2] + '] is not a Node.');
+          }
+        }
+      }
+    }
+    latex += template.slice(inputPos);  //append rest of the template
+
+    return latex;
+  }
+
+  //backup Node's toTex function
+  //@private
+  var nodeToTex = FunctionNode.prototype.toTex;
+
+  /**
+   * Get LaTeX representation. (wrapper function)
+   * This overrides parts of Node's toTex function.
+   * If callback is an object containing callbacks, it
+   * calls the correct callback for the current node,
+   * otherwise it falls back to calling Node's toTex
+   * function.
+   *
+   * @param {Object} options
+   * @return {string}
+   */
+  FunctionNode.prototype.toTex = function (options) {
+    var customTex;
+    if (options && (typeof options.handler === 'object') && hasOwnProperty(options.handler, this.name)) {
+      //callback is a map of callback functions
+      customTex = options.handler[this.name](this, options);
+    }
+
+    if (typeof customTex !== 'undefined') {
+      return customTex;
+    }
+
+    //fall back to Node's toTex
+    return nodeToTex.call(this, options);
+  };
+
+  /**
+   * Get LaTeX representation
+   * @param {Object} options
+   * @return {string} str
+   */
+  FunctionNode.prototype._toTex = function (options) {
+    var args = this.args.map(function (arg) { //get LaTeX of the arguments
+      return arg.toTex(options);
+    });
+
+    var latexConverter;
+
+    if (math[this.name] && ((typeof math[this.name].toTex === 'function') || (typeof math[this.name].toTex === 'object') || (typeof math[this.name].toTex === 'string'))) {
+      //.toTex is a callback function
+      latexConverter = math[this.name].toTex;
+    }
+
+    var customToTex;
+    switch (typeof latexConverter) {
+      case 'function': //a callback function
+        customToTex = latexConverter(this, options);
+        break;
+      case 'string': //a template string
+        customToTex = expandTemplate(latexConverter, this, options);
+        break;
+      case 'object': //an object with different "converters" for different numbers of arguments
+        switch (typeof latexConverter[args.length]) {
+          case 'function':
+            customToTex = latexConverter[args.length](this, options);
+            break;
+          case 'string':
+            customToTex = expandTemplate(latexConverter[args.length], this, options);
+            break;
+        }
+    }
+
+    if (typeof customToTex !== 'undefined') {
+      return customToTex;
+    }
+
+    return expandTemplate(latex.defaultTemplate, this, options);
+  };
+
+  /**
+   * Get identifier.
+   * @return {string}
+   */
+  FunctionNode.prototype.getIdentifier = function () {
+    return this.type + ':' + this.name;
+  };
+
+  return FunctionNode;
+}
+
+exports.name = 'FunctionNode';
+exports.path = 'expression.node';
+exports.math = true; // request access to the math namespace as 5th argument of the factory function
+exports.factory = factory;
+
+
+/***/ }),
+/* 60 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var deepMap = __webpack_require__(1);
+var number = __webpack_require__(3);
+
+function factory (type, config, load, typed) {
+  /**
+   * Test whether a value is positive: larger than zero.
+   * The function supports types `number`, `BigNumber`, `Fraction`, and `Unit`.
+   *
+   * The function is evaluated element-wise in case of Array or Matrix input.
+   *
+   * Syntax:
+   *
+   *     math.isPositive(x)
+   *
+   * Examples:
+   *
+   *    math.isPositive(3);                     // returns true
+   *    math.isPositive(-2);                    // returns false
+   *    math.isPositive(0);                     // returns false
+   *    math.isPositive(-0);                    // returns false
+   *    math.isPositive(0.5);                   // returns true
+   *    math.isPositive(math.bignumber(2));     // returns true
+   *    math.isPositive(math.fraction(-2, 5));  // returns false
+   *    math.isPositive(math.fraction(1,3));    // returns false
+   *    math.isPositive('2');                   // returns true
+   *    math.isPositive([2, 0, -3]');           // returns [true, false, false]
+   *
+   * See also:
+   *
+   *    isNumeric, isZero, isNegative, isInteger
+   *
+   * @param {number | BigNumber | Fraction | Unit | Array | Matrix} x  Value to be tested
+   * @return {boolean}  Returns true when `x` is larger than zero.
+   *                    Throws an error in case of an unknown data type.
+   */
+  var isPositive = typed('isPositive', {
+    'number': function (x) {
+      return x > 0;
+    },
+
+    'BigNumber': function (x) {
+      return !x.isNeg() && !x.isZero() && !x.isNaN();
+    },
+
+    'Fraction': function (x) {
+      return x.s > 0 && x.n > 0;
+    },
+
+    'Unit': function (x) {
+      return isPositive(x.value);
+    },
+
+    'Array | Matrix': function (x) {
+      return deepMap(x, isPositive);
+    }
+  });
+
+  return isPositive;
+}
+
+exports.name = 'isPositive';
+exports.factory = factory;
+
+
+/***/ }),
+/* 61 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var deepMap = __webpack_require__(1);
+var number = __webpack_require__(3);
+
+function factory (type, config, load, typed) {
+  /**
+   * Test whether a value is negative: smaller than zero.
+   * The function supports types `number`, `BigNumber`, `Fraction`, and `Unit`.
+   *
+   * The function is evaluated element-wise in case of Array or Matrix input.
+   *
+   * Syntax:
+   *
+   *     math.isNegative(x)
+   *
+   * Examples:
+   *
+   *    math.isNegative(3);                     // returns false
+   *    math.isNegative(-2);                    // returns true
+   *    math.isNegative(0);                     // returns false
+   *    math.isNegative(-0);                    // returns false
+   *    math.isNegative(math.bignumber(2));     // returns false
+   *    math.isNegative(math.fraction(-2, 5));  // returns true
+   *    math.isNegative('-2');                  // returns true
+   *    math.isNegative([2, 0, -3]');           // returns [false, false, true]
+   *
+   * See also:
+   *
+   *    isNumeric, isPositive, isZero, isInteger
+   *
+   * @param {number | BigNumber | Fraction | Unit | Array | Matrix} x  Value to be tested
+   * @return {boolean}  Returns true when `x` is larger than zero.
+   *                    Throws an error in case of an unknown data type.
+   */
+  var isNegative = typed('isNegative', {
+    'number': function (x) {
+      return x < 0;
+    },
+
+    'BigNumber': function (x) {
+      return x.isNeg() && !x.isZero() && !x.isNaN();
+    },
+
+    'Fraction': function (x) {
+      return x.s < 0; // It's enough to decide on the sign
+    },
+
+    'Unit': function (x) {
+      return isNegative(x.value);
+    },
+
+    'Array | Matrix': function (x) {
+      return deepMap(x, isNegative);
+    }
+  });
+
+  return isNegative;
+}
+
+exports.name = 'isNegative';
+exports.factory = factory;
+
+
+/***/ }),
+/* 62 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Test whether a value is a Matrix
+ * @param {*} x
+ * @returns {boolean} returns true with input is a Matrix
+ *                    (like a DenseMatrix or SparseMatrix)
+ */
+module.exports = function isMatrix (x) {
+  return x && x.constructor.prototype.isMatrix || false;
+};
+
+
+/***/ }),
+/* 63 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Determine the type of a variable
+ *
+ *     type(x)
+ *
+ * The following types are recognized:
+ *
+ *     'undefined'
+ *     'null'
+ *     'boolean'
+ *     'number'
+ *     'string'
+ *     'Array'
+ *     'Function'
+ *     'Date'
+ *     'RegExp'
+ *     'Object'
+ *
+ * @param {*} x
+ * @return {string} Returns the name of the type. Primitive types are lower case,
+ *                  non-primitive types are upper-camel-case.
+ *                  For example 'number', 'string', 'Array', 'Date'.
+ */
+exports.type = function(x) {
+  var type = typeof x;
+
+  if (type === 'object') {
+    if (x === null)           return 'null';
+    if (Array.isArray(x))     return 'Array';
+    if (x instanceof Date)    return 'Date';
+    if (x instanceof RegExp)  return 'RegExp';
+    if (x instanceof Boolean) return 'boolean';
+    if (x instanceof Number)  return 'number';
+    if (x instanceof String)  return 'string';
+
+    return 'Object';
+  }
+
+  if (type === 'function')    return 'Function';
+
+  return type;
+};
+
+
+/***/ }),
+/* 64 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var DimensionError = __webpack_require__(11);
+
+function factory (type, config, load, typed) {
+
+  var equalScalar = load(__webpack_require__(10));
+  
+  var SparseMatrix = type.SparseMatrix;
+
+  /**
+   * Iterates over SparseMatrix A and SparseMatrix B nonzero items and invokes the callback function f(Aij, Bij). 
+   * Callback function invoked MAX(NNZA, NNZB) times
+   *
+   *
+   *          ┌  f(Aij, Bij)  ; A(i,j) !== 0 || B(i,j) !== 0
+   * C(i,j) = ┤  
+   *          └  0            ; otherwise
+   *
+   *
+   * @param {Matrix}   a                 The SparseMatrix instance (A)
+   * @param {Matrix}   b                 The SparseMatrix instance (B)
+   * @param {Function} callback          The f(Aij,Bij) operation to invoke
+   *
+   * @return {Matrix}                    SparseMatrix (C)
+   *
+   * see https://github.com/josdejong/mathjs/pull/346#issuecomment-97620294
+   */
+  var algorithm05 = function (a, b, callback) {
+    // sparse matrix arrays
+    var avalues = a._values;
+    var aindex = a._index;
+    var aptr = a._ptr;
+    var asize = a._size;
+    var adt = a._datatype;
+    // sparse matrix arrays
+    var bvalues = b._values;
+    var bindex = b._index;
+    var bptr = b._ptr;
+    var bsize = b._size;
+    var bdt = b._datatype;
+
+    // validate dimensions
+    if (asize.length !== bsize.length)
+      throw new DimensionError(asize.length, bsize.length);
+
+    // check rows & columns
+    if (asize[0] !== bsize[0] || asize[1] !== bsize[1])
+      throw new RangeError('Dimension mismatch. Matrix A (' + asize + ') must match Matrix B (' + bsize + ')');
+
+    // rows & columns
+    var rows = asize[0];
+    var columns = asize[1];
+
+    // datatype
+    var dt;
+    // equal signature to use
+    var eq = equalScalar;
+    // zero value
+    var zero = 0;
+    // callback signature to use
+    var cf = callback;
+
+    // process data types
+    if (typeof adt === 'string' && adt === bdt) {
+      // datatype
+      dt = adt;
+      // find signature that matches (dt, dt)
+      eq = typed.find(equalScalar, [dt, dt]);
+      // convert 0 to the same datatype
+      zero = typed.convert(0, dt);
+      // callback
+      cf = typed.find(callback, [dt, dt]);
+    }
+
+    // result arrays
+    var cvalues = avalues && bvalues ? [] : undefined;
+    var cindex = [];
+    var cptr = [];
+    // matrix
+    var c = new SparseMatrix({
+      values: cvalues,
+      index: cindex,
+      ptr: cptr,
+      size: [rows, columns],
+      datatype: dt
+    });
+
+    // workspaces
+    var xa = cvalues ? [] : undefined;
+    var xb = cvalues ? [] : undefined;
+    // marks indicating we have a value in x for a given column
+    var wa = [];
+    var wb = [];
+
+    // vars
+    var i, j, k, k1;
+    
+    // loop columns
+    for (j = 0; j < columns; j++) {
+      // update cptr
+      cptr[j] = cindex.length;
+      // columns mark
+      var mark = j + 1;
+      // loop values A(:,j)
+      for (k = aptr[j], k1 = aptr[j + 1]; k < k1; k++) {
+        // row
+        i = aindex[k];
+        // push index
+        cindex.push(i);
+        // update workspace
+        wa[i] = mark;
+        // check we need to process values
+        if (xa)
+          xa[i] = avalues[k];
+      }
+      // loop values B(:,j)
+      for (k = bptr[j], k1 = bptr[j + 1]; k < k1; k++) {
+        // row
+        i = bindex[k];
+        // check row existed in A
+        if (wa[i] !== mark) {
+          // push index
+          cindex.push(i);
+        }
+        // update workspace
+        wb[i] = mark;
+        // check we need to process values
+        if (xb)
+          xb[i] = bvalues[k];
+      }
+      // check we need to process values (non pattern matrix)
+      if (cvalues) {
+        // initialize first index in j
+        k = cptr[j];
+        // loop index in j
+        while (k < cindex.length) {
+          // row
+          i = cindex[k];
+          // marks
+          var wai = wa[i];
+          var wbi = wb[i];
+          // check Aij or Bij are nonzero
+          if (wai === mark || wbi === mark) {
+            // matrix values @ i,j
+            var va = wai === mark ? xa[i] : zero;
+            var vb = wbi === mark ? xb[i] : zero;
+            // Cij
+            var vc = cf(va, vb);
+            // check for zero
+            if (!eq(vc, zero)) {
+              // push value
+              cvalues.push(vc);
+              // increment pointer
+              k++;
+            }
+            else {
+              // remove value @ i, do not increment pointer
+              cindex.splice(k, 1);
+            }
+          }
+        }
+      }
+    }
+    // update cptr
+    cptr[columns] = cindex.length;
+
+    // return sparse matrix
+    return c;
+  };
+
+  return algorithm05;
+}
+
+exports.name = 'algorithm05';
+exports.factory = factory;
+
+
+/***/ }),
+/* 65 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var array = __webpack_require__(2);
+var isInteger = __webpack_require__(3).isInteger;
+
+function factory (type, config, load, typed) {
+  
+  var matrix = load(__webpack_require__(0));
+  
+  /**
+   * Create a 2-dimensional identity matrix with size m x n or n x n.
+   * The matrix has ones on the diagonal and zeros elsewhere.
+   *
+   * Syntax:
+   *
+   *    math.eye(n)
+   *    math.eye(n, format)
+   *    math.eye(m, n)
+   *    math.eye(m, n, format)
+   *    math.eye([m, n])
+   *    math.eye([m, n], format)
+   *
+   * Examples:
+   *
+   *    math.eye(3);                    // returns [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+   *    math.eye(3, 2);                 // returns [[1, 0], [0, 1], [0, 0]]
+   *
+   *    var A = [[1, 2, 3], [4, 5, 6]];
+   *    math.eye(math.size(A));         // returns [[1, 0, 0], [0, 1, 0]]
+   *
+   * See also:
+   *
+   *    diag, ones, zeros, size, range
+   *
+   * @param {...number | Matrix | Array} size   The size for the matrix
+   * @param {string} [format]                   The Matrix storage format
+   *
+   * @return {Matrix | Array | number} A matrix with ones on the diagonal.
+   */
+  var eye = typed('eye', {
+    '': function () {
+      return (config.matrix === 'Matrix') ? matrix([]) : [];
+    },
+
+    'string': function (format) {
+      return matrix(format);
+    },
+
+    'number | BigNumber': function (rows) {
+      return _eye(rows, rows, config.matrix === 'Matrix' ? 'default' : undefined);
+    },
+    
+    'number | BigNumber, string': function (rows, format) {
+      return _eye(rows, rows, format);
+    },
+
+    'number | BigNumber, number | BigNumber': function (rows, cols) {
+      return _eye(rows, cols, config.matrix === 'Matrix' ? 'default' : undefined);
+    },
+    
+    'number | BigNumber, number | BigNumber, string': function (rows, cols, format) {
+      return _eye(rows, cols, format);
+    },
+
+    'Array':  function (size) {
+      return _eyeVector(size);
+    },
+    
+    'Array, string':  function (size, format) {
+      return _eyeVector(size, format);
+    },
+
+    'Matrix': function (size) {
+      return _eyeVector(size.valueOf(), size.storage());
+    },
+    
+    'Matrix, string': function (size, format) {
+      return _eyeVector(size.valueOf(), format);
+    }
+  });
+
+  eye.toTex = undefined; // use default template
+
+  return eye;
+
+  function _eyeVector (size, format) {
+    switch (size.length) {
+      case 0: return format ? matrix(format) : [];
+      case 1: return _eye(size[0], size[0], format);
+      case 2: return _eye(size[0], size[1], format);
+      default: throw new Error('Vector containing two values expected');
+    }
+  }
+
+  /**
+   * Create an identity matrix
+   * @param {number | BigNumber} rows
+   * @param {number | BigNumber} cols
+   * @param {string} [format]
+   * @returns {Matrix}
+   * @private
+   */
+  function _eye (rows, cols, format) {
+    // BigNumber constructor with the right precision
+    var Big = (type.isBigNumber(rows) || type.isBigNumber(cols))
+            ? type.BigNumber
+            : null;
+
+    if (type.isBigNumber(rows)) rows = rows.toNumber();
+    if (type.isBigNumber(cols)) cols = cols.toNumber();
+
+    if (!isInteger(rows) || rows < 1) {
+      throw new Error('Parameters in function eye must be positive integers');
+    }
+    if (!isInteger(cols) || cols < 1) {
+      throw new Error('Parameters in function eye must be positive integers');
+    }
+    
+    var one = Big ? new type.BigNumber(1) : 1;
+    var defaultValue = Big ? new Big(0) : 0;
+    var size = [rows, cols];
+    
+    // check we need to return a matrix
+    if (format) {
+      // get matrix storage constructor
+      var F = type.Matrix.storage(format);
+      // create diagonal matrix (use optimized implementation for storage format)
+      return F.diagonal(size, one, 0, defaultValue);
+    }
+    
+    // create and resize array
+    var res = array.resize([], size, defaultValue);
+    // fill in ones on the diagonal
+    var minimum = rows < cols ? rows : cols;
+    // fill diagonal
+    for (var d = 0; d < minimum; d++) {
+      res[d][d] = one;
+    }
+    return res;
+  }
+}
+
+exports.name = 'eye';
+exports.factory = factory;
+
+
+/***/ }),
 /* 66 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12887,7 +12887,7 @@ exports.factory = factory;
 function factory (type, config, load, typed) {
   var register = load(__webpack_require__(7)).register;
   var compile = load(__webpack_require__(7)).compile;
-  var Node = load(__webpack_require__(14));
+  var Node = load(__webpack_require__(15));
 
   /**
    * @constructor ParenthesisNode
@@ -13032,8 +13032,8 @@ exports.factory = factory;
 var clone = __webpack_require__(5).clone;
 var isInteger = __webpack_require__(3).isInteger;
 var array = __webpack_require__(2);
-var IndexError = __webpack_require__(54);
-var DimensionError = __webpack_require__(10);
+var IndexError = __webpack_require__(56);
+var DimensionError = __webpack_require__(11);
 
 function factory (type, config, load, typed) {
   var matrix = load(__webpack_require__(0));
@@ -13181,8 +13181,8 @@ exports.factory = factory;
 
 
 var arraySize = __webpack_require__(2).size;
-var isMatrix = __webpack_require__(61);
-var IndexError = __webpack_require__(54);
+var isMatrix = __webpack_require__(62);
+var IndexError = __webpack_require__(56);
 
 /**
  * Reduce a given matrix or array to a new matrix or
@@ -13271,7 +13271,7 @@ function _switch(mat){
 "use strict";
 
 
-var isCollection = __webpack_require__(48);
+var isCollection = __webpack_require__(50);
 
 /**
  * Test whether an array contains collections
@@ -13481,12 +13481,12 @@ exports.factory = factory;
 "use strict";
 
 
-var scatter = __webpack_require__(468);
-var DimensionError = __webpack_require__(10);
+var scatter = __webpack_require__(470);
+var DimensionError = __webpack_require__(11);
 
 function factory (type, config, load, typed) {
 
-  var equalScalar = load(__webpack_require__(11));
+  var equalScalar = load(__webpack_require__(10));
 
   var SparseMatrix = type.SparseMatrix;
 
@@ -13654,7 +13654,7 @@ exports.factory = factory;
 var deepMap = __webpack_require__(1);
 
 function factory (type, config, load, typed) {
-  var gamma = load(__webpack_require__(149));
+  var gamma = load(__webpack_require__(152));
   var latex = __webpack_require__(4);
 
   /**
@@ -13827,7 +13827,7 @@ exports.normalizedVectorToEntity = normalizedVectorToEntity;
 exports.normalizedVectorToDistance = normalizedVectorToDistance;
 exports.distanceVectorToWorldSpace = distanceVectorToWorldSpace;
 
-var _config = __webpack_require__(29);
+var _config = __webpack_require__(30);
 
 var Config = _interopRequireWildcard(_config);
 
@@ -13880,15 +13880,15 @@ function distanceVectorToWorldSpace(vector) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__gl_matrix_common__ = __webpack_require__(30);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__gl_matrix_mat2__ = __webpack_require__(171);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__gl_matrix_mat2d__ = __webpack_require__(172);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__gl_matrix_mat3__ = __webpack_require__(95);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__gl_matrix_mat4__ = __webpack_require__(173);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__gl_matrix_quat__ = __webpack_require__(174);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__gl_matrix_vec2__ = __webpack_require__(175);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__gl_matrix_vec3__ = __webpack_require__(96);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__gl_matrix_vec4__ = __webpack_require__(97);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__gl_matrix_common__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__gl_matrix_mat2__ = __webpack_require__(174);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__gl_matrix_mat2d__ = __webpack_require__(175);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__gl_matrix_mat3__ = __webpack_require__(96);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__gl_matrix_mat4__ = __webpack_require__(176);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__gl_matrix_quat__ = __webpack_require__(177);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__gl_matrix_vec2__ = __webpack_require__(178);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__gl_matrix_vec3__ = __webpack_require__(97);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__gl_matrix_vec4__ = __webpack_require__(98);
 /* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "glMatrix", function() { return __WEBPACK_IMPORTED_MODULE_0__gl_matrix_common__; });
 /* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "mat2", function() { return __WEBPACK_IMPORTED_MODULE_1__gl_matrix_mat2__; });
 /* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "mat2d", function() { return __WEBPACK_IMPORTED_MODULE_2__gl_matrix_mat2d__; });
@@ -14232,11 +14232,11 @@ exports.factory = factory;
 "use strict";
 
 
-var DimensionError = __webpack_require__(10);
+var DimensionError = __webpack_require__(11);
 
 function factory (type, config, load, typed) {
 
-  var equalScalar = load(__webpack_require__(11));
+  var equalScalar = load(__webpack_require__(10));
 
   var SparseMatrix = type.SparseMatrix;
 
@@ -14572,7 +14572,7 @@ exports.factory = factory;
 "use strict";
 
 
-var types = __webpack_require__(62);
+var types = __webpack_require__(63);
 
 function factory (type, config, load, typed) {
   /**
@@ -14676,11 +14676,11 @@ var escape = __webpack_require__(9).escape;
 function factory (type, config, load, typed) {
   var register = load(__webpack_require__(7)).register;
   var compile = load(__webpack_require__(7)).compile;
-  var Node = load(__webpack_require__(14));
+  var Node = load(__webpack_require__(15));
   var RangeNode = load(__webpack_require__(84));
-  var SymbolNode = load(__webpack_require__(42));
+  var SymbolNode = load(__webpack_require__(38));
 
-  var Range = load(__webpack_require__(105));
+  var Range = load(__webpack_require__(106));
 
   var isArray = Array.isArray;
 
@@ -14936,12 +14936,12 @@ exports.factory = factory;
 "use strict";
 
 
-var operators = __webpack_require__(55);
+var operators = __webpack_require__(57);
 
 function factory (type, config, load, typed) {
   var register = load(__webpack_require__(7)).register;
   var compile = load(__webpack_require__(7)).compile;
-  var Node = load(__webpack_require__(14));
+  var Node = load(__webpack_require__(15));
 
   /**
    * @constructor RangeNode
@@ -15206,7 +15206,7 @@ var join = __webpack_require__(2).join;
 function factory (type, config, load, typed) {
   var register = load(__webpack_require__(7)).register;
   var compile = load(__webpack_require__(7)).compile;
-  var Node = load(__webpack_require__(14));
+  var Node = load(__webpack_require__(15));
 
   /**
    * @constructor ArrayNode
@@ -15408,6 +15408,684 @@ exports.factory = factory;
 "use strict";
 
 
+
+function factory (type, config, load, typed, math) {
+  var parse = load(__webpack_require__(43));
+  var ConstantNode = load(__webpack_require__(49));
+  var FunctionNode = load(__webpack_require__(59));
+  var OperatorNode = load(__webpack_require__(58));
+  var ParenthesisNode = load(__webpack_require__(66));
+  var SymbolNode = load(__webpack_require__(38));
+  var Node = load(__webpack_require__(15));
+  var simplifyConstant = load(__webpack_require__(132));
+  var simplifyCore = load(__webpack_require__(134));
+  var resolve = load(__webpack_require__(441));
+
+  var util = load(__webpack_require__(133));
+  var isCommutative = util.isCommutative;
+  var isAssociative = util.isAssociative;
+  var flatten = util.flatten;
+  var unflattenr = util.unflattenr;
+  var unflattenl = util.unflattenl;
+  var createMakeNodeFunction = util.createMakeNodeFunction;
+
+  /**
+   * Simplify an expression tree.
+   *
+   * A list of rules are applied to an expression, repeating over the list until
+   * no further changes are made.
+   * It's possible to pass a custom set of rules to the function as second
+   * argument. A rule can be specified as an object, string, or function:
+   *
+   *     var rules = [
+   *       { l: 'n1*n3 + n2*n3', r: '(n1+n2)*n3' },
+   *       'n1*n3 + n2*n3 -> (n1+n2)*n3',
+   *       function (node) {
+   *         // ... return a new node or return the node unchanged
+   *         return node
+   *       }
+   *     ]
+   *
+   * String and object rules consist of a left and right pattern. The left is
+   * used to match against the expression and the right determines what matches
+   * are replaced with. The main difference between a pattern and a normal
+   * expression is that variables starting with the following characters are
+   * interpreted as wildcards:
+   *
+   * - 'n' - matches any Node
+   * - 'c' - matches any ConstantNode
+   * - 'v' - matches any Node that is not a ConstantNode
+   *
+   * The default list of rules is exposed on the function as `simplify.rules`
+   * and can be used as a basis to built a set of custom rules.
+   *
+   * For more details on the theory, see:
+   *
+   * - [Strategies for simplifying math expressions (Stackoverflow)](http://stackoverflow.com/questions/7540227/strategies-for-simplifying-math-expressions)
+   * - [Symbolic computation - Simplification (Wikipedia)](https://en.wikipedia.org/wiki/Symbolic_computation#Simplification)
+   *
+   * Syntax:
+   *
+   *     simplify(expr)
+   *     simplify(expr, rules)
+   *     simplify(expr, rules, scope)
+   *     simplify(expr, scope)
+   *
+   * Examples:
+   *
+   *     math.simplify('2 * 1 * x ^ (2 - 1)');      // Node {2 * x}
+   *     math.simplify('2 * 3 * x', {x: 4});        // Node {24}
+   *     var f = math.parse('2 * 1 * x ^ (2 - 1)');
+   *     math.simplify(f);                          // Node {2 * x}
+   *
+   * See also:
+   *
+   *     derivative, parse, eval
+   *
+   * @param {Node | string} expr
+   *            The expression to be simplified
+   * @param {Array<{l:string, r: string} | string | function>} [rules]
+   *            Optional list with custom rules
+   * @return {Node} Returns the simplified form of `expr`
+   */
+  var simplify = typed('simplify', {
+    'string': function (expr) {
+      return simplify(parse(expr), simplify.rules, {});
+    },
+
+    'string, Object': function (expr, scope) {
+      return simplify(parse(expr), simplify.rules, scope);
+    },
+
+    'string, Array': function (expr, rules) {
+      return simplify(parse(expr), rules, {});
+    },
+
+    'string, Array, Object': function (expr, rules, scope) {
+      return simplify(parse(expr), rules, scope);
+    },
+
+    'Node, Object': function (expr, scope) {
+      return simplify(expr, simplify.rules, scope);
+    },
+
+    'Node': function (expr) {
+      return simplify(expr, simplify.rules, {});
+    },
+
+    'Node, Array': function (expr, rules) {
+      return simplify(expr, rules, {});
+    },
+
+    'Node, Array, Object': function (expr, rules, scope) {
+      rules = _buildRules(rules);
+
+      var res = resolve(expr, scope);
+      var res = removeParens(res);
+      var visited = {};
+
+      var str = res.toString({parenthesis: 'all'});
+      while(!visited[str]) {
+        visited[str] = true;
+        _lastsym = 0; // counter for placeholder symbols
+        for (var i=0; i<rules.length; i++) {
+          if (typeof rules[i] === 'function') {
+            res = rules[i](res);
+          }
+          else {
+            flatten(res);
+            res = applyRule(res, rules[i]);
+          }
+          unflattenl(res); // using left-heavy binary tree here since custom rule functions may expect it
+        }
+        str = res.toString({parenthesis: 'all'});
+      }
+
+      return res;
+    }
+  });
+  simplify.simplifyCore = simplifyCore;
+  simplify.resolve = resolve;
+
+  function removeParens(node) {
+    return node.transform(function(node, path, parent) {
+      return type.isParenthesisNode(node)
+          ? node.content
+          : node;
+    });
+  }
+
+  // All constants that are allowed in rules
+  var SUPPORTED_CONSTANTS = {
+    true: true,
+    false: true,
+    e: true,
+    i: true,
+    Infinity: true,
+    LN2: true,
+    LN10: true,
+    LOG2E: true,
+    LOG10E: true,
+    NaN: true,
+    phi: true,
+    pi: true,
+    SQRT1_2: true,
+    SQRT2: true,
+    tau: true,
+    // null: false,
+    // uninitialized: false,
+    // version: false,
+  };
+
+  // Array of strings, used to build the ruleSet.
+  // Each l (left side) and r (right side) are parsed by
+  // the expression parser into a node tree.
+  // Left hand sides are matched to subtrees within the
+  // expression to be parsed and replaced with the right
+  // hand side.
+  // TODO: Add support for constraints on constants (either in the form of a '=' expression or a callback [callback allows things like comparing symbols alphabetically])
+  // To evaluate lhs constants for rhs constants, use: { l: 'c1+c2', r: 'c3', evaluate: 'c3 = c1 + c2' }. Multiple assignments are separated by ';' in block format.
+  // It is possible to get into an infinite loop with conflicting rules
+  simplify.rules = [
+    simplifyCore,
+    //{ l: 'n+0', r: 'n' },     // simplifyCore
+    //{ l: 'n^0', r: '1' },     // simplifyCore
+    //{ l: '0*n', r: '0' },     // simplifyCore
+    //{ l: 'n/n', r: '1'},      // simplifyCore
+    //{ l: 'n^1', r: 'n' },     // simplifyCore
+    //{ l: '+n1', r:'n1' },     // simplifyCore
+    //{ l: 'n--n1', r:'n+n1' }, // simplifyCore
+    { l: 'log(e)', r:'1' },
+
+    // temporary rules
+    { l: 'n-n1', r:'n+-n1' }, // temporarily replace 'subtract' so we can further flatten the 'add' operator
+    { l: '-(c*v)', r: '(-c) * v' }, // make non-constant terms positive
+    { l: '-v', r: '(-1) * v' },
+    { l: 'n/n1^n2', r:'n*n1^-n2' }, // temporarily replace 'divide' so we can further flatten the 'multiply' operator
+    { l: 'n/n1', r:'n*n1^-1' },
+
+    // expand nested exponentiation
+    { l: '(n ^ n1) ^ n2', r: 'n ^ (n1 * n2)'},
+
+    // collect like factors
+    { l: 'n*n', r: 'n^2' },
+    { l: 'n * n^n1', r: 'n^(n1+1)' },
+    { l: 'n^n1 * n^n2', r: 'n^(n1+n2)' },
+
+    // collect like terms
+    { l: 'n+n', r: '2*n' },
+    { l: 'n+-n', r: '0' },
+    { l: 'n1*n2 + n2', r: '(n1+1)*n2' },
+    { l: 'n1*n3 + n2*n3', r: '(n1+n2)*n3' },
+
+    // remove parenthesis in the case of negating a quantitiy
+    { l: 'n1 + -1 * (n2 + n3)', r:'n1 + -1 * n2 + -1 * n3' },
+
+    simplifyConstant,
+
+    { l: '(-n)*n1', r: '-(n*n1)' }, // make factors positive (and undo 'make non-constant terms positive')
+
+    // ordering of constants
+    { l: 'c+v', r: 'v+c', context: { 'add': { commutative:false } } },
+    { l: 'v*c', r: 'c*v', context: { 'multiply': { commutative:false } } },
+
+    // undo temporary rules
+    //{ l: '(-1) * n', r: '-n' }, // #811 added test which proved this is redundant
+    { l: 'n+-n1', r:'n-n1' },  // undo replace 'subtract'
+    { l: 'n*(n1^-1)', r:'n/n1' },  // undo replace 'divide'
+    { l: 'n*n1^-n2', r:'n/n1^n2' },
+    { l: 'n1^-1', r:'1/n1' },
+
+    { l: 'n*(n1/n2)', r:'(n*n1)/n2' }, // '*' before '/'
+    { l: 'n-(n1+n2)', r:'n-n1-n2' }, // '-' before '+'
+    // { l: '(n1/n2)/n3', r: 'n1/(n2*n3)' },
+    // { l: '(n*n1)/(n*n2)', r: 'n1/n2' },
+
+    { l: '1*n', r: 'n' } // this pattern can be produced by simplifyConstant
+
+  ];
+
+  /**
+   * Parse the string array of rules into nodes
+   *
+   * Example syntax for rules:
+   *
+   * Position constants to the left in a product:
+   * { l: 'n1 * c1', r: 'c1 * n1' }
+   * n1 is any Node, and c1 is a ConstantNode.
+   *
+   * Apply difference of squares formula:
+   * { l: '(n1 - n2) * (n1 + n2)', r: 'n1^2 - n2^2' }
+   * n1, n2 mean any Node.
+   *
+   * Short hand notation:
+   * 'n1 * c1 -> c1 * n1'
+   */
+  function _buildRules(rules) {
+    // Array of rules to be used to simplify expressions
+    var ruleSet = [];
+    for(var i=0; i<rules.length; i++) {
+      var rule = rules[i];
+      var newRule;
+      var ruleType = typeof rule;
+      switch (ruleType) {
+        case 'string':
+          var lr = rule.split('->');
+          if (lr.length !== 2) {
+            throw SyntaxError('Could not parse rule: ' + rule);
+          }
+          rule = {l: lr[0], r: lr[1]};
+          /* falls through */
+        case 'object':
+          newRule = {
+            l: removeParens(parse(rule.l)),
+            r: removeParens(parse(rule.r)),
+          }
+          if(rule.context) {
+            newRule.evaluate = rule.context;
+          }
+          if(rule.evaluate) {
+            newRule.evaluate = parse(rule.evaluate);
+          }
+
+          if (isAssociative(newRule.l)) {
+            var makeNode = createMakeNodeFunction(newRule.l);
+            var expandsym = _getExpandPlaceholderSymbol();
+            newRule.expanded = {};
+            newRule.expanded.l = makeNode([newRule.l.clone(), expandsym]);
+            // Push the expandsym into the deepest possible branch.
+            // This helps to match the newRule against nodes returned from getSplits() later on.
+            flatten(newRule.expanded.l);
+            unflattenr(newRule.expanded.l);
+            newRule.expanded.r = makeNode([newRule.r, expandsym]);
+          }
+          break;
+        case 'function':
+          newRule = rule;
+          break;
+        default:
+          throw TypeError('Unsupported type of rule: ' + ruleType);
+      }
+     // console.log('Adding rule: ' + rules[i]);
+     // console.log(newRule);
+      ruleSet.push(newRule);
+    }
+    return ruleSet;
+  }
+
+  var _lastsym = 0;
+  function _getExpandPlaceholderSymbol() {
+    return new SymbolNode('_p' + _lastsym++);
+  }
+
+  /**
+   * Returns a simplfied form of node, or the original node if no simplification was possible.
+   *
+   * @param  {ConstantNode | SymbolNode | ParenthesisNode | FunctionNode | OperatorNode} node
+   * @return {ConstantNode | SymbolNode | ParenthesisNode | FunctionNode | OperatorNode} The simplified form of `expr`, or the original node if no simplification was possible.
+   */
+  var applyRule = typed('applyRule', {
+    'Node, Object': function (node, rule) {
+
+      //console.log('Entering applyRule(' + node.toString() + ')');
+
+      // Do not clone node unless we find a match
+      var res = node;
+
+      // First replace our child nodes with their simplified versions
+      // If a child could not be simplified, the assignments will have
+      // no effect since the node is returned unchanged
+      if (res instanceof OperatorNode || res instanceof FunctionNode) {
+        if (res.args) {
+          for(var i=0; i<res.args.length; i++) {
+            res.args[i] = applyRule(res.args[i], rule);
+          }
+        }
+      }
+      else if(res instanceof ParenthesisNode) {
+        if(res.content) {
+          res.content = applyRule(res.content, rule);
+        }
+      }
+
+      // Try to match a rule against this node
+      var repl = rule.r;
+      var matches = _ruleMatch(rule.l, res)[0];
+
+      // If the rule is associative operator, we can try matching it while allowing additional terms.
+      // This allows us to match rules like 'n+n' to the expression '(1+x)+x' or even 'x+1+x' if the operator is commutative.
+      if (!matches && rule.expanded) {
+        repl = rule.expanded.r;
+        matches = _ruleMatch(rule.expanded.l, res)[0];
+      }
+
+      if (matches) {
+        // var before = res.toString({parenthesis: 'all'});
+
+        // Create a new node by cloning the rhs of the matched rule
+        res = repl.clone();
+
+        // Replace placeholders with their respective nodes without traversing deeper into the replaced nodes
+        var _transform = function(node) {
+          if(node.isSymbolNode && matches.placeholders.hasOwnProperty(node.name)) {
+            return matches.placeholders[node.name].clone();
+          }
+          else {
+            return node.map(_transform);
+          }
+        }
+
+        res = _transform(res);
+
+        // var after = res.toString({parenthesis: 'all'});
+        // console.log('Simplified ' + before + ' to ' + after);
+      }
+
+      return res;
+    }
+  });
+
+  /**
+   * Get (binary) combinations of a flattened binary node
+   * e.g. +(node1, node2, node3) -> [
+   *        +(node1,  +(node2, node3)),
+   *        +(node2,  +(node1, node3)),
+   *        +(node3,  +(node1, node2))]
+   *
+   */
+  function getSplits(node, context) {
+    var res = [];
+    var right, rightArgs;
+    var makeNode = createMakeNodeFunction(node);
+    if (isCommutative(node, context)) {
+      for (var i=0; i<node.args.length; i++) {
+        rightArgs = node.args.slice(0);
+        rightArgs.splice(i, 1);
+        right = (rightArgs.length === 1) ? rightArgs[0] : makeNode(rightArgs);
+        res.push(makeNode([node.args[i], right]));
+      }
+    }
+    else {
+      rightArgs = node.args.slice(1);
+      right = (rightArgs.length === 1) ? rightArgs[0] : makeNode(rightArgs);
+      res.push(makeNode([node.args[0], right]));
+    }
+    return res;
+  }
+
+  /**
+   * Returns the set union of two match-placeholders or null if there is a conflict.
+   */
+  function mergeMatch(match1, match2) {
+    var res = {placeholders:{}};
+
+    // Some matches may not have placeholders; this is OK
+    if (!match1.placeholders && !match2.placeholders) {
+      return res;
+    }
+    else if (!match1.placeholders) {
+      return match2;
+    }
+    else if (!match2.placeholders) {
+      return match1;
+    }
+
+    // Placeholders with the same key must match exactly
+    for (var key in match1.placeholders) {
+      res.placeholders[key] = match1.placeholders[key];
+      if (match2.placeholders.hasOwnProperty(key)) {
+        if (!_exactMatch(match1.placeholders[key], match2.placeholders[key] )) {
+          return null;
+        }
+      }
+    }
+
+    for (var key in match2.placeholders) {
+      res.placeholders[key] = match2.placeholders[key];
+    }
+
+    return res;
+  }
+
+  /**
+   * Combine two lists of matches by applying mergeMatch to the cartesian product of two lists of matches.
+   * Each list represents matches found in one child of a node.
+   */
+  function combineChildMatches(list1, list2) {
+    var res = [];
+
+    if (list1.length === 0 || list2.length === 0) {
+      return res;
+    }
+
+    var merged;
+    for (var i1 = 0; i1 < list1.length; i1++) {
+      for (var i2 = 0; i2 < list2.length; i2++) {
+        merged = mergeMatch(list1[i1], list2[i2]);
+        if (merged) {
+          res.push(merged);
+        }
+      }
+    }
+    return res;
+  }
+
+  /**
+   * Combine multiple lists of matches by applying mergeMatch to the cartesian product of two lists of matches.
+   * Each list represents matches found in one child of a node.
+   * Returns a list of unique matches.
+   */
+  function mergeChildMatches(childMatches) {
+    if (childMatches.length === 0) {
+      return childMatches;
+    }
+
+    var sets = childMatches.reduce(combineChildMatches);
+    var uniqueSets = [];
+    var unique = {};
+    for(var i = 0; i < sets.length; i++) {
+      var s = JSON.stringify(sets[i]);
+      if (!unique[s]) {
+        unique[s] = true;
+        uniqueSets.push(sets[i]);
+      }
+    }
+    return uniqueSets;
+  }
+
+  /**
+   * Determines whether node matches rule.
+   *
+   * @param {ConstantNode | SymbolNode | ParenthesisNode | FunctionNode | OperatorNode} rule
+   * @param {ConstantNode | SymbolNode | ParenthesisNode | FunctionNode | OperatorNode} node
+   * @return {Object} Information about the match, if it exists.
+   */
+  function _ruleMatch(rule, node, isSplit) {
+//    console.log('Entering _ruleMatch(' + JSON.stringify(rule) + ', ' + JSON.stringify(node) + ')');
+//    console.log('rule = ' + rule);
+//    console.log('node = ' + node);
+
+//    console.log('Entering _ruleMatch(' + rule.toString() + ', ' + node.toString() + ')');
+    var res = [{placeholders:{}}];
+
+    if (rule instanceof OperatorNode && node instanceof OperatorNode
+     || rule instanceof FunctionNode && node instanceof FunctionNode) {
+
+      // If the rule is an OperatorNode or a FunctionNode, then node must match exactly
+      if (rule instanceof OperatorNode) {
+        if (rule.op !== node.op || rule.fn !== node.fn) {
+          return [];
+        }
+      }
+      else if (rule instanceof FunctionNode) {
+        if (rule.name !== node.name) {
+          return [];
+        }
+      }
+
+      // rule and node match. Search the children of rule and node.
+      if (node.args.length === 1 && rule.args.length === 1 || !isAssociative(node) || isSplit) {
+        // Expect non-associative operators to match exactly
+        var childMatches = [];
+        for (var i = 0; i < rule.args.length; i++) {
+          var childMatch = _ruleMatch(rule.args[i], node.args[i]);
+          if (childMatch.length === 0) {
+            // Child did not match, so stop searching immediately
+            return [];
+          }
+          // The child matched, so add the information returned from the child to our result
+          childMatches.push(childMatch);
+        }
+        res = mergeChildMatches(childMatches);
+      }
+      else if (node.args.length >= 2 && rule.args.length === 2) { // node is flattened, rule is not
+        // Associative operators/functions can be split in different ways so we check if the rule matches each
+        // them and return their union.
+        var splits = getSplits(node, rule.context);
+        var splitMatches = [];
+        for(var i = 0; i < splits.length; i++) {
+          var matchSet = _ruleMatch(rule, splits[i], true); // recursing at the same tree depth here
+          splitMatches = splitMatches.concat(matchSet);
+        }
+        return splitMatches;
+      }
+      else if (rule.args.length > 2) {
+        throw Error('Unexpected non-binary associative function: ' + rule.toString());
+      }
+      else {
+        // Incorrect number of arguments in rule and node, so no match
+        return [];
+      }
+    }
+    else if (rule instanceof SymbolNode) {
+      // If the rule is a SymbolNode, then it carries a special meaning
+      // according to the first character of the symbol node name.
+      // c.* matches a ConstantNode
+      // n.* matches any node
+      if (rule.name.length === 0) {
+        throw new Error('Symbol in rule has 0 length...!?');
+      }
+     if (math.hasOwnProperty(rule.name)) {
+        if (!SUPPORTED_CONSTANTS[rule.name]) {
+          throw new Error('Built in constant: ' + rule.name + ' is not supported by simplify.');
+        }
+
+        // built-in constant must match exactly
+        if(rule.name !== node.name) {
+          return [];
+        }
+      }
+      else if (rule.name[0] === 'n' || rule.name.substring(0,2) === '_p') {
+        // rule matches _anything_, so assign this node to the rule.name placeholder
+        // Assign node to the rule.name placeholder.
+        // Our parent will check for matches among placeholders.
+        res[0].placeholders[rule.name] = node;
+      }
+      else if (rule.name[0] === 'v') {
+        // rule matches any variable thing (not a ConstantNode)
+        if(!type.isConstantNode(node)) {
+          res[0].placeholders[rule.name] = node;
+        }
+        else {
+          // Mis-match: rule was expecting something other than a ConstantNode
+          return [];
+        }
+      }
+      else if (rule.name[0] === 'c') {
+        // rule matches any ConstantNode
+        if(node instanceof ConstantNode) {
+          res[0].placeholders[rule.name] = node;
+        }
+        else {
+          // Mis-match: rule was expecting a ConstantNode
+          return [];
+        }
+      }
+      else {
+        throw new Error('Invalid symbol in rule: ' + rule.name);
+      }
+    }
+    else if (rule instanceof ConstantNode) {
+      // Literal constant must match exactly
+      if(rule.value !== node.value) {
+        return [];
+      }
+    }
+    else {
+      // Some other node was encountered which we aren't prepared for, so no match
+      return [];
+    }
+
+    // It's a match!
+
+    // console.log('_ruleMatch(' + rule.toString() + ', ' + node.toString() + ') found a match');
+    return res;
+  }
+
+
+  /**
+   * Determines whether p and q (and all their children nodes) are identical.
+   *
+   * @param {ConstantNode | SymbolNode | ParenthesisNode | FunctionNode | OperatorNode} p
+   * @param {ConstantNode | SymbolNode | ParenthesisNode | FunctionNode | OperatorNode} q
+   * @return {Object} Information about the match, if it exists.
+   */
+  function _exactMatch(p, q) {
+    if(p instanceof ConstantNode && q instanceof ConstantNode) {
+      if(p.value !== q.value) {
+        return false;
+      }
+    }
+    else if(p instanceof SymbolNode && q instanceof SymbolNode) {
+      if(p.name !== q.name) {
+        return false;
+      }
+    }
+    else if(p instanceof OperatorNode && q instanceof OperatorNode
+         || p instanceof FunctionNode && q instanceof FunctionNode) {
+      if (p instanceof OperatorNode) {
+        if (p.op !== q.op || p.fn !== q.fn) {
+          return false;
+        }
+      }
+      else if (p instanceof FunctionNode) {
+        if (p.name !== q.name) {
+          return false;
+        }
+      }
+
+      if(p.args.length !== q.args.length) {
+        return false;
+      }
+
+      for(var i=0; i<p.args.length; i++) {
+        if(!_exactMatch(p.args[i], q.args[i])) {
+          return false;
+        }
+      }
+    }
+    else {
+      return false;
+    }
+
+    return true;
+  }
+
+  return simplify;
+}
+
+exports.math = true;
+exports.name = 'simplify';
+exports.factory = factory;
+
+
+/***/ }),
+/* 88 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 var deepMap = __webpack_require__(1);
 var number = __webpack_require__(3);
 
@@ -15479,7 +16157,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 88 */
+/* 89 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15508,7 +16186,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 89 */
+/* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -15676,10 +16354,10 @@ function factory (type) {
 exports.factory = factory;
 
 /***/ }),
-/* 90 */
+/* 91 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var bitNot = __webpack_require__(91);
+var bitNot = __webpack_require__(92);
 
 /**
  * Applies bitwise function to numbers
@@ -15806,7 +16484,7 @@ function decCoefficientToBinaryString (x) {
 
 
 /***/ }),
-/* 91 */
+/* 92 */
 /***/ (function(module, exports) {
 
 /**
@@ -15833,17 +16511,17 @@ module.exports = function bitNot (x) {
 
 
 /***/ }),
-/* 92 */
+/* 93 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var DimensionError = __webpack_require__(10);
+var DimensionError = __webpack_require__(11);
 
 function factory (type, config, load, typed) {
 
-  var equalScalar = load(__webpack_require__(11));
+  var equalScalar = load(__webpack_require__(10));
 
   var SparseMatrix = type.SparseMatrix;
 
@@ -16000,7 +16678,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 93 */
+/* 94 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16009,7 +16687,7 @@ exports.factory = factory;
 var isInteger = __webpack_require__(3).isInteger;
 
 function factory (type, config, load, typed) {
-  var asc = load(__webpack_require__(51));
+  var asc = load(__webpack_require__(54));
   function desc(a, b) {
     return -asc(a, b);
   }
@@ -16143,14 +16821,14 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 94 */
+/* 95 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var ArgumentsError = __webpack_require__(53);
-var isCollection = __webpack_require__(48);
+var ArgumentsError = __webpack_require__(46);
+var isCollection = __webpack_require__(50);
 var isNumber = __webpack_require__(3).isNumber;
 
 // TODO: rethink math.distribution
@@ -16160,7 +16838,7 @@ function factory (type, config, load, typed, math) {
   var array = __webpack_require__(2);
 
   // seeded pseudo random number generator
-  var rng = load(__webpack_require__(522));
+  var rng = load(__webpack_require__(524));
 
   /**
    * Create a distribution object with a set of random functions for given
@@ -16348,7 +17026,7 @@ function factory (type, config, load, typed, math) {
         if (length == 0) {
           return [];
         } else if (number >= length) {
-          return possibles;
+          return number > 1 ? possibles : possibles[0];
         }
 
         var result = [];
@@ -16449,7 +17127,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 95 */
+/* 96 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -16484,7 +17162,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (immutable) */ __webpack_exports__["multiplyScalarAndAdd"] = multiplyScalarAndAdd;
 /* harmony export (immutable) */ __webpack_exports__["exactEquals"] = exactEquals;
 /* harmony export (immutable) */ __webpack_exports__["equals"] = equals;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__common__ = __webpack_require__(30);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__common__ = __webpack_require__(31);
 /* Copyright (c) 2015, Brandon Jones, Colin MacKenzie IV.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -17257,7 +17935,7 @@ const sub = subtract;
 
 
 /***/ }),
-/* 96 */
+/* 97 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -17301,7 +17979,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (immutable) */ __webpack_exports__["str"] = str;
 /* harmony export (immutable) */ __webpack_exports__["exactEquals"] = exactEquals;
 /* harmony export (immutable) */ __webpack_exports__["equals"] = equals;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__common__ = __webpack_require__(30);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__common__ = __webpack_require__(31);
 /* Copyright (c) 2015, Brandon Jones, Colin MacKenzie IV.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18097,7 +18775,7 @@ const forEach = (function() {
 
 
 /***/ }),
-/* 97 */
+/* 98 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -18133,7 +18811,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (immutable) */ __webpack_exports__["str"] = str;
 /* harmony export (immutable) */ __webpack_exports__["exactEquals"] = exactEquals;
 /* harmony export (immutable) */ __webpack_exports__["equals"] = equals;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__common__ = __webpack_require__(30);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__common__ = __webpack_require__(31);
 /* Copyright (c) 2015, Brandon Jones, Colin MacKenzie IV.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18759,7 +19437,7 @@ const forEach = (function() {
 
 
 /***/ }),
-/* 98 */
+/* 99 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18826,7 +19504,7 @@ function isPowerOf2(value) {
 }
 
 /***/ }),
-/* 99 */
+/* 100 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18838,11 +19516,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _blob_brain = __webpack_require__(178);
+var _blob_brain = __webpack_require__(181);
 
 var _blob_brain2 = _interopRequireDefault(_blob_brain);
 
-var _config = __webpack_require__(29);
+var _config = __webpack_require__(30);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -18903,7 +19581,7 @@ var BlobBrains = function () {
 exports.default = BlobBrains;
 
 /***/ }),
-/* 100 */
+/* 101 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18915,23 +19593,23 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _config = __webpack_require__(29);
+var _config = __webpack_require__(30);
 
 var Config = _interopRequireWildcard(_config);
 
-var _blob_brains = __webpack_require__(99);
+var _blob_brains = __webpack_require__(100);
 
 var _blob_brains2 = _interopRequireDefault(_blob_brains);
 
-var _simulation_util = __webpack_require__(52);
+var _simulation_util = __webpack_require__(55);
 
 var SimulationUtil = _interopRequireWildcard(_simulation_util);
 
-var _network = __webpack_require__(101);
+var _network = __webpack_require__(102);
 
 var _network2 = _interopRequireDefault(_network);
 
-var _util = __webpack_require__(581);
+var _util = __webpack_require__(583);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -19065,7 +19743,7 @@ var Genetic = function () {
 exports.default = Genetic;
 
 /***/ }),
-/* 101 */
+/* 102 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19079,9 +19757,9 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _mathjs = __webpack_require__(180);
+var _mathjs = __webpack_require__(183);
 
-var _ai_util = __webpack_require__(580);
+var _ai_util = __webpack_require__(582);
 
 var AIUtil = _interopRequireWildcard(_ai_util);
 
@@ -19152,10 +19830,10 @@ var Network = function () {
 exports.default = Network;
 
 /***/ }),
-/* 102 */
+/* 103 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Emitter = __webpack_require__(185);
+var Emitter = __webpack_require__(188);
 
 /**
  * Extend given object with emitter functions `on`, `off`, `once`, `emit`
@@ -19177,10 +19855,10 @@ exports.mixin = function (obj) {
 
 
 /***/ }),
-/* 103 */
+/* 104 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Complex = __webpack_require__(200);
+var Complex = __webpack_require__(203);
 var format = __webpack_require__(3).format;
 var isNumber = __webpack_require__(3).isNumber;
 
@@ -19380,7 +20058,7 @@ exports.math = true; // request access to the math namespace
 
 
 /***/ }),
-/* 104 */
+/* 105 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19456,7 +20134,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 105 */
+/* 106 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19779,7 +20457,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 106 */
+/* 107 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19857,7 +20535,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 107 */
+/* 108 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var memoize = __webpack_require__(34).memoize;
@@ -19912,7 +20590,7 @@ function hasher (args) {
 
 
 /***/ }),
-/* 108 */
+/* 109 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19984,7 +20662,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 109 */
+/* 110 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19998,11 +20676,11 @@ var NO_INT = 'Number of decimals in function round must be an integer';
 
 function factory (type, config, load, typed) {
   var matrix = load(__webpack_require__(0));
-  var equalScalar = load(__webpack_require__(11));
-  var zeros = load(__webpack_require__(40));
+  var equalScalar = load(__webpack_require__(10));
+  var zeros = load(__webpack_require__(42));
 
-  var algorithm11 = load(__webpack_require__(17));
-  var algorithm12 = load(__webpack_require__(16));
+  var algorithm11 = load(__webpack_require__(19));
+  var algorithm12 = load(__webpack_require__(18));
   var algorithm14 = load(__webpack_require__(6));
   
   /**
@@ -20165,7 +20843,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 110 */
+/* 111 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20286,7 +20964,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 111 */
+/* 112 */
 /***/ (function(module, exports, __webpack_require__) {
 
 function factory (construction, config, load, typed) {
@@ -20294,39 +20972,39 @@ function factory (construction, config, load, typed) {
 
 
   // construction functions
-  docs.bignumber = __webpack_require__(224);
-  docs['boolean'] = __webpack_require__(225);
-  docs.complex = __webpack_require__(226);
-  docs.createUnit = __webpack_require__(227);
-  docs.fraction = __webpack_require__(228);
-  docs.index = __webpack_require__(229);
-  docs.matrix = __webpack_require__(230);
-  docs.number = __webpack_require__(231);
-  docs.sparse = __webpack_require__(232);
-  docs.splitUnit = __webpack_require__(233);
-  docs.string = __webpack_require__(234);
-  docs.unit = __webpack_require__(235);
+  docs.bignumber = __webpack_require__(227);
+  docs['boolean'] = __webpack_require__(228);
+  docs.complex = __webpack_require__(229);
+  docs.createUnit = __webpack_require__(230);
+  docs.fraction = __webpack_require__(231);
+  docs.index = __webpack_require__(232);
+  docs.matrix = __webpack_require__(233);
+  docs.number = __webpack_require__(234);
+  docs.sparse = __webpack_require__(235);
+  docs.splitUnit = __webpack_require__(236);
+  docs.string = __webpack_require__(237);
+  docs.unit = __webpack_require__(238);
 
   // constants
-  docs.e = __webpack_require__(112);
-  docs.E = __webpack_require__(112);
-  docs['false'] = __webpack_require__(236);
-  docs.i = __webpack_require__(237);
-  docs['Infinity'] = __webpack_require__(238);
-  docs.LN2 = __webpack_require__(239);
-  docs.LN10 = __webpack_require__(240);
-  docs.LOG2E = __webpack_require__(241);
-  docs.LOG10E = __webpack_require__(242);
-  docs.NaN = __webpack_require__(243);
-  docs['null'] = __webpack_require__(244);
-  docs.pi = __webpack_require__(113);
-  docs.PI = __webpack_require__(113);
-  docs.phi = __webpack_require__(245);
-  docs.SQRT1_2 = __webpack_require__(246);
-  docs.SQRT2 = __webpack_require__(247);
-  docs.tau = __webpack_require__(248);
-  docs['true'] = __webpack_require__(249);
-  docs.version = __webpack_require__(250);
+  docs.e = __webpack_require__(113);
+  docs.E = __webpack_require__(113);
+  docs['false'] = __webpack_require__(239);
+  docs.i = __webpack_require__(240);
+  docs['Infinity'] = __webpack_require__(241);
+  docs.LN2 = __webpack_require__(242);
+  docs.LN10 = __webpack_require__(243);
+  docs.LOG2E = __webpack_require__(244);
+  docs.LOG10E = __webpack_require__(245);
+  docs.NaN = __webpack_require__(246);
+  docs['null'] = __webpack_require__(247);
+  docs.pi = __webpack_require__(114);
+  docs.PI = __webpack_require__(114);
+  docs.phi = __webpack_require__(248);
+  docs.SQRT1_2 = __webpack_require__(249);
+  docs.SQRT2 = __webpack_require__(250);
+  docs.tau = __webpack_require__(251);
+  docs['true'] = __webpack_require__(252);
+  docs.version = __webpack_require__(253);
 
   // physical constants
   // TODO: more detailed docs for physical constants
@@ -20389,206 +21067,207 @@ function factory (construction, config, load, typed) {
   docs.planckTemperature = {description: 'Planck temperature', examples: ['planckTemperature']};
 
   // functions - algebra
-  docs.derivative = __webpack_require__(251);
-  docs.lsolve = __webpack_require__(252);
-  docs.lup = __webpack_require__(253);
-  docs.lusolve = __webpack_require__(254);
-  docs.simplify = __webpack_require__(255);
-  docs.slu = __webpack_require__(256);
-  docs.usolve = __webpack_require__(257);
-  docs.qr = __webpack_require__(258);
+  docs.derivative = __webpack_require__(254);
+  docs.lsolve = __webpack_require__(255);
+  docs.lup = __webpack_require__(256);
+  docs.lusolve = __webpack_require__(257);
+  docs.simplify = __webpack_require__(258);
+  docs.rationalize = __webpack_require__(259);
+  docs.slu = __webpack_require__(260);
+  docs.usolve = __webpack_require__(261);
+  docs.qr = __webpack_require__(262);
 
   // functions - arithmetic
-  docs.abs = __webpack_require__(259);
-  docs.add = __webpack_require__(260);
-  docs.cbrt = __webpack_require__(261);
-  docs.ceil = __webpack_require__(262);
-  docs.cube = __webpack_require__(263);
-  docs.divide = __webpack_require__(264);
-  docs.dotDivide = __webpack_require__(265);
-  docs.dotMultiply = __webpack_require__(266);
-  docs.dotPow = __webpack_require__(267);
-  docs.exp = __webpack_require__(268);
-  docs.fix = __webpack_require__(269);
-  docs.floor = __webpack_require__(270);
-  docs.gcd = __webpack_require__(271);
-  docs.hypot = __webpack_require__(272);
-  docs.lcm = __webpack_require__(273);
-  docs.log = __webpack_require__(274);
-  docs.log10 = __webpack_require__(275);
-  docs.mod = __webpack_require__(276);
-  docs.multiply = __webpack_require__(277);
-  docs.norm = __webpack_require__(278);
-  docs.nthRoot = __webpack_require__(279);
-  docs.pow = __webpack_require__(280);
-  docs.round = __webpack_require__(281);
-  docs.sign = __webpack_require__(282);
-  docs.sqrt = __webpack_require__(283);
-  docs.square = __webpack_require__(284);
-  docs.subtract = __webpack_require__(285);
-  docs.unaryMinus = __webpack_require__(286);
-  docs.unaryPlus = __webpack_require__(287);
-  docs.xgcd = __webpack_require__(288);
+  docs.abs = __webpack_require__(263);
+  docs.add = __webpack_require__(264);
+  docs.cbrt = __webpack_require__(265);
+  docs.ceil = __webpack_require__(266);
+  docs.cube = __webpack_require__(267);
+  docs.divide = __webpack_require__(268);
+  docs.dotDivide = __webpack_require__(269);
+  docs.dotMultiply = __webpack_require__(270);
+  docs.dotPow = __webpack_require__(271);
+  docs.exp = __webpack_require__(272);
+  docs.fix = __webpack_require__(273);
+  docs.floor = __webpack_require__(274);
+  docs.gcd = __webpack_require__(275);
+  docs.hypot = __webpack_require__(276);
+  docs.lcm = __webpack_require__(277);
+  docs.log = __webpack_require__(278);
+  docs.log10 = __webpack_require__(279);
+  docs.mod = __webpack_require__(280);
+  docs.multiply = __webpack_require__(281);
+  docs.norm = __webpack_require__(282);
+  docs.nthRoot = __webpack_require__(283);
+  docs.pow = __webpack_require__(284);
+  docs.round = __webpack_require__(285);
+  docs.sign = __webpack_require__(286);
+  docs.sqrt = __webpack_require__(287);
+  docs.square = __webpack_require__(288);
+  docs.subtract = __webpack_require__(289);
+  docs.unaryMinus = __webpack_require__(290);
+  docs.unaryPlus = __webpack_require__(291);
+  docs.xgcd = __webpack_require__(292);
 
   // functions - bitwise
-  docs.bitAnd = __webpack_require__(289);
-  docs.bitNot = __webpack_require__(290);
-  docs.bitOr = __webpack_require__(291);
-  docs.bitXor = __webpack_require__(292);
-  docs.leftShift = __webpack_require__(293);
-  docs.rightArithShift = __webpack_require__(294);
-  docs.rightLogShift = __webpack_require__(295);
+  docs.bitAnd = __webpack_require__(293);
+  docs.bitNot = __webpack_require__(294);
+  docs.bitOr = __webpack_require__(295);
+  docs.bitXor = __webpack_require__(296);
+  docs.leftShift = __webpack_require__(297);
+  docs.rightArithShift = __webpack_require__(298);
+  docs.rightLogShift = __webpack_require__(299);
 
   // functions - combinatorics
-  docs.bellNumbers = __webpack_require__(296);
-  docs.catalan = __webpack_require__(297);
-  docs.composition = __webpack_require__(298);
-  docs.stirlingS2 = __webpack_require__(299);
+  docs.bellNumbers = __webpack_require__(300);
+  docs.catalan = __webpack_require__(301);
+  docs.composition = __webpack_require__(302);
+  docs.stirlingS2 = __webpack_require__(303);
 
   // functions - core
-  docs['config'] =  __webpack_require__(300);
-  docs['import'] =  __webpack_require__(301);
-  docs['typed'] =  __webpack_require__(302);
+  docs['config'] =  __webpack_require__(304);
+  docs['import'] =  __webpack_require__(305);
+  docs['typed'] =  __webpack_require__(306);
 
   // functions - complex
-  docs.arg = __webpack_require__(303);
-  docs.conj = __webpack_require__(304);
-  docs.re = __webpack_require__(305);
-  docs.im = __webpack_require__(306);
+  docs.arg = __webpack_require__(307);
+  docs.conj = __webpack_require__(308);
+  docs.re = __webpack_require__(309);
+  docs.im = __webpack_require__(310);
 
   // functions - expression
-  docs['eval'] =  __webpack_require__(307);
-  docs.help =  __webpack_require__(308);
+  docs['eval'] =  __webpack_require__(311);
+  docs.help =  __webpack_require__(312);
 
   // functions - geometry
-  docs.distance = __webpack_require__(309);
-  docs.intersect = __webpack_require__(310);
+  docs.distance = __webpack_require__(313);
+  docs.intersect = __webpack_require__(314);
 
   // functions - logical
-  docs['and'] = __webpack_require__(311);
-  docs['not'] = __webpack_require__(312);
-  docs['or'] = __webpack_require__(313);
-  docs['xor'] = __webpack_require__(314);
+  docs['and'] = __webpack_require__(315);
+  docs['not'] = __webpack_require__(316);
+  docs['or'] = __webpack_require__(317);
+  docs['xor'] = __webpack_require__(318);
 
   // functions - matrix
-  docs['concat'] = __webpack_require__(315);
-  docs.cross = __webpack_require__(316);
-  docs.det = __webpack_require__(317);
-  docs.diag = __webpack_require__(318);
-  docs.dot = __webpack_require__(319);
-  docs.eye = __webpack_require__(320);
-  docs.filter =  __webpack_require__(321);
-  docs.flatten = __webpack_require__(322);
-  docs.forEach =  __webpack_require__(323);
-  docs.inv = __webpack_require__(324);
-  docs.kron = __webpack_require__(325);
-  docs.map =  __webpack_require__(326);
-  docs.ones = __webpack_require__(327);
-  docs.partitionSelect =  __webpack_require__(328);
-  docs.range = __webpack_require__(329);
-  docs.resize = __webpack_require__(330);
-  docs.reshape = __webpack_require__(331);
-  docs.size = __webpack_require__(332);
-  docs.sort =  __webpack_require__(333);
-  docs.squeeze = __webpack_require__(334);
-  docs.subset = __webpack_require__(335);
-  docs.trace = __webpack_require__(336);
-  docs.transpose = __webpack_require__(337);
-  docs.zeros = __webpack_require__(338);
+  docs['concat'] = __webpack_require__(319);
+  docs.cross = __webpack_require__(320);
+  docs.det = __webpack_require__(321);
+  docs.diag = __webpack_require__(322);
+  docs.dot = __webpack_require__(323);
+  docs.eye = __webpack_require__(324);
+  docs.filter =  __webpack_require__(325);
+  docs.flatten = __webpack_require__(326);
+  docs.forEach =  __webpack_require__(327);
+  docs.inv = __webpack_require__(328);
+  docs.kron = __webpack_require__(329);
+  docs.map =  __webpack_require__(330);
+  docs.ones = __webpack_require__(331);
+  docs.partitionSelect =  __webpack_require__(332);
+  docs.range = __webpack_require__(333);
+  docs.resize = __webpack_require__(334);
+  docs.reshape = __webpack_require__(335);
+  docs.size = __webpack_require__(336);
+  docs.sort =  __webpack_require__(337);
+  docs.squeeze = __webpack_require__(338);
+  docs.subset = __webpack_require__(339);
+  docs.trace = __webpack_require__(340);
+  docs.transpose = __webpack_require__(341);
+  docs.zeros = __webpack_require__(342);
 
   // functions - probability
-  docs.combinations = __webpack_require__(339);
+  docs.combinations = __webpack_require__(343);
   //docs.distribution = require('./function/probability/distribution');
-  docs.factorial = __webpack_require__(340);
-  docs.gamma = __webpack_require__(341);
-  docs.kldivergence = __webpack_require__(342);
-  docs.multinomial = __webpack_require__(343);
-  docs.permutations = __webpack_require__(344);
-  docs.pickRandom = __webpack_require__(345);
-  docs.random = __webpack_require__(346);
-  docs.randomInt = __webpack_require__(347);
+  docs.factorial = __webpack_require__(344);
+  docs.gamma = __webpack_require__(345);
+  docs.kldivergence = __webpack_require__(346);
+  docs.multinomial = __webpack_require__(347);
+  docs.permutations = __webpack_require__(348);
+  docs.pickRandom = __webpack_require__(349);
+  docs.random = __webpack_require__(350);
+  docs.randomInt = __webpack_require__(351);
 
   // functions - relational
-  docs.compare = __webpack_require__(348);
-  docs.compareNatural = __webpack_require__(349);
-  docs.deepEqual = __webpack_require__(350);
-  docs['equal'] = __webpack_require__(351);
-  docs.larger = __webpack_require__(352);
-  docs.largerEq = __webpack_require__(353);
-  docs.smaller = __webpack_require__(354);
-  docs.smallerEq = __webpack_require__(355);
-  docs.unequal = __webpack_require__(356);
+  docs.compare = __webpack_require__(352);
+  docs.compareNatural = __webpack_require__(353);
+  docs.deepEqual = __webpack_require__(354);
+  docs['equal'] = __webpack_require__(355);
+  docs.larger = __webpack_require__(356);
+  docs.largerEq = __webpack_require__(357);
+  docs.smaller = __webpack_require__(358);
+  docs.smallerEq = __webpack_require__(359);
+  docs.unequal = __webpack_require__(360);
 
   // functions - set
-  docs.setCartesian = __webpack_require__(357);
-  docs.setDifference = __webpack_require__(358);
-  docs.setDistinct = __webpack_require__(359);
-  docs.setIntersect = __webpack_require__(360);
-  docs.setIsSubset = __webpack_require__(361);
-  docs.setMultiplicity = __webpack_require__(362);
-  docs.setPowerset = __webpack_require__(363);
-  docs.setSize = __webpack_require__(364);
-  docs.setSymDifference = __webpack_require__(365);
-  docs.setUnion = __webpack_require__(366);
+  docs.setCartesian = __webpack_require__(361);
+  docs.setDifference = __webpack_require__(362);
+  docs.setDistinct = __webpack_require__(363);
+  docs.setIntersect = __webpack_require__(364);
+  docs.setIsSubset = __webpack_require__(365);
+  docs.setMultiplicity = __webpack_require__(366);
+  docs.setPowerset = __webpack_require__(367);
+  docs.setSize = __webpack_require__(368);
+  docs.setSymDifference = __webpack_require__(369);
+  docs.setUnion = __webpack_require__(370);
 
   // functions - special
-  docs.erf = __webpack_require__(367);
+  docs.erf = __webpack_require__(371);
 
   // functions - statistics
-  docs.mad = __webpack_require__(368);
-  docs.max = __webpack_require__(369);
-  docs.mean = __webpack_require__(370);
-  docs.median = __webpack_require__(371);
-  docs.min = __webpack_require__(372);
-  docs.mode = __webpack_require__(373);
-  docs.prod = __webpack_require__(374);
-  docs.quantileSeq = __webpack_require__(375);
-  docs.std = __webpack_require__(376);
-  docs.sum = __webpack_require__(377);
-  docs['var'] = __webpack_require__(378);
+  docs.mad = __webpack_require__(372);
+  docs.max = __webpack_require__(373);
+  docs.mean = __webpack_require__(374);
+  docs.median = __webpack_require__(375);
+  docs.min = __webpack_require__(376);
+  docs.mode = __webpack_require__(377);
+  docs.prod = __webpack_require__(378);
+  docs.quantileSeq = __webpack_require__(379);
+  docs.std = __webpack_require__(380);
+  docs.sum = __webpack_require__(381);
+  docs['var'] = __webpack_require__(382);
 
   // functions - trigonometry
-  docs.acos = __webpack_require__(379);
-  docs.acosh = __webpack_require__(380);
-  docs.acot = __webpack_require__(381);
-  docs.acoth = __webpack_require__(382);
-  docs.acsc = __webpack_require__(383);
-  docs.acsch = __webpack_require__(384);
-  docs.asec = __webpack_require__(385);
-  docs.asech = __webpack_require__(386);
-  docs.asin = __webpack_require__(387);
-  docs.asinh = __webpack_require__(388);
-  docs.atan = __webpack_require__(389);
-  docs.atanh = __webpack_require__(390);
-  docs.atan2 = __webpack_require__(391);
-  docs.cos = __webpack_require__(392);
-  docs.cosh = __webpack_require__(393);
-  docs.cot = __webpack_require__(394);
-  docs.coth = __webpack_require__(395);
-  docs.csc = __webpack_require__(396);
-  docs.csch = __webpack_require__(397);
-  docs.sec = __webpack_require__(398);
-  docs.sech = __webpack_require__(399);
-  docs.sin = __webpack_require__(400);
-  docs.sinh = __webpack_require__(401);
-  docs.tan = __webpack_require__(402);
-  docs.tanh = __webpack_require__(403);
+  docs.acos = __webpack_require__(383);
+  docs.acosh = __webpack_require__(384);
+  docs.acot = __webpack_require__(385);
+  docs.acoth = __webpack_require__(386);
+  docs.acsc = __webpack_require__(387);
+  docs.acsch = __webpack_require__(388);
+  docs.asec = __webpack_require__(389);
+  docs.asech = __webpack_require__(390);
+  docs.asin = __webpack_require__(391);
+  docs.asinh = __webpack_require__(392);
+  docs.atan = __webpack_require__(393);
+  docs.atanh = __webpack_require__(394);
+  docs.atan2 = __webpack_require__(395);
+  docs.cos = __webpack_require__(396);
+  docs.cosh = __webpack_require__(397);
+  docs.cot = __webpack_require__(398);
+  docs.coth = __webpack_require__(399);
+  docs.csc = __webpack_require__(400);
+  docs.csch = __webpack_require__(401);
+  docs.sec = __webpack_require__(402);
+  docs.sech = __webpack_require__(403);
+  docs.sin = __webpack_require__(404);
+  docs.sinh = __webpack_require__(405);
+  docs.tan = __webpack_require__(406);
+  docs.tanh = __webpack_require__(407);
 
   // functions - units
-  docs.to = __webpack_require__(404);
+  docs.to = __webpack_require__(408);
 
   // functions - utils
-  docs.clone = __webpack_require__(405);
-  docs.format = __webpack_require__(406);
-  docs.isNaN = __webpack_require__(407);
-  docs.isInteger = __webpack_require__(408);
-  docs.isNegative = __webpack_require__(409);
-  docs.isNumeric = __webpack_require__(410);
-  docs.isPositive = __webpack_require__(411);
-  docs.isPrime = __webpack_require__(412);
-  docs.isZero = __webpack_require__(413);
+  docs.clone = __webpack_require__(409);
+  docs.format = __webpack_require__(410);
+  docs.isNaN = __webpack_require__(411);
+  docs.isInteger = __webpack_require__(412);
+  docs.isNegative = __webpack_require__(413);
+  docs.isNumeric = __webpack_require__(414);
+  docs.isPositive = __webpack_require__(415);
+  docs.isPrime = __webpack_require__(416);
+  docs.isZero = __webpack_require__(417);
   // docs.print = require('./function/utils/print'); // TODO: add documentation for print as soon as the parser supports objects.
-  docs['typeof'] =  __webpack_require__(414);
+  docs['typeof'] =  __webpack_require__(418);
 
   return docs;
 }
@@ -20599,7 +21278,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 112 */
+/* 113 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -20620,7 +21299,7 @@ module.exports = {
 
 
 /***/ }),
-/* 113 */
+/* 114 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -20639,7 +21318,7 @@ module.exports = {
 
 
 /***/ }),
-/* 114 */
+/* 115 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20651,9 +21330,9 @@ var getSafeProperty = __webpack_require__(13).getSafeProperty;
 function factory (type, config, load, typed) {
   var register = load(__webpack_require__(7)).register;
   var compile = load(__webpack_require__(7)).compile;
-  var Node = load(__webpack_require__(14));
+  var Node = load(__webpack_require__(15));
   var IndexNode = load(__webpack_require__(83));
-  var access = load(__webpack_require__(115));
+  var access = load(__webpack_require__(116));
 
   /**
    * @constructor AccessorNode
@@ -20844,17 +21523,17 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 115 */
+/* 116 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var errorTransform = __webpack_require__(43).transform;
+var errorTransform = __webpack_require__(44).transform;
 var getSafeProperty = __webpack_require__(13).getSafeProperty;
 
 function factory (type, config, load, typed) {
-  var subset = load(__webpack_require__(22));
+  var subset = load(__webpack_require__(23));
 
   /**
    * Retrieve part of an object:
@@ -20900,7 +21579,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 116 */
+/* 117 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20914,14 +21593,14 @@ var setSafeProperty = __webpack_require__(13).setSafeProperty;
 function factory (type, config, load, typed) {
   var register = load(__webpack_require__(7)).register;
   var compile = load(__webpack_require__(7)).compile;
-  var Node = load(__webpack_require__(14));
+  var Node = load(__webpack_require__(15));
   var ArrayNode = load(__webpack_require__(85));
   var matrix = load(__webpack_require__(0));
-  var assign = load(__webpack_require__(417));
-  var access = load(__webpack_require__(115));
+  var assign = load(__webpack_require__(421));
+  var access = load(__webpack_require__(116));
 
   var keywords = __webpack_require__(82);
-  var operators = __webpack_require__(55);
+  var operators = __webpack_require__(57);
 
   /**
    * @constructor AssignmentNode
@@ -21202,7 +21881,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 117 */
+/* 118 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21214,8 +21893,8 @@ var join = __webpack_require__(2).join;
 function factory (type, config, load, typed) {
   var register = load(__webpack_require__(7)).register;
   var compile = load(__webpack_require__(7)).compile;
-  var Node = load(__webpack_require__(14));
-  var ResultSet = load(__webpack_require__(106));
+  var Node = load(__webpack_require__(15));
+  var ResultSet = load(__webpack_require__(107));
 
   /**
    * @constructor BlockNode
@@ -21380,19 +22059,19 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 118 */
+/* 119 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var latex = __webpack_require__(4);
-var operators = __webpack_require__(55);
+var operators = __webpack_require__(57);
 
 function factory (type, config, load, typed) {
   var register = load(__webpack_require__(7)).register;
   var compile = load(__webpack_require__(7)).compile;
-  var Node = load(__webpack_require__(14));
+  var Node = load(__webpack_require__(15));
 
   /**
    * A lazy evaluating conditional operator: 'condition ? trueExpr : falseExpr'
@@ -21616,7 +22295,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 119 */
+/* 120 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21628,14 +22307,14 @@ var escape = __webpack_require__(9).escape;
 var map = __webpack_require__(2).map;
 var join = __webpack_require__(2).join;
 var latex = __webpack_require__(4);
-var operators = __webpack_require__(55);
+var operators = __webpack_require__(57);
 var setSafeProperty = __webpack_require__(13).setSafeProperty;
-var getUniqueArgumentName = __webpack_require__(120);
+var getUniqueArgumentName = __webpack_require__(121);
 
 function factory (type, config, load, typed) {
   var register = load(__webpack_require__(7)).register;
   var compile = load(__webpack_require__(7)).compile;
-  var Node = load(__webpack_require__(14));
+  var Node = load(__webpack_require__(15));
 
   /**
    * @constructor FunctionAssignmentNode
@@ -21825,7 +22504,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 120 */
+/* 121 */
 /***/ (function(module, exports) {
 
 /**
@@ -21842,7 +22521,7 @@ module.exports = getUniqueArgumentName;
 
 
 /***/ }),
-/* 121 */
+/* 122 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21856,7 +22535,7 @@ var hasOwnProperty = __webpack_require__(5).hasOwnProperty;
 function factory (type, config, load, typed) {
   var register = load(__webpack_require__(7)).register;
   var compile = load(__webpack_require__(7)).compile;
-  var Node = load(__webpack_require__(14));
+  var Node = load(__webpack_require__(15));
 
   /**
    * @constructor ObjectNode
@@ -22024,14 +22703,73 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 122 */
+/* 123 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function factory (type, config, load, typed) {
+  var parse = load(__webpack_require__(43));
+
+  /**
+   * Parse an expression. Returns a node tree, which can be evaluated by
+   * invoking node.eval();
+   *
+   * Note the evaluating arbitrary expressions may involve security risks,
+   * see [http://mathjs.org/docs/expressions/security.html](http://mathjs.org/docs/expressions/security.html) for more information.
+   *
+   * Syntax:
+   *
+   *     math.parse(expr)
+   *     math.parse(expr, options)
+   *     math.parse([expr1, expr2, expr3, ...])
+   *     math.parse([expr1, expr2, expr3, ...], options)
+   *
+   * Example:
+   *
+   *     var node = math.parse('sqrt(3^2 + 4^2)');
+   *     node.compile().eval(); // 5
+   *
+   *     var scope = {a:3, b:4}
+   *     var node = math.parse('a * b'); // 12
+   *     var code = node.compile();
+   *     code.eval(scope); // 12
+   *     scope.a = 5;
+   *     code.eval(scope); // 20
+   *
+   *     var nodes = math.parse(['a = 3', 'b = 4', 'a * b']);
+   *     nodes[2].compile().eval(); // 12
+   *
+   * See also:
+   *
+   *     eval, compile
+   *
+   * @param {string | string[] | Matrix} expr          Expression to be parsed
+   * @param {{nodes: Object<string, Node>}} [options]  Available options:
+   *                                                   - `nodes` a set of custom nodes
+   * @return {Node | Node[]} node
+   * @throws {Error}
+   */
+  return typed('parse', {
+    'string | Array | Matrix': parse,
+    'string | Array | Matrix, Object': parse
+  });
+}
+
+exports.name = 'parse';
+exports.factory = factory;
+
+
+/***/ }),
+/* 124 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 function factory (type, config, load, typed, math) {
-  var Parser = load(__webpack_require__(123));
+  var Parser = load(__webpack_require__(125));
 
   /**
    * Create a parser. The function creates a new `math.expression.Parser` object.
@@ -22089,7 +22827,7 @@ exports.math = true; // requires the math namespace as 5th argument
 
 
 /***/ }),
-/* 123 */
+/* 125 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22099,7 +22837,7 @@ var extend = __webpack_require__(5).extend;
 var customs = __webpack_require__(13);
 
 function factory (type, config, load, typed, math) {
-  var _parse = load(__webpack_require__(41));
+  var _parse = load(__webpack_require__(43));
 
   /**
    * @constructor Parser
@@ -22260,13 +22998,13 @@ exports.math = true; // requires the math namespace as 5th argument
 
 
 /***/ }),
-/* 124 */
+/* 126 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var deepForEach = __webpack_require__(44);
+var deepForEach = __webpack_require__(45);
 var reduce = __webpack_require__(68);
 var containsCollections = __webpack_require__(69);
 
@@ -22366,20 +23104,20 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 125 */
+/* 127 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var size = __webpack_require__(2).size;
-var deepForEach = __webpack_require__(44);
+var deepForEach = __webpack_require__(45);
 var reduce = __webpack_require__(68);
 var containsCollections = __webpack_require__(69);
 
 function factory (type, config, load, typed) {
-  var add = load(__webpack_require__(18));
-  var divide = load(__webpack_require__(49));
+  var add = load(__webpack_require__(20));
+  var divide = load(__webpack_require__(51));
 
   /**
    * Compute the mean value of matrix or a list with values.
@@ -22471,7 +23209,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 126 */
+/* 128 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22481,12 +23219,12 @@ var util = __webpack_require__(25);
 
 function factory (type, config, load, typed) {
   var matrix       = load(__webpack_require__(0));
-  var divideScalar = load(__webpack_require__(19));
-  var addScalar    = load(__webpack_require__(20));
+  var divideScalar = load(__webpack_require__(14));
+  var addScalar    = load(__webpack_require__(16));
   var multiply     = load(__webpack_require__(12));
-  var unaryMinus   = load(__webpack_require__(39));
-  var det          = load(__webpack_require__(127));
-  var eye          = load(__webpack_require__(64));
+  var unaryMinus   = load(__webpack_require__(37));
+  var det          = load(__webpack_require__(129));
+  var eye          = load(__webpack_require__(65));
 
   /**
    * Calculate the inverse of a square matrix.
@@ -22685,7 +23423,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 127 */
+/* 129 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22697,10 +23435,10 @@ var string = util.string;
 
 function factory (type, config, load, typed) {
   var matrix = load(__webpack_require__(0));
-  var add = load(__webpack_require__(18));
+  var add = load(__webpack_require__(20));
   var subtract = load(__webpack_require__(21));
   var multiply = load(__webpack_require__(12));
-  var unaryMinus = load(__webpack_require__(39));
+  var unaryMinus = load(__webpack_require__(37));
 
   /**
    * Calculate the determinant of a matrix.
@@ -22860,18 +23598,18 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 128 */
+/* 130 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var deepForEach = __webpack_require__(44);
+var deepForEach = __webpack_require__(45);
 var reduce = __webpack_require__(68);
 var containsCollections = __webpack_require__(69);
 
 function factory (type, config, load, typed) {
-  var smaller = load(__webpack_require__(46));
+  var smaller = load(__webpack_require__(41));
   
   /**
    * Compute the maximum value of a matrix or a  list of values.
@@ -22966,7 +23704,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 129 */
+/* 131 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23252,682 +23990,286 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 130 */
+/* 132 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-
-function factory (type, config, load, typed, math) {
-  var parse = load(__webpack_require__(41));
-  var ConstantNode = load(__webpack_require__(56));
-  var FunctionNode = load(__webpack_require__(57));
-  var OperatorNode = load(__webpack_require__(65));
-  var ParenthesisNode = load(__webpack_require__(66));
-  var SymbolNode = load(__webpack_require__(42));
-  var Node = load(__webpack_require__(14));
-  var simplifyConstant = load(__webpack_require__(438));
-  var simplifyCore = load(__webpack_require__(439));
-  var resolve = load(__webpack_require__(440));
-
-  var util = load(__webpack_require__(131));
+var digits = __webpack_require__(3).digits;
+// TODO this could be improved by simplifying seperated constants under associative and commutative operators
+function factory(type, config, load, typed, math) {
+  var util = load(__webpack_require__(133));
   var isCommutative = util.isCommutative;
   var isAssociative = util.isAssociative;
-  var flatten = util.flatten;
-  var unflattenr = util.unflattenr;
-  var unflattenl = util.unflattenl;
+  var allChildren = util.allChildren;
   var createMakeNodeFunction = util.createMakeNodeFunction;
+  var ConstantNode = math.expression.node.ConstantNode;
+  var OperatorNode = math.expression.node.OperatorNode;
+  var FunctionNode = math.expression.node.FunctionNode;
 
-  /**
-   * Simplify an expression tree.
-   *
-   * A list of rules are applied to an expression, repeating over the list until
-   * no further changes are made.
-   * It's possible to pass a custom set of rules to the function as second
-   * argument. A rule can be specified as an object, string, or function:
-   *
-   *     var rules = [
-   *       { l: 'n1*n3 + n2*n3', r: '(n1+n2)*n3' },
-   *       'n1*n3 + n2*n3 -> (n1+n2)*n3',
-   *       function (node) {
-   *         // ... return a new node or return the node unchanged
-   *         return node
-   *       }
-   *     ]
-   *
-   * String and object rules consist of a left and right pattern. The left is
-   * used to match against the expression and the right determines what matches
-   * are replaced with. The main difference between a pattern and a normal
-   * expression is that variables starting with the following characters are
-   * interpreted as wildcards:
-   *
-   * - 'n' - matches any Node
-   * - 'c' - matches any ConstantNode
-   * - 'v' - matches any Node that is not a ConstantNode
-   *
-   * The default list of rules is exposed on the function as `simplify.rules`
-   * and can be used as a basis to built a set of custom rules.
-   *
-   * For more details on the theory, see:
-   *
-   * - [Strategies for simplifying math expressions (Stackoverflow)](http://stackoverflow.com/questions/7540227/strategies-for-simplifying-math-expressions)
-   * - [Symbolic computation - Simplification (Wikipedia)](https://en.wikipedia.org/wiki/Symbolic_computation#Simplification)
-   *
-   * Syntax:
-   *
-   *     simplify(expr)
-   *     simplify(expr, rules)
-   *     simplify(expr, rules, scope)
-   *     simplify(expr, scope)
-   *
-   * Examples:
-   *
-   *     math.simplify('2 * 1 * x ^ (2 - 1)');      // Node {2 * x}
-   *     math.simplify('2 * 3 * x', {x: 4});        // Node {24}
-   *     var f = math.parse('2 * 1 * x ^ (2 - 1)');
-   *     math.simplify(f);                          // Node {2 * x}
-   *
-   * See also:
-   *
-   *     derivative, parse, eval
-   *
-   * @param {Node | string} expr
-   *            The expression to be simplified
-   * @param {Array<{l:string, r: string} | string | function>} [rules]
-   *            Optional list with custom rules
-   * @return {Node} Returns the simplified form of `expr`
-   */
-  var simplify = typed('simplify', {
-    'string': function (expr) {
-      return simplify(parse(expr), simplify.rules, {});
-    },
+  function simplifyConstant(expr) {
+    var res = foldFraction(expr);
+    return type.isNode(res) ? res : _toNode(res);
+  }
 
-    'string, Object': function (expr, scope) {
-      return simplify(parse(expr), simplify.rules, scope);
-    },
-
-    'string, Array': function (expr, rules) {
-      return simplify(parse(expr), rules, {});
-    },
-
-    'string, Array, Object': function (expr, rules, scope) {
-      return simplify(parse(expr), rules, scope);
-    },
-
-    'Node, Object': function (expr, scope) {
-      return simplify(expr, simplify.rules, scope);
-    },
-
-    'Node': function (expr) {
-      return simplify(expr, simplify.rules, {});
-    },
-
-    'Node, Array': function (expr, rules) {
-      return simplify(expr, rules, {});
-    },
-
-    'Node, Array, Object': function (expr, rules, scope) {
-      rules = _buildRules(rules);
-
-      var res = resolve(expr, scope);
-      var res = removeParens(res);
-      var visited = {};
-
-      var str = res.toString({parenthesis: 'all'});
-      while(!visited[str]) {
-        visited[str] = true;
-        _lastsym = 0; // counter for placeholder symbols
-        for (var i=0; i<rules.length; i++) {
-          if (typeof rules[i] === 'function') {
-            res = rules[i](res);
-          }
-          else {
-            flatten(res);
-            res = applyRule(res, rules[i]);
-          }
-          unflattenl(res); // using left-heavy binary tree here since custom rule functions may expect it
+  function _eval(fnname, args) {
+    try {
+      return _toNumber(math[fnname].apply(null, args));
+    }
+    catch (ignore) {
+      // sometimes the implicit type conversion causes the evaluation to fail, so we'll try again after removing Fractions
+      args = args.map(function(x){
+        if (type.isFraction(x)) {
+          return x.valueOf();
         }
-        str = res.toString({parenthesis: 'all'});
-      }
+        return x;
+      });
+      return _toNumber(math[fnname].apply(null, args));
+    }
+  }
 
-      return res;
+  var _toNode = typed({
+    'Fraction': _fractionToNode,
+    'number': function(n) {
+      if (n < 0) {
+        return unaryMinusNode(new ConstantNode(-n));
+      }
+      return new ConstantNode(n);
+    },
+    'BigNumber': function(n) {
+      if (n < 0) {
+        return unaryMinusNode(new ConstantNode(n.negated().toString(), 'number'));
+      }
+      return new ConstantNode(n.toString(), 'number');
+    },
+    'Complex': function(s) {
+      throw 'Cannot convert Complex number to Node';
     }
   });
-  simplify.simplifyCore = simplifyCore;
-  simplify.resolve = resolve;
 
-  function removeParens(node) {
-    return node.transform(function(node, path, parent) {
-      return type.isParenthesisNode(node)
-          ? node.content
-          : node;
+  // convert a number to a fraction only if it can be expressed exactly
+  function _exactFraction(n) {
+    if (isFinite(n)) {
+      var f = math.fraction(n);
+      if (f.valueOf() === n) {
+        return f;
+      }
+    }
+    return n;
+  }
+
+  // Convert numbers to a preferred number type in preference order: Fraction, number, Complex
+  // BigNumbers are left alone
+  var _toNumber = typed({
+    'string': function(s) {
+      if (config.number === 'BigNumber') {
+        return math.bignumber(s);
+      }
+      else if (config.number === 'Fraction') {
+        return math.fraction(s);
+      }
+      else {
+        return _exactFraction(parseFloat(s));
+      }
+    },
+
+    'Fraction': function(s) { return s; },
+
+    'BigNumber': function(s) { return s; },
+
+    'number': function(s) {
+      return _exactFraction(s);
+    },
+
+    'Complex': function(s) {
+      if (s.im !== 0) {
+        return s;
+      }
+      return _exactFraction(s.re);
+    },
+  });
+
+  function unaryMinusNode(n) {
+    return new OperatorNode('-', 'unaryMinus', [n]);
+  }
+
+  function _fractionToNode(f) {
+    var n;
+    var vn = f.s*f.n;
+    if (vn < 0) {
+      n = new OperatorNode('-', 'unaryMinus', [new ConstantNode(-vn)])
+    }
+    else {
+      n = new ConstantNode(vn);
+    }
+
+    if (f.d === 1) {
+      return n;
+    }
+    return new OperatorNode('/', 'divide', [n, new ConstantNode(f.d)]);
+  }
+
+  /*
+   * Create a binary tree from a list of Fractions and Nodes.
+   * Tries to fold Fractions by evaluating them until the first Node in the list is hit, so
+   * `args` should be sorted to have the Fractions at the start (if the operator is commutative).
+   * @param args - list of Fractions and Nodes
+   * @param fn - evaluator for the binary operation evaluator that accepts two Fractions
+   * @param makeNode - creates a binary OperatorNode/FunctionNode from a list of child Nodes
+   * if args.length is 1, returns args[0]
+   * @return - Either a Node representing a binary expression or Fraction
+   */
+  function foldOp(fn, args, makeNode) {
+    return args.reduce(function(a, b) {
+      if (!type.isNode(a) && !type.isNode(b)) {
+        try {
+          return _eval(fn, [a,b]);
+        }
+        catch (ignoreandcontinue) {}
+        a = _toNode(a);
+        b = _toNode(b);
+      }
+      else if (!type.isNode(a)) {
+        a = _toNode(a);
+      }
+      else if (!type.isNode(b)) {
+        b = _toNode(b);
+      }
+
+      return makeNode([a, b]);
     });
   }
 
-  // All constants that are allowed in rules
-  var SUPPORTED_CONSTANTS = {
-    true: true,
-    false: true,
-    e: true,
-    i: true,
-    Infinity: true,
-    LN2: true,
-    LN10: true,
-    LOG2E: true,
-    LOG10E: true,
-    NaN: true,
-    phi: true,
-    pi: true,
-    SQRT1_2: true,
-    SQRT2: true,
-    tau: true,
-    // null: false,
-    // uninitialized: false,
-    // version: false,
-  };
-
-  // Array of strings, used to build the ruleSet.
-  // Each l (left side) and r (right side) are parsed by
-  // the expression parser into a node tree.
-  // Left hand sides are matched to subtrees within the
-  // expression to be parsed and replaced with the right
-  // hand side.
-  // TODO: Add support for constraints on constants (either in the form of a '=' expression or a callback [callback allows things like comparing symbols alphabetically])
-  // To evaluate lhs constants for rhs constants, use: { l: 'c1+c2', r: 'c3', evaluate: 'c3 = c1 + c2' }. Multiple assignments are separated by ';' in block format.
-  // It is possible to get into an infinite loop with conflicting rules
-  simplify.rules = [
-    simplifyCore,
-    //{ l: 'n+0', r: 'n' },     // simplifyCore
-    //{ l: 'n^0', r: '1' },     // simplifyCore
-    //{ l: '0*n', r: '0' },     // simplifyCore
-    //{ l: 'n/n', r: '1'},      // simplifyCore
-    //{ l: 'n^1', r: 'n' },     // simplifyCore
-    //{ l: '+n1', r:'n1' },     // simplifyCore
-    //{ l: 'n--n1', r:'n+n1' }, // simplifyCore
-    { l: 'log(e)', r:'1' },
-
-    // temporary rules
-    { l: 'n-n1', r:'n+-n1' }, // temporarily replace 'subtract' so we can further flatten the 'add' operator
-    { l: '-(c*v)', r: '(-c) * v' }, // make non-constant terms positive
-    { l: '-v', r: '(-1) * v' },
-    { l: 'n/n1^n2', r:'n*n1^-n2' }, // temporarily replace 'divide' so we can further flatten the 'multiply' operator
-    { l: 'n/n1', r:'n*n1^-1' },
-
-    // expand nested exponentiation
-    { l: '(n ^ n1) ^ n2', r: 'n ^ (n1 * n2)'},
-
-    // collect like factors
-    { l: 'n*n', r: 'n^2' },
-    { l: 'n * n^n1', r: 'n^(n1+1)' },
-    { l: 'n^n1 * n^n2', r: 'n^(n1+n2)' },
-
-    // collect like terms
-    { l: 'n+n', r: '2*n' },
-    { l: 'n+-n', r: '0' },
-    { l: 'n1*n2 + n2', r: '(n1+1)*n2' },
-    { l: 'n1*n3 + n2*n3', r: '(n1+n2)*n3' },
-
-    simplifyConstant,
-
-    { l: '(-n)*n1', r: '-(n*n1)' }, // make factors positive (and undo 'make non-constant terms positive')
-
-    // ordering of constants
-    { l: 'c+v', r: 'v+c', context: { 'add': { commutative:false } } },
-    { l: 'v*c', r: 'c*v', context: { 'multiply': { commutative:false } } },
-
-    // undo temporary rules
-    //{ l: '(-1) * n', r: '-n' }, // #811 added test which proved this is redundant
-    { l: 'n+-n1', r:'n-n1' },  // undo replace 'subtract'
-    { l: 'n*(n1^-1)', r:'n/n1' },  // undo replace 'divide'
-    { l: 'n*n1^-n2', r:'n/n1^n2' },
-    { l: 'n1^-1', r:'1/n1' },
-
-    { l: 'n*(n1/n2)', r:'(n*n1)/n2' }, // '*' before '/'
-    { l: 'n-(n1+n2)', r:'n-n1-n2' }, // '-' before '+'
-    // { l: '(n1/n2)/n3', r: 'n1/(n2*n3)' }, 
-    // { l: '(n*n1)/(n*n2)', r: 'n1/n2' }, 
-
-    { l: '1*n', r: 'n' } // this pattern can be produced by simplifyConstant
-
-  ];
-
-  /**
-   * Parse the string array of rules into nodes
-   *
-   * Example syntax for rules:
-   *
-   * Position constants to the left in a product:
-   * { l: 'n1 * c1', r: 'c1 * n1' }
-   * n1 is any Node, and c1 is a ConstantNode.
-   *
-   * Apply difference of squares formula:
-   * { l: '(n1 - n2) * (n1 + n2)', r: 'n1^2 - n2^2' }
-   * n1, n2 mean any Node.
-   *
-   * Short hand notation:
-   * 'n1 * c1 -> c1 * n1'
-   */
-  function _buildRules(rules) {
-    // Array of rules to be used to simplify expressions
-    var ruleSet = [];
-    for(var i=0; i<rules.length; i++) {
-      var rule = rules[i];
-      var newRule;
-      var ruleType = typeof rule;
-      switch (ruleType) {
-        case 'string':
-          var lr = rule.split('->');
-          if (lr.length !== 2) {
-            throw SyntaxError('Could not parse rule: ' + rule);
-          }
-          rule = {l: lr[0], r: lr[1]};
-          /* falls through */
-        case 'object':
-          newRule = {
-            l: removeParens(parse(rule.l)),
-            r: removeParens(parse(rule.r)),
-          }
-          if(rule.context) {
-            newRule.evaluate = rule.context;
-          }
-          if(rule.evaluate) {
-            newRule.evaluate = parse(rule.evaluate);
-          }
-
-          if (newRule.l.isOperatorNode && isAssociative(newRule.l)) {
-            var makeNode = createMakeNodeFunction(newRule.l);
-            var expandsym = _getExpandPlaceholderSymbol();
-            newRule.expanded = {};
-            newRule.expanded.l = makeNode([newRule.l.clone(), expandsym]);
-            // Push the expandsym into the deepest possible branch.
-            // This helps to match the newRule against nodes returned from getSplits() later on.
-            flatten(newRule.expanded.l);
-            unflattenr(newRule.expanded.l);
-            newRule.expanded.r = makeNode([newRule.r, expandsym]);
-          }
-          break;
-        case 'function':
-          newRule = rule;
-          break;
-        default:
-          throw TypeError('Unsupported type of rule: ' + ruleType);
-      }
-     // console.log('Adding rule: ' + rules[i]);
-     // console.log(newRule);
-      ruleSet.push(newRule);
-    }
-    return ruleSet;
-  }
-
-  var _lastsym = 0;
-  function _getExpandPlaceholderSymbol() {
-    return new SymbolNode('_p' + _lastsym++);
-  }
-
-  /**
-   * Returns a simplfied form of node, or the original node if no simplification was possible.
-   *
-   * @param  {ConstantNode | SymbolNode | ParenthesisNode | FunctionNode | OperatorNode} node
-   * @return {ConstantNode | SymbolNode | ParenthesisNode | FunctionNode | OperatorNode} The simplified form of `expr`, or the original node if no simplification was possible.
-   */
-  var applyRule = typed('applyRule', {
-    'Node, Object': function (node, rule) {
-
-      //console.log('Entering applyRule(' + node.toString() + ')');
-
-      // Do not clone node unless we find a match
-      var res = node;
-
-      // First replace our child nodes with their simplified versions
-      // If a child could not be simplified, the assignments will have
-      // no effect since the node is returned unchanged
-      if (res instanceof OperatorNode || res instanceof FunctionNode) {
-        if (res.args) {
-          for(var i=0; i<res.args.length; i++) {
-            res.args[i] = applyRule(res.args[i], rule);
-          }
+  // destroys the original node and returns a folded one
+  function foldFraction(node) {
+    switch(node.type) {
+      case 'SymbolNode':
+        return node;
+      case 'ConstantNode':
+        if (node.valueType === 'number') {
+          return _toNumber(node.value);
         }
-      }
-      else if(res instanceof ParenthesisNode) {
-        if(res.content) {
-          res.content = applyRule(res.content, rule);
+        return node;
+      case 'FunctionNode':
+        if (math[node.name] && math[node.name].rawArgs) {
+          return node;
         }
-      }
 
-      // Try to match a rule against this node
-      var repl = rule.r;
-      var matches = _ruleMatch(rule.l, res)[0];
+        // Process operators as OperatorNode
+        var operatorFunctions = [ 'add', 'multiply' ];
+        if (operatorFunctions.indexOf(node.name) === -1) {
+          var args = node.args.map(foldFraction);
 
-      // If the rule is associative operator, we can try matching it while allowing additional terms.
-      // This allows us to match rules like 'n+n' to the expression '(1+x)+x' or even 'x+1+x' if the operator is commutative.
-      if (!matches && rule.expanded) {
-        repl = rule.expanded.r;
-        matches = _ruleMatch(rule.expanded.l, res)[0];
-      }
+          // If all args are numbers
+          if (!args.some(type.isNode)) {
+            try {
+              return _eval(node.name, args);
+            }
+            catch (ignoreandcontine) {}
+          }
 
-      if (matches) {
-        // var before = res.toString({parenthesis: 'all'});
-
-        // Create a new node by cloning the rhs of the matched rule
-        res = repl.clone();
-     
-        // Replace placeholders with their respective nodes without traversing deeper into the replaced nodes
-        var _transform = function(node) {
-          if(node.isSymbolNode && matches.placeholders.hasOwnProperty(node.name)) {
-            return matches.placeholders[node.name].clone();
+          // Convert all args to nodes and construct a symbolic function call
+          args = args.map(function(arg) {
+            return type.isNode(arg) ? arg : _toNode(arg);
+          });
+          return new FunctionNode(node.name, args);
+        }
+        else {
+          // treat as operator
+        }
+        /* falls through */
+      case 'OperatorNode':
+        var fn = node.fn.toString();
+        var args;
+        var res;
+        var makeNode = createMakeNodeFunction(node);
+        if (node.args.length === 1) {
+          args = [foldFraction(node.args[0])];
+          if (!type.isNode(args[0])) {
+            res = _eval(fn, args);
           }
           else {
-            return node.map(_transform);
+            res = makeNode(args);
           }
         }
-        
-        res = _transform(res);
-        
-        // var after = res.toString({parenthesis: 'all'});
-        // console.log('Simplified ' + before + ' to ' + after);
-      }
+        else if (isAssociative(node)) {
+          args = allChildren(node);
+          args = args.map(foldFraction);
 
-      return res;
-    }
-  });
+          if (isCommutative(fn)) {
+            // commutative binary operator
+            var consts = [], vars = [];
 
-  /**
-   * Get (binary) combinations of a flattened binary node
-   * e.g. +(node1, node2, node3) -> [
-   *        +(node1,  +(node2, node3)),
-   *        +(node2,  +(node1, node3)),
-   *        +(node3,  +(node1, node2))]
-   *
-   */
-  function getSplits(node, context) {
-    var res = [];
-    var right, rightArgs;
-    var makeNode = createMakeNodeFunction(node);
-    if (isCommutative(node, context)) {
-      for (var i=0; i<node.args.length; i++) {
-        rightArgs = node.args.slice(0);
-        rightArgs.splice(i, 1);
-        right = (rightArgs.length === 1) ? rightArgs[0] : makeNode(rightArgs);
-        res.push(makeNode([node.args[i], right]));
-      }
-    }
-    else {
-      rightArgs = node.args.slice(1);
-      right = (rightArgs.length === 1) ? rightArgs[0] : makeNode(rightArgs);
-      res.push(makeNode([node.args[0], right]));
-    }
-    return res;
-  }
+            for (var i=0; i < args.length; i++) {
+              if (!type.isNode(args[i])) {
+                consts.push(args[i]);
+              }
+              else {
+                vars.push(args[i]);
+              }
+            }
 
-  /**
-   * Returns the set union of two match-placeholders or null if there is a conflict.
-   */
-  function mergeMatch(match1, match2) {
-    var res = {placeholders:{}};
-
-    // Some matches may not have placeholders; this is OK
-    if (!match1.placeholders && !match2.placeholders) {
-      return res;
-    }
-    else if (!match1.placeholders) {
-      return match2;
-    }
-    else if (!match2.placeholders) {
-      return match1;
-    }
-
-    // Placeholders with the same key must match exactly
-    for (var key in match1.placeholders) {
-      res.placeholders[key] = match1.placeholders[key];
-      if (match2.placeholders.hasOwnProperty(key)) {
-        if (!_exactMatch(match1.placeholders[key], match2.placeholders[key] )) {
-          return null;
-        }
-      }
-    }
-
-    for (var key in match2.placeholders) {
-      res.placeholders[key] = match2.placeholders[key];
-    }
-
-    return res;
-  }
-
-  /**
-   * Combine two lists of matches by applying mergeMatch to the cartesian product of two lists of matches.
-   * Each list represents matches found in one child of a node.
-   */
-  function combineChildMatches(list1, list2) {
-    var res = [];
-
-    if (list1.length === 0 || list2.length === 0) {
-      return res;
-    }
-
-    var merged;
-    for (var i1 = 0; i1 < list1.length; i1++) {
-      for (var i2 = 0; i2 < list2.length; i2++) {
-        merged = mergeMatch(list1[i1], list2[i2]);
-        if (merged) {
-          res.push(merged);
-        }
-      }
-    }
-    return res;
-  }
-
-  /**
-   * Combine multiple lists of matches by applying mergeMatch to the cartesian product of two lists of matches.
-   * Each list represents matches found in one child of a node.
-   * Returns a list of unique matches.
-   */
-  function mergeChildMatches(childMatches) {
-    if (childMatches.length === 0) {
-      return childMatches;
-    }
-
-    var sets = childMatches.reduce(combineChildMatches);
-    var uniqueSets = [];
-    var unique = {};
-    for(var i = 0; i < sets.length; i++) {
-      var s = JSON.stringify(sets[i]);
-      if (!unique[s]) {
-        unique[s] = true;
-        uniqueSets.push(sets[i]);
-      }
-    }
-    return uniqueSets;
-  }
-
-  /**
-   * Determines whether node matches rule.
-   *
-   * @param {ConstantNode | SymbolNode | ParenthesisNode | FunctionNode | OperatorNode} rule
-   * @param {ConstantNode | SymbolNode | ParenthesisNode | FunctionNode | OperatorNode} node
-   * @return {Object} Information about the match, if it exists.
-   */
-  function _ruleMatch(rule, node, isSplit) {
-//    console.log('Entering _ruleMatch(' + JSON.stringify(rule) + ', ' + JSON.stringify(node) + ')');
-//    console.log('rule = ' + rule);
-//    console.log('node = ' + node);
-
-//    console.log('Entering _ruleMatch(' + rule.toString() + ', ' + node.toString() + ')');
-    var res = [{placeholders:{}}];
-
-    if (rule instanceof OperatorNode && node instanceof OperatorNode
-     || rule instanceof FunctionNode && node instanceof FunctionNode) {
-
-      // If the rule is an OperatorNode or a FunctionNode, then node must match exactly
-      if (rule instanceof OperatorNode) {
-        if (rule.op !== node.op || rule.fn !== node.fn) {
-          return [];
-        }
-      }
-      else if (rule instanceof FunctionNode) {
-        if (rule.name !== node.name) {
-          return [];
-        }
-      }
-
-      // rule and node match. Search the children of rule and node.
-      if (node.args.length === 1 && rule.args.length === 1 || !isAssociative(node) || isSplit) {
-        // Expect non-associative operators to match exactly
-        var childMatches = [];
-        for (var i = 0; i < rule.args.length; i++) {
-          var childMatch = _ruleMatch(rule.args[i], node.args[i]);
-          if (childMatch.length === 0) {
-            // Child did not match, so stop searching immediately
-            return [];
+            if (consts.length > 1) {
+              res = foldOp(fn, consts, makeNode);
+              vars.unshift(res);
+              res = foldOp(fn, vars, makeNode);
+            }
+            else {
+              // we won't change the children order since it's not neccessary
+              res = foldOp(fn, args, makeNode);
+            }
           }
-          // The child matched, so add the information returned from the child to our result
-          childMatches.push(childMatch);
-        }
-        res = mergeChildMatches(childMatches);
-      }
-      else if (node.args.length >= 2 && rule.args.length === 2) { // node is flattened, rule is not
-        // Associative operators/functions can be split in different ways so we check if the rule matches each
-        // them and return their union.
-        var splits = getSplits(node, rule.context);
-        var splitMatches = [];
-        for(var i = 0; i < splits.length; i++) {
-          var matchSet = _ruleMatch(rule, splits[i], true); // recursing at the same tree depth here
-          splitMatches = splitMatches.concat(matchSet);
-        }
-        return splitMatches;
-      }
-      else if (rule.args.length > 2) {
-        throw Error('Unexpected non-binary associative function: ' + rule.toString());
-      }
-      else {
-        // Incorrect number of arguments in rule and node, so no match
-        return [];
-      }
-    }
-    else if (rule instanceof SymbolNode) {
-      // If the rule is a SymbolNode, then it carries a special meaning
-      // according to the first character of the symbol node name.
-      // c.* matches a ConstantNode
-      // n.* matches any node
-      if (rule.name.length === 0) {
-        throw new Error('Symbol in rule has 0 length...!?');
-      }
-     if (math.hasOwnProperty(rule.name)) {
-        if (!SUPPORTED_CONSTANTS[rule.name]) {
-          throw new Error('Built in constant: ' + rule.name + ' is not supported by simplify.');
-        }
-
-        // built-in constant must match exactly
-        if(rule.name !== node.name) {
-          return [];
-        }
-      }
-      else if (rule.name[0] === 'n' || rule.name.substring(0,2) === '_p') {
-        // rule matches _anything_, so assign this node to the rule.name placeholder
-        // Assign node to the rule.name placeholder.
-        // Our parent will check for matches among placeholders.
-        res[0].placeholders[rule.name] = node;
-      }
-      else if (rule.name[0] === 'v') {
-        // rule matches any variable thing (not a ConstantNode)
-        if(!type.isConstantNode(node)) {
-          res[0].placeholders[rule.name] = node;
+          else {
+            // non-commutative binary operator
+            res = foldOp(fn, args, makeNode);
+          }
         }
         else {
-          // Mis-match: rule was expecting something other than a ConstantNode
-          return [];
+          // non-associative binary operator
+          args = node.args.map(foldFraction);
+          res = foldOp(fn, args, makeNode);
         }
-      }
-      else if (rule.name[0] === 'c') {
-        // rule matches any ConstantNode
-        if(node instanceof ConstantNode) {
-          res[0].placeholders[rule.name] = node;
-        }
-        else {
-          // Mis-match: rule was expecting a ConstantNode
-          return [];
-        }
-      }
-      else {
-        throw new Error('Invalid symbol in rule: ' + rule.name);
-      }
+        return res;
+      case 'ParenthesisNode':
+        // remove the uneccessary parenthesis
+        return foldFraction(node.content);
+      case 'AccessorNode':
+        /* falls through */
+      case 'ArrayNode':
+        /* falls through */
+      case 'AssignmentNode':
+        /* falls through */
+      case 'BlockNode':
+        /* falls through */
+      case 'FunctionAssignmentNode':
+        /* falls through */
+      case 'IndexNode':
+        /* falls through */
+      case 'ObjectNode':
+        /* falls through */
+      case 'RangeNode':
+        /* falls through */
+      case 'UpdateNode':
+        /* falls through */
+      case 'ConditionalNode':
+        /* falls through */
+      default:
+        throw 'Unimplemented node type in simplifyConstant: '+node.type;
     }
-    else if (rule instanceof ConstantNode) {
-      // Literal constant must match exactly
-      if(rule.value !== node.value) {
-        return [];
-      }
-    }
-    else {
-      // Some other node was encountered which we aren't prepared for, so no match
-      return [];
-    }
-
-    // It's a match!
-
-    // console.log('_ruleMatch(' + rule.toString() + ', ' + node.toString() + ') found a match');
-    return res;
   }
 
-
-  /**
-   * Determines whether p and q (and all their children nodes) are identical.
-   *
-   * @param {ConstantNode | SymbolNode | ParenthesisNode | FunctionNode | OperatorNode} p
-   * @param {ConstantNode | SymbolNode | ParenthesisNode | FunctionNode | OperatorNode} q
-   * @return {Object} Information about the match, if it exists.
-   */
-  function _exactMatch(p, q) {
-    if(p instanceof ConstantNode && q instanceof ConstantNode) {
-      if(p.value !== q.value) {
-        return false;
-      }
-    }
-    else if(p instanceof SymbolNode && q instanceof SymbolNode) {
-      if(p.name !== q.name) {
-        return false;
-      }
-    }
-    else if(p instanceof OperatorNode && q instanceof OperatorNode
-         || p instanceof FunctionNode && q instanceof FunctionNode) {
-      if (p instanceof OperatorNode) {
-        if (p.op !== q.op || p.fn !== q.fn) {
-          return false;
-        }
-      }
-      else if (p instanceof FunctionNode) {
-        if (p.name !== q.name) {
-          return false;
-        }
-      }
-
-      if(p.args.length !== q.args.length) {
-        return false;
-      }
-
-      for(var i=0; i<p.args.length; i++) {
-        if(!_exactMatch(p.args[i], q.args[i])) {
-          return false;
-        }
-      }
-    }
-    else {
-      return false;
-    }
-
-    return true;
-  }
-
-  return simplify;
+  return simplifyConstant;
 }
 
 exports.math = true;
-exports.name = 'simplify';
+exports.name = 'simplifyConstant';
+exports.path = 'algebra.simplify';
 exports.factory = factory;
 
 
 /***/ }),
-/* 131 */
+/* 133 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23953,7 +24295,7 @@ function factory(type, config, load, typed, math) {
 
 
   function isCommutative(node, context) {
-    if (!node.args || node.args.length <=1) {
+    if (!type.isOperatorNode(node)) {
       return true;
     }
     var name = node.fn.toString();
@@ -23964,8 +24306,8 @@ function factory(type, config, load, typed, math) {
   }
 
   function isAssociative(node, context) {
-    if (!node.args || node.args.length <=1) {
-      return true;
+    if (!type.isOperatorNode(node)) {
+      return false;
     }
     var name = node.fn.toString();
     if (context && context.hasOwnProperty(name) && context[name].hasOwnProperty('associative')) {
@@ -24007,7 +24349,7 @@ function factory(type, config, load, typed, math) {
       }
     };
 
-    if (type.isOperatorNode(node) && isAssociative(node)) {
+    if (isAssociative(node)) {
       op = node.op;
       findChildren(node);
       return children;
@@ -24091,7 +24433,183 @@ exports.factory = factory;
 exports.math = true;
 
 /***/ }),
-/* 132 */
+/* 134 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function factory(type, config, load, typed, math) {
+  var ConstantNode = math.expression.node.ConstantNode;
+  var OperatorNode = math.expression.node.OperatorNode;
+  var FunctionNode = math.expression.node.FunctionNode;
+
+  var node0 = new ConstantNode(0);
+  var node1 = new ConstantNode(1);
+
+  /**
+   * simplifyCore() performs single pass simplification suitable for
+   * applications requiring ultimate performance. In contrast, simplify()
+   * extends simplifyCore() with additional passes to provide deeper
+   * simplification.
+   *
+   * Syntax:
+   *
+   *     simplify.simpifyCore(expr)
+   *
+   * Examples:
+   *
+   *     var f = math.parse('2 * 1 * x ^ (2 - 1)');
+   *     math.simplify.simpifyCore(f);                          // Node {2 * x}
+   *     math.simplify('2 * 1 * x ^ (2 - 1)', [math.simplify.simpifyCore]); // Node {2 * x};
+   *
+   * See also:
+   *
+   *     derivative
+   *
+   * @param {Node} node
+   *     The expression to be simplified
+   */
+  function simplifyCore(node) {
+    if (type.isOperatorNode(node) && node.args.length <= 2) {
+      var a0 = simplifyCore(node.args[0]);
+      var a1 = node.args[1] && simplifyCore(node.args[1]);
+      if (node.op === "+") {
+          if (node.args.length === 1) {
+            return node.args[0];
+          }
+          if (type.isConstantNode(a0)) {
+              if (a0.value === "0") {
+                  return a1;
+              } else if (type.isConstantNode(a1) && a0.value && a0.value.length < 5 && a1.value && a1.value.length < 5) {
+                  return new ConstantNode(Number(a0.value) + Number(a1.value));
+              }
+          }
+          if (type.isConstantNode(a1) && a1.value === "0") {
+              return a0;
+          }
+          if (node.args.length === 2 && type.isOperatorNode(a1) && a1.op === '-' && a1.fn === 'unaryMinus') {
+              return new OperatorNode('-', 'subtract', [a0,a1.args[0]]);
+          }
+          return new OperatorNode(node.op, node.fn, a1 ? [a0,a1] : [a0]);
+      } else if (node.op === "-") {
+          if (type.isConstantNode(a0) && a1) {
+              if (type.isConstantNode(a1) && a0.value && a0.value.length < 5 && a1.value && a1.value.length < 5) {
+                  return new ConstantNode(Number(a0.value) - Number(a1.value));
+              } else if (a0.value === "0") {
+                  return new OperatorNode("-", "unaryMinus", [a1]);
+              }
+          }
+          if (node.fn === "subtract" && node.args.length === 2) {
+              if (type.isConstantNode(a1) && a1.value === "0") {
+                  return a0;
+              }
+              if (type.isOperatorNode(a1) && a1.fn === "unaryMinus") {
+                  return simplifyCore(new OperatorNode("+", "add", [a0, a1.args[0]]));
+              }
+              return new OperatorNode(node.op, node.fn, [a0,a1]);
+          } else if (node.fn === "unaryMinus") {
+              if (type.isOperatorNode(a0)) {
+                  if (a0.fn === 'unaryMinus') {
+                      return a0.args[0];
+                  } else if (a0.fn === 'subtract') {
+                      return new OperatorNode('-', 'subtract', [a0.args[1], a0.args[0]]);
+                  }
+              }
+              return new OperatorNode(node.op, node.fn, [a0]);
+          }
+          throw new Error('never happens');
+      } else if (node.op === "*") {
+          if (type.isConstantNode(a0)) {
+              if (a0.value === "0") {
+                  return node0;
+              } else if (a0.value === "1") {
+                  return a1;
+              } else if (type.isConstantNode(a1) && a0.value && a0.value.length < 5 && a1.value && a1.value.length < 5) {
+                  return new ConstantNode(Number(a0.value) * Number(a1.value));
+              }
+          }
+          if (type.isConstantNode(a1)) {
+              if (a1.value === "0") {
+                  return node0;
+              } else if (a1.value === "1") {
+                  return a0;
+              } else if (type.isOperatorNode(a0) && a0.op === node.op) {
+                  var a00 = a0.args[0];
+                  if (type.isConstantNode(a00) && a1.value && a1.value.length < 5 && a00.value && a00.value.length < 5) {
+                      var a00_a1 =  new ConstantNode(Number(a0.args[0].value) * Number(a1.value));
+                      return new OperatorNode(node.op, node.fn, [a00_a1, a0.args[1]]); // constants on left
+                  }
+              }
+              return new OperatorNode(node.op, node.fn, [a1, a0]); // constants on left
+          }
+          return new OperatorNode(node.op, node.fn, [a0, a1]);
+      } else if (node.op === "/") {
+          if (type.isConstantNode(a0)) {
+              if (a0.value === "0") {
+                  return node0;
+              } else if (type.isConstantNode(a1) && a0.value && a0.value.length < 5 && (a1.value === "1" || a1.value==="2" || a1.value==="4")) {
+                  return new ConstantNode(Number(a0.value) / Number(a1.value));
+              }
+          }
+          return new OperatorNode(node.op, node.fn, [a0, a1]);
+      } else if (node.op === "^") {
+          if (type.isConstantNode(a1)) {
+              if (a1.value === "0") {
+                  return node1;
+              } else if (a1.value === "1") {
+                  return a0;
+              } else {
+                  if (type.isConstantNode(a0) && 
+                      a0.value && a0.value.length < 5 && 
+                      a1.value && a1.value.length < 2) { 
+                      // fold constant
+                      return new ConstantNode(
+                          math.pow(Number(a0.value), Number(a1.value)));
+                  } else if (type.isOperatorNode(a0) && a0.op === "^") {
+                      var a01 = a0.args[1];
+                      if (type.isConstantNode(a01)) {
+                          return new OperatorNode(node.op, node.fn, [
+                              a0.args[0], 
+                              new ConstantNode(a01.value * a1.value)
+                          ]);
+                      }
+                  }
+              }
+          }
+          return new OperatorNode(node.op, node.fn, [a0, a1]);
+      }
+    } else if (type.isParenthesisNode(node)) {
+        var c = simplifyCore(node.content);
+        if (type.isParenthesisNode(c) || type.isSymbolNode(c) || type.isConstantNode(c)) {
+            return c;
+        }
+        return new ParenthesisNode(c);
+    } else if (type.isFunctionNode(node)) {
+          var args = node.args.map(simplifyCore);
+          if (args.length === 1) {
+              if (type.isParenthesisNode(args[0])) {
+                  args[0] = args[0].content;
+              }
+          }
+          return new FunctionNode(simplifyCore(node.fn), args);
+    } else {
+        // cannot simplify
+    }
+    return node;
+  }
+
+  return simplifyCore;
+}
+
+exports.math = true;
+exports.name = 'simplifyCore';
+exports.path = 'algebra.simplify';
+exports.factory = factory;
+
+
+/***/ }),
+/* 135 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24132,22 +24650,22 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 133 */
+/* 136 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var nearlyEqual = __webpack_require__(3).nearlyEqual;
-var bigNearlyEqual = __webpack_require__(37);
+var bigNearlyEqual = __webpack_require__(39);
 
 function factory (type, config, load, typed) {
 
   var matrix = load(__webpack_require__(0));
 
-  var algorithm03 = load(__webpack_require__(15));
+  var algorithm03 = load(__webpack_require__(17));
   var algorithm07 = load(__webpack_require__(26));
-  var algorithm12 = load(__webpack_require__(16));
+  var algorithm12 = load(__webpack_require__(18));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
 
@@ -24343,7 +24861,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 134 */
+/* 137 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24419,7 +24937,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 135 */
+/* 138 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24481,7 +24999,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 136 */
+/* 139 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24494,14 +25012,14 @@ var object = util.object;
 function factory (type, config, load, typed) {
 
   var matrix = load(__webpack_require__(0));
-  var abs = load(__webpack_require__(31));
-  var addScalar = load(__webpack_require__(20));
-  var divideScalar = load(__webpack_require__(19));
-  var multiplyScalar = load(__webpack_require__(23));
+  var abs = load(__webpack_require__(28));
+  var addScalar = load(__webpack_require__(16));
+  var divideScalar = load(__webpack_require__(14));
+  var multiplyScalar = load(__webpack_require__(22));
   var subtract = load(__webpack_require__(21));
   var larger = load(__webpack_require__(36));
-  var equalScalar = load(__webpack_require__(11));
-  var unaryMinus = load(__webpack_require__(39));
+  var equalScalar = load(__webpack_require__(10));
+  var unaryMinus = load(__webpack_require__(37));
   
   var SparseMatrix = type.SparseMatrix;
   var DenseMatrix = type.DenseMatrix;
@@ -24875,7 +25393,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 137 */
+/* 140 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24889,8 +25407,8 @@ var number = util.number,
 
 function factory (type, config, load, typed) {
 
-  var cs_sqr = load(__webpack_require__(442));
-  var cs_lu = load(__webpack_require__(450));
+  var cs_sqr = load(__webpack_require__(444));
+  var cs_lu = load(__webpack_require__(452));
 
   /**
    * Calculate the Sparse Matrix LU decomposition with full pivoting. Sparse Matrix `A` is decomposed in two matrices (`L`, `U`) and two permutation vectors (`pinv`, `q`) where
@@ -24954,7 +25472,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 138 */
+/* 141 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25013,22 +25531,22 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 139 */
+/* 142 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var nearlyEqual = __webpack_require__(3).nearlyEqual;
-var bigNearlyEqual = __webpack_require__(37);
+var bigNearlyEqual = __webpack_require__(39);
 
 function factory (type, config, load, typed) {
   
   var matrix = load(__webpack_require__(0));
 
-  var algorithm03 = load(__webpack_require__(15));
+  var algorithm03 = load(__webpack_require__(17));
   var algorithm07 = load(__webpack_require__(26));
-  var algorithm12 = load(__webpack_require__(16));
+  var algorithm12 = load(__webpack_require__(18));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
 
@@ -25195,7 +25713,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 140 */
+/* 143 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25225,7 +25743,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 141 */
+/* 144 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25233,7 +25751,7 @@ exports.factory = factory;
 
 function factory (type, config, load) {
 
-  var cs_flip = load(__webpack_require__(88));
+  var cs_flip = load(__webpack_require__(89));
 
   /**
    * Marks the node at w[j]
@@ -25257,7 +25775,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 142 */
+/* 145 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25266,12 +25784,12 @@ exports.factory = factory;
 function factory (type, config, load, typed) {
 
   var matrix = load(__webpack_require__(0));
-  var divideScalar = load(__webpack_require__(19));
-  var multiplyScalar = load(__webpack_require__(23));
+  var divideScalar = load(__webpack_require__(14));
+  var multiplyScalar = load(__webpack_require__(22));
   var subtract = load(__webpack_require__(21));
-  var equalScalar = load(__webpack_require__(11));
+  var equalScalar = load(__webpack_require__(10));
 
-  var solveValidation = load(__webpack_require__(89));
+  var solveValidation = load(__webpack_require__(90));
 
   var DenseMatrix = type.DenseMatrix;
 
@@ -25451,7 +25969,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 143 */
+/* 146 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25460,12 +25978,12 @@ exports.factory = factory;
 function factory (type, config, load, typed) {
 
   var matrix = load(__webpack_require__(0));
-  var divideScalar = load(__webpack_require__(19));
-  var multiplyScalar = load(__webpack_require__(23));
+  var divideScalar = load(__webpack_require__(14));
+  var multiplyScalar = load(__webpack_require__(22));
   var subtract = load(__webpack_require__(21));
-  var equalScalar = load(__webpack_require__(11));
+  var equalScalar = load(__webpack_require__(10));
 
-  var solveValidation = load(__webpack_require__(89));
+  var solveValidation = load(__webpack_require__(90));
   
   var DenseMatrix = type.DenseMatrix;
 
@@ -25646,7 +26164,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 144 */
+/* 147 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25655,14 +26173,14 @@ exports.factory = factory;
 function factory (type, config, load, typed) {
 
   var matrix = load(__webpack_require__(0));
-  var divideScalar = load(__webpack_require__(19));
+  var divideScalar = load(__webpack_require__(14));
   var latex = __webpack_require__(4);
   
   var algorithm02 = load(__webpack_require__(24));
-  var algorithm03 = load(__webpack_require__(15));
+  var algorithm03 = load(__webpack_require__(17));
   var algorithm07 = load(__webpack_require__(26));
-  var algorithm11 = load(__webpack_require__(17));
-  var algorithm12 = load(__webpack_require__(16));
+  var algorithm11 = load(__webpack_require__(19));
+  var algorithm12 = load(__webpack_require__(18));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
 
@@ -25798,17 +26316,17 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 145 */
+/* 148 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var DimensionError = __webpack_require__(10);
+var DimensionError = __webpack_require__(11);
 
 function factory (type, config, load, typed) {
 
-  var equalScalar = load(__webpack_require__(11));
+  var equalScalar = load(__webpack_require__(10));
 
   var SparseMatrix = type.SparseMatrix;
 
@@ -25954,7 +26472,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 146 */
+/* 149 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25963,7 +26481,7 @@ exports.factory = factory;
 var deepMap = __webpack_require__(1);
 
 function factory (type, config, load, typed) {
-  var divideScalar = load(__webpack_require__(19));
+  var divideScalar = load(__webpack_require__(14));
 
   /**
    * Calculate the logarithm of a value.
@@ -26047,7 +26565,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 147 */
+/* 150 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26059,7 +26577,7 @@ var format = __webpack_require__(9).format;
 function factory (type, config, load, typed) {
   
   var matrix = load(__webpack_require__(0));
-  var add = load(__webpack_require__(18));
+  var add = load(__webpack_require__(20));
 
   /**
    * Calculate the trace of a matrix: the sum of the elements on the main
@@ -26201,22 +26719,22 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 148 */
+/* 151 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 function factory (type, config, load, typed) {
-  var add = load(__webpack_require__(18));
+  var add = load(__webpack_require__(20));
   var subtract = load(__webpack_require__(21));
   var multiply = load(__webpack_require__(12));
-  var divide = load(__webpack_require__(49));
-  var pow = load(__webpack_require__(47));
+  var divide = load(__webpack_require__(51));
+  var pow = load(__webpack_require__(48));
   var factorial = load(__webpack_require__(72));
   var combinations = load(__webpack_require__(73));
-  var isNegative = load(__webpack_require__(60));
-  var isInteger = load(__webpack_require__(50));
+  var isNegative = load(__webpack_require__(61));
+  var isInteger = load(__webpack_require__(53));
   var larger = load(__webpack_require__(36));
 
   /**
@@ -26277,7 +26795,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 149 */
+/* 152 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26288,7 +26806,7 @@ var isInteger = __webpack_require__(3).isInteger;
 
 function factory (type, config, load, typed) {
   var multiply = load(__webpack_require__(12));
-  var pow = load(__webpack_require__(47));
+  var pow = load(__webpack_require__(48));
 
   /**
    * Compute the gamma function of a value using Lanczos approximation for
@@ -26486,7 +27004,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 150 */
+/* 153 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26556,7 +27074,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 151 */
+/* 154 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26642,7 +27160,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 152 */
+/* 155 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26652,7 +27170,7 @@ var size = __webpack_require__(2).size;
 
 function factory (type, config, load, typed) {
   var matrix = load(__webpack_require__(0));
-  var compareAsc = load(__webpack_require__(51));
+  var compareAsc = load(__webpack_require__(54));
   var compareDesc = function (a, b) {
     return -compareAsc(a, b);
   };
@@ -26773,16 +27291,16 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 153 */
+/* 156 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var deepForEach = __webpack_require__(44);
+var deepForEach = __webpack_require__(45);
 
 function factory (type, config, load, typed) {
-  var add = load(__webpack_require__(20));
+  var add = load(__webpack_require__(16));
 
   /**
    * Compute the sum of a matrix or a list with values.
@@ -26864,7 +27382,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 154 */
+/* 157 */
 /***/ (function(module, exports) {
 
 var g;
@@ -26891,7 +27409,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 155 */
+/* 158 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26904,9 +27422,9 @@ var generalize = __webpack_require__(2).generalize;
 function factory (type, config, load, typed) {
   var equal = load(__webpack_require__(32));
   var index = load(__webpack_require__(27));
-  var matrix = load(__webpack_require__(45));
-  var size = load(__webpack_require__(28));
-  var subset = load(__webpack_require__(22));
+  var matrix = load(__webpack_require__(47));
+  var size = load(__webpack_require__(29));
+  var subset = load(__webpack_require__(23));
   var compareNatural = load(__webpack_require__(33));
   
   /**
@@ -26973,7 +27491,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 156 */
+/* 159 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26986,9 +27504,9 @@ var generalize = __webpack_require__(2).generalize;
 function factory (type, config, load, typed) {
   var equal = load(__webpack_require__(32));
   var index = load(__webpack_require__(27));
-  var matrix = load(__webpack_require__(45));
-  var size = load(__webpack_require__(28));
-  var subset = load(__webpack_require__(22));
+  var matrix = load(__webpack_require__(47));
+  var size = load(__webpack_require__(29));
+  var subset = load(__webpack_require__(23));
   var compareNatural = load(__webpack_require__(33));
   
   /**
@@ -27047,7 +27565,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 157 */
+/* 160 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27058,10 +27576,10 @@ var flatten = __webpack_require__(2).flatten;
 function factory (type, config, load, typed) {
   var index = load(__webpack_require__(27));
   var concat = load(__webpack_require__(67));
-  var size = load(__webpack_require__(28));
-  var sort = load(__webpack_require__(152));
-  var subset = load(__webpack_require__(22));
-  var setDifference = load(__webpack_require__(155));
+  var size = load(__webpack_require__(29));
+  var sort = load(__webpack_require__(155));
+  var subset = load(__webpack_require__(23));
+  var setDifference = load(__webpack_require__(158));
   
   /**
    * Create the symmetric difference of two (multi)sets.
@@ -27106,7 +27624,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 158 */
+/* 161 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27117,10 +27635,10 @@ var reduce = __webpack_require__(68);
 var containsCollections = __webpack_require__(69);
 
 function factory (type, config, load, typed) {
-  var add = load(__webpack_require__(20));
-  var divide = load(__webpack_require__(19));
-  var compare = load(__webpack_require__(51));
-  var partitionSelect = load(__webpack_require__(93));
+  var add = load(__webpack_require__(16));
+  var divide = load(__webpack_require__(14));
+  var compare = load(__webpack_require__(54));
+  var partitionSelect = load(__webpack_require__(94));
 
   /**
    * Compute the median of a matrix or a list with values. The values are
@@ -27231,7 +27749,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 159 */
+/* 162 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27239,13 +27757,13 @@ exports.factory = factory;
 
 var DEFAULT_NORMALIZATION = 'unbiased';
 
-var deepForEach = __webpack_require__(44);
+var deepForEach = __webpack_require__(45);
 
 function factory (type, config, load, typed) {
-  var add = load(__webpack_require__(20));
+  var add = load(__webpack_require__(16));
   var subtract = load(__webpack_require__(21));
-  var multiply = load(__webpack_require__(23));
-  var divide = load(__webpack_require__(19));
+  var multiply = load(__webpack_require__(22));
+  var divide = load(__webpack_require__(14));
 
   /**
    * Compute the variance of a matrix or a  list with values.
@@ -27366,7 +27884,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 160 */
+/* 163 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27441,21 +27959,21 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 161 */
+/* 164 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _simulation = __webpack_require__(162);
+var _simulation = __webpack_require__(165);
 
 var _simulation2 = _interopRequireDefault(_simulation);
 
-var _genetics = __webpack_require__(100);
+var _genetics = __webpack_require__(101);
 
 var _genetics2 = _interopRequireDefault(_genetics);
 
-var _index = __webpack_require__(587);
+var _index = __webpack_require__(589);
 
 var Index = _interopRequireWildcard(_index);
 
@@ -27463,7 +27981,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-__webpack_require__(588);
+__webpack_require__(590);
 
 
 document.addEventListener('DOMContentLoaded', function (event) {
@@ -27518,7 +28036,7 @@ document.addEventListener('DOMContentLoaded', function (event) {
 });
 
 /***/ }),
-/* 162 */
+/* 165 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27532,35 +28050,35 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _physics = __webpack_require__(74);
 
-var _blob_renderer = __webpack_require__(163);
+var _blob_renderer = __webpack_require__(166);
 
 var _blob_renderer2 = _interopRequireDefault(_blob_renderer);
 
-var _blob_brains = __webpack_require__(99);
+var _blob_brains = __webpack_require__(100);
 
 var _blob_brains2 = _interopRequireDefault(_blob_brains);
 
-var _genetics = __webpack_require__(100);
+var _genetics = __webpack_require__(101);
 
 var _genetics2 = _interopRequireDefault(_genetics);
 
-var _network = __webpack_require__(101);
+var _network = __webpack_require__(102);
 
 var _network2 = _interopRequireDefault(_network);
 
-var _simulation_util = __webpack_require__(52);
+var _simulation_util = __webpack_require__(55);
 
 var SimulationUtil = _interopRequireWildcard(_simulation_util);
 
-var _config = __webpack_require__(29);
+var _config = __webpack_require__(30);
 
 var Config = _interopRequireWildcard(_config);
 
-var _blob = __webpack_require__(585);
+var _blob = __webpack_require__(587);
 
 var _blob2 = _interopRequireDefault(_blob);
 
-var _food = __webpack_require__(586);
+var _food = __webpack_require__(588);
 
 var _food2 = _interopRequireDefault(_food);
 
@@ -27823,7 +28341,7 @@ var Simulation = function () {
 exports.default = Simulation;
 
 /***/ }),
-/* 163 */
+/* 166 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27835,47 +28353,47 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _blob_vs = __webpack_require__(164);
+var _blob_vs = __webpack_require__(167);
 
 var _blob_vs2 = _interopRequireDefault(_blob_vs);
 
-var _blob_fs = __webpack_require__(165);
+var _blob_fs = __webpack_require__(168);
 
 var _blob_fs2 = _interopRequireDefault(_blob_fs);
 
-var _normal_vs = __webpack_require__(166);
+var _normal_vs = __webpack_require__(169);
 
 var _normal_vs2 = _interopRequireDefault(_normal_vs);
 
-var _normal_fs = __webpack_require__(167);
+var _normal_fs = __webpack_require__(170);
 
 var _normal_fs2 = _interopRequireDefault(_normal_fs);
 
-var _background_vs = __webpack_require__(168);
+var _background_vs = __webpack_require__(171);
 
 var _background_vs2 = _interopRequireDefault(_background_vs);
 
-var _background_fs = __webpack_require__(169);
+var _background_fs = __webpack_require__(172);
 
 var _background_fs2 = _interopRequireDefault(_background_fs);
 
-var _blob_renderable = __webpack_require__(170);
+var _blob_renderable = __webpack_require__(173);
 
 var _blob_renderable2 = _interopRequireDefault(_blob_renderable);
 
-var _grid = __webpack_require__(176);
+var _grid = __webpack_require__(179);
 
 var _grid2 = _interopRequireDefault(_grid);
 
-var _circle = __webpack_require__(177);
+var _circle = __webpack_require__(180);
 
 var _circle2 = _interopRequireDefault(_circle);
 
-var _config = __webpack_require__(29);
+var _config = __webpack_require__(30);
 
 var Config = _interopRequireWildcard(_config);
 
-var _simulation_util = __webpack_require__(52);
+var _simulation_util = __webpack_require__(55);
 
 var SimulationUtil = _interopRequireWildcard(_simulation_util);
 
@@ -27883,7 +28401,7 @@ var _physics = __webpack_require__(74);
 
 var Physics = _interopRequireWildcard(_physics);
 
-var _render_util = __webpack_require__(98);
+var _render_util = __webpack_require__(99);
 
 var RenderUtil = _interopRequireWildcard(_render_util);
 
@@ -28167,9 +28685,9 @@ var BlobRenderer = function () {
   }, {
     key: 'createOrthographicMatrix',
     value: function createOrthographicMatrix() {
-      this.GL.canvas.width = Config.WIDTH;
-      this.GL.canvas.height = Config.HEIGHT;
-      this.GL.viewport(0, 0, Config.WIDTH, Config.HEIGHT);
+      this.GL.canvas.width = 1920;
+      this.GL.canvas.height = 1080;
+      this.GL.viewport(0, 0, 1920, 1080);
       _glMatrix.mat4.ortho(this.orthographicMatrix, 0, Config.WIDTH, Config.HEIGHT, 0, 0, 100);
     }
   }]);
@@ -28180,7 +28698,7 @@ var BlobRenderer = function () {
 exports.default = BlobRenderer;
 
 /***/ }),
-/* 164 */
+/* 167 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28194,7 +28712,7 @@ var vertexShader = "\n#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\
 exports.default = vertexShader;
 
 /***/ }),
-/* 165 */
+/* 168 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28208,7 +28726,7 @@ var fragmentShader = "\n#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float
 exports.default = fragmentShader;
 
 /***/ }),
-/* 166 */
+/* 169 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28222,7 +28740,7 @@ var vertexShader = "\n#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\
 exports.default = vertexShader;
 
 /***/ }),
-/* 167 */
+/* 170 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28236,7 +28754,7 @@ var fragmentShader = "\n#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float
 exports.default = fragmentShader;
 
 /***/ }),
-/* 168 */
+/* 171 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28250,7 +28768,7 @@ var vertexShader = "\n#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\
 exports.default = vertexShader;
 
 /***/ }),
-/* 169 */
+/* 172 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28264,7 +28782,7 @@ var fragmentShader = "\n#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float
 exports.default = fragmentShader;
 
 /***/ }),
-/* 170 */
+/* 173 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28278,7 +28796,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _glMatrix = __webpack_require__(75);
 
-var _render_util = __webpack_require__(98);
+var _render_util = __webpack_require__(99);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -28321,7 +28839,7 @@ var BlobRenderable = function () {
 exports.default = BlobRenderable;
 
 /***/ }),
-/* 171 */
+/* 174 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -28350,7 +28868,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (immutable) */ __webpack_exports__["equals"] = equals;
 /* harmony export (immutable) */ __webpack_exports__["multiplyScalar"] = multiplyScalar;
 /* harmony export (immutable) */ __webpack_exports__["multiplyScalarAndAdd"] = multiplyScalarAndAdd;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__common__ = __webpack_require__(30);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__common__ = __webpack_require__(31);
 /* Copyright (c) 2015, Brandon Jones, Colin MacKenzie IV.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -28791,7 +29309,7 @@ const sub = subtract;
 
 
 /***/ }),
-/* 172 */
+/* 175 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -28819,7 +29337,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (immutable) */ __webpack_exports__["multiplyScalarAndAdd"] = multiplyScalarAndAdd;
 /* harmony export (immutable) */ __webpack_exports__["exactEquals"] = exactEquals;
 /* harmony export (immutable) */ __webpack_exports__["equals"] = equals;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__common__ = __webpack_require__(30);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__common__ = __webpack_require__(31);
 /* Copyright (c) 2015, Brandon Jones, Colin MacKenzie IV.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29293,7 +29811,7 @@ const sub = subtract;
 
 
 /***/ }),
-/* 173 */
+/* 176 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -29342,7 +29860,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (immutable) */ __webpack_exports__["multiplyScalarAndAdd"] = multiplyScalarAndAdd;
 /* harmony export (immutable) */ __webpack_exports__["exactEquals"] = exactEquals;
 /* harmony export (immutable) */ __webpack_exports__["equals"] = equals;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__common__ = __webpack_require__(30);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__common__ = __webpack_require__(31);
 /* Copyright (c) 2015, Brandon Jones, Colin MacKenzie IV.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -31031,7 +31549,7 @@ const sub = subtract;
 
 
 /***/ }),
-/* 174 */
+/* 177 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -31051,10 +31569,10 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (immutable) */ __webpack_exports__["fromMat3"] = fromMat3;
 /* harmony export (immutable) */ __webpack_exports__["fromEuler"] = fromEuler;
 /* harmony export (immutable) */ __webpack_exports__["str"] = str;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__common__ = __webpack_require__(30);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__mat3__ = __webpack_require__(95);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__vec3__ = __webpack_require__(96);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__vec4__ = __webpack_require__(97);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__common__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__mat3__ = __webpack_require__(96);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__vec3__ = __webpack_require__(97);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__vec4__ = __webpack_require__(98);
 /* Copyright (c) 2015, Brandon Jones, Colin MacKenzie IV.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -31722,7 +32240,7 @@ const setAxes = (function() {
 
 
 /***/ }),
-/* 175 */
+/* 178 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -31761,7 +32279,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (immutable) */ __webpack_exports__["str"] = str;
 /* harmony export (immutable) */ __webpack_exports__["exactEquals"] = exactEquals;
 /* harmony export (immutable) */ __webpack_exports__["equals"] = equals;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__common__ = __webpack_require__(30);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__common__ = __webpack_require__(31);
 /* Copyright (c) 2015, Brandon Jones, Colin MacKenzie IV.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32365,19 +32883,19 @@ const forEach = (function() {
 
 
 /***/ }),
-/* 176 */
+/* 179 */
 /***/ (function(module, exports) {
 
 module.exports = "data:image/jpeg;base64,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"
 
 /***/ }),
-/* 177 */
+/* 180 */
 /***/ (function(module, exports) {
 
 module.exports = "data:image/png;base64,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"
 
 /***/ }),
-/* 178 */
+/* 181 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -32389,7 +32907,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _brain_interface = __webpack_require__(179);
+var _brain_interface = __webpack_require__(182);
 
 var _brain_interface2 = _interopRequireDefault(_brain_interface);
 
@@ -32435,7 +32953,7 @@ var BlobBrain = function (_BrainInterface) {
 exports.default = BlobBrain;
 
 /***/ }),
-/* 179 */
+/* 182 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -32477,10 +32995,10 @@ var BrainInterface = function () {
 exports.default = BrainInterface;
 
 /***/ }),
-/* 180 */
+/* 183 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var core = __webpack_require__(181);
+var core = __webpack_require__(184);
 
 /**
  * math.js factory function. Creates a new instance of math.js
@@ -32511,7 +33029,7 @@ function create (config) {
   math.create = create;
 
   // import data types, functions, constants, expression parser, etc.
-  math['import'](__webpack_require__(188));
+  math['import'](__webpack_require__(191));
 
   return math;
 }
@@ -32521,21 +33039,21 @@ module.exports = create();
 
 
 /***/ }),
-/* 181 */
+/* 184 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(182);
+module.exports = __webpack_require__(185);
 
 /***/ }),
-/* 182 */
+/* 185 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var isFactory = __webpack_require__(5).isFactory;
-var typedFactory = __webpack_require__(183);
-var emitter = __webpack_require__(102);
+var typedFactory = __webpack_require__(186);
+var emitter = __webpack_require__(103);
 
-var importFactory = __webpack_require__(186);
-var configFactory = __webpack_require__(187);
+var importFactory = __webpack_require__(189);
+var configFactory = __webpack_require__(190);
 
 /**
  * Math.js core. Creates a new, empty math.js instance
@@ -32665,13 +33183,13 @@ exports.create = function create (options) {
 
 
 /***/ }),
-/* 183 */
+/* 186 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var typedFunction = __webpack_require__(184);
+var typedFunction = __webpack_require__(187);
 var digits = __webpack_require__(3).digits;
 var isBigNumber = __webpack_require__(76);
-var isMatrix = __webpack_require__(61);
+var isMatrix = __webpack_require__(62);
 
 // returns a new instance of typed-function
 var createTyped = function () {
@@ -32962,7 +33480,7 @@ exports.create = function create(type) {
 
 
 /***/ }),
-/* 184 */
+/* 187 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -34362,7 +34880,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 
 
 /***/ }),
-/* 185 */
+/* 188 */
 /***/ (function(module, exports) {
 
 function E () {
@@ -34434,7 +34952,7 @@ module.exports = E;
 
 
 /***/ }),
-/* 186 */
+/* 189 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -34443,7 +34961,7 @@ module.exports = E;
 var lazy = __webpack_require__(5).lazy;
 var isFactory = __webpack_require__(5).isFactory;
 var traverse = __webpack_require__(5).traverse;
-var ArgumentsError = __webpack_require__(53);
+var ArgumentsError = __webpack_require__(46);
 
 function factory (type, config, load, typed, math) {
   /**
@@ -34748,7 +35266,7 @@ exports.lazy = true;
 
 
 /***/ }),
-/* 187 */
+/* 190 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -34879,55 +35397,55 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 188 */
+/* 191 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(189),        // data types (Matrix, Complex, Unit, ...)
-  __webpack_require__(221),   // constants
-  __webpack_require__(223),  // expression parsing
-  __webpack_require__(435),    // functions
-  __webpack_require__(577),        // serialization utility (math.json.reviver)
-  __webpack_require__(579)        // errors
+  __webpack_require__(192),        // data types (Matrix, Complex, Unit, ...)
+  __webpack_require__(224),   // constants
+  __webpack_require__(226),  // expression parsing
+  __webpack_require__(438),    // functions
+  __webpack_require__(579),        // serialization utility (math.json.reviver)
+  __webpack_require__(581)        // errors
 ];
 
 
 /***/ }),
-/* 189 */
+/* 192 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(190),
-  __webpack_require__(194),
-  __webpack_require__(195),
-  __webpack_require__(199),
+  __webpack_require__(193),
+  __webpack_require__(197),
+  __webpack_require__(198),
   __webpack_require__(202),
   __webpack_require__(205),
+  __webpack_require__(208),
   __webpack_require__(79),
-  __webpack_require__(213),
-  __webpack_require__(214),
-  __webpack_require__(215)
+  __webpack_require__(216),
+  __webpack_require__(217),
+  __webpack_require__(218)
 ];
 
 
 /***/ }),
-/* 190 */
+/* 193 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
   // type
-  __webpack_require__(191),
+  __webpack_require__(194),
 
   // construction function
-  __webpack_require__(193)
+  __webpack_require__(196)
 ];
 
 
 /***/ }),
-/* 191 */
+/* 194 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Decimal = __webpack_require__(192); // make sure to pick the es5 version
+var Decimal = __webpack_require__(195); // make sure to pick the es5 version
 
 function factory (type, config, load, typed, math) {
   var BigNumber = Decimal.clone({precision: config.precision});
@@ -34977,16 +35495,16 @@ exports.factory = factory;
 exports.math = true; // request access to the math namespace
 
 /***/ }),
-/* 192 */
+/* 195 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var __WEBPACK_AMD_DEFINE_RESULT__;/*! decimal.js v7.2.3 https://github.com/MikeMcl/decimal.js/LICENCE */
+var __WEBPACK_AMD_DEFINE_RESULT__;/*! decimal.js v9.0.1 https://github.com/MikeMcl/decimal.js/LICENCE */
 ;(function (globalScope) {
   'use strict';
 
 
   /*
-   *  decimal.js v7.2.3
+   *  decimal.js v9.0.1
    *  An arbitrary-precision Decimal type for JavaScript.
    *  https://github.com/MikeMcl/decimal.js
    *  Copyright (c) 2017 Michael Mclaughlin <M8ch88l@gmail.com>
@@ -35016,7 +35534,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*! decimal.js v7.2.3 https://github.com/MikeM
 
 
     // The initial configuration properties of the Decimal constructor.
-    Decimal = {
+    DEFAULTS = {
 
       // These values must be integers within the stated ranges (inclusive).
       // Most of these values can be changed at run-time using the `Decimal.config` method.
@@ -35081,7 +35599,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*! decimal.js v7.2.3 https://github.com/MikeM
   // ----------------------------------- END OF EDITABLE DEFAULTS ------------------------------- //
 
 
-    inexact, noConflict, quadrant,
+    Decimal, inexact, noConflict, quadrant,
     external = true,
 
     decimalError = '[DecimalError] ',
@@ -35105,7 +35623,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*! decimal.js v7.2.3 https://github.com/MikeM
     PI_PRECISION = PI.length - 1,
 
     // Decimal.prototype object
-    P = {};
+    P = { name: '[object Decimal]' };
 
 
   // Decimal prototype methods
@@ -39142,6 +39660,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*! decimal.js v7.2.3 https://github.com/MikeM
    *   minE       {number}
    *   modulo     {number}
    *   crypto     {boolean|number}
+   *   defaults   {true}
    *
    * E.g. Decimal.config({ precision: 20, rounding: 4 })
    *
@@ -39149,6 +39668,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*! decimal.js v7.2.3 https://github.com/MikeM
   function config(obj) {
     if (!obj || typeof obj !== 'object') throw Error(decimalError + 'Object expected');
     var i, p, v,
+      useDefaults = obj.defaults === true,
       ps = [
         'precision', 1, MAX_DIGITS,
         'rounding', 0, 8,
@@ -39160,13 +39680,15 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*! decimal.js v7.2.3 https://github.com/MikeM
       ];
 
     for (i = 0; i < ps.length; i += 3) {
-      if ((v = obj[p = ps[i]]) !== void 0) {
+      if (p = ps[i], useDefaults) this[p] = DEFAULTS[p];
+      if ((v = obj[p]) !== void 0) {
         if (mathfloor(v) === v && v >= ps[i + 1] && v <= ps[i + 2]) this[p] = v;
         else throw Error(invalidArgument + p + ': ' + v);
       }
     }
 
-    if ((v = obj[p = 'crypto']) !== void 0) {
+    if (p = 'crypto', useDefaults) this[p] = DEFAULTS[p];
+    if ((v = obj[p]) !== void 0) {
       if (v === true || v === false || v === 0 || v === 1) {
         if (v) {
           if (typeof crypto != 'undefined' && crypto &&
@@ -39309,6 +39831,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*! decimal.js v7.2.3 https://github.com/MikeM
 
     Decimal.config = Decimal.set = config;
     Decimal.clone = clone;
+    Decimal.isDecimal = isDecimalInstance;
 
     Decimal.abs = abs;
     Decimal.acos = acos;
@@ -39349,8 +39872,10 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*! decimal.js v7.2.3 https://github.com/MikeM
 
     if (obj === void 0) obj = {};
     if (obj) {
-      ps = ['precision', 'rounding', 'toExpNeg', 'toExpPos', 'maxE', 'minE', 'modulo', 'crypto'];
-      for (i = 0; i < ps.length;) if (!obj.hasOwnProperty(p = ps[i++])) obj[p] = this[p];
+      if (obj.defaults !== true) {
+        ps = ['precision', 'rounding', 'toExpNeg', 'toExpPos', 'maxE', 'minE', 'modulo', 'crypto'];
+        for (i = 0; i < ps.length;) if (!obj.hasOwnProperty(p = ps[i++])) obj[p] = this[p];
+      }
     }
 
     Decimal.config(obj);
@@ -39424,6 +39949,16 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*! decimal.js v7.2.3 https://github.com/MikeM
     external = true;
 
     return t.sqrt();
+  }
+
+
+  /*
+   * Return true if object is a Decimal instance (where Decimal is any Decimal constructor),
+   * otherwise return false.
+   *
+   */
+  function isDecimalInstance(obj) {
+    return obj instanceof Decimal || obj && obj.name === '[object Decimal]' || false;
   }
 
 
@@ -39757,7 +40292,9 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*! decimal.js v7.2.3 https://github.com/MikeM
 
 
   // Create and configure initial Decimal constructor.
-  Decimal = clone(Decimal);
+  Decimal = clone(DEFAULTS);
+
+  Decimal['default'] = Decimal.Decimal = Decimal;
 
   // Create the internal constants from their string values.
   LN10 = new Decimal(LN10);
@@ -39776,7 +40313,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*! decimal.js v7.2.3 https://github.com/MikeM
 
   // Node and other environments that support module.exports.
   } else if (typeof module != 'undefined' && module.exports) {
-    module.exports = Decimal['default'] = Decimal.Decimal = Decimal;
+    module.exports = Decimal;
 
   // Browser.
   } else {
@@ -39797,7 +40334,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*! decimal.js v7.2.3 https://github.com/MikeM
 
 
 /***/ }),
-/* 193 */
+/* 196 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39872,7 +40409,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 194 */
+/* 197 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39957,20 +40494,20 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 195 */
+/* 198 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
   // type
-  __webpack_require__(196),
+  __webpack_require__(199),
 
   // construction function
-  __webpack_require__(198)
+  __webpack_require__(201)
 ];
 
 
 /***/ }),
-/* 196 */
+/* 199 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40142,7 +40679,7 @@ exports.lazy = false; // we need to register a listener on the import events, so
 
 
 /***/ }),
-/* 197 */
+/* 200 */
 /***/ (function(module, exports) {
 
 /**
@@ -40331,7 +40868,7 @@ exports.toFixed = function (value, precision) {
 
 
 /***/ }),
-/* 198 */
+/* 201 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40389,20 +40926,20 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 199 */
+/* 202 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
   // type
-  __webpack_require__(103),
+  __webpack_require__(104),
 
   // construction function
-  __webpack_require__(201)
+  __webpack_require__(204)
 ];
 
 
 /***/ }),
-/* 200 */
+/* 203 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -41662,7 +42199,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
 
 
 /***/ }),
-/* 201 */
+/* 204 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41769,23 +42306,23 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 202 */
+/* 205 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
   // type
-  __webpack_require__(203),
+  __webpack_require__(206),
 
   // construction function
-  __webpack_require__(104)
+  __webpack_require__(105)
 ];
 
 
 /***/ }),
-/* 203 */
+/* 206 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Fraction = __webpack_require__(204);
+var Fraction = __webpack_require__(207);
 
 /**
  * Attach type information
@@ -41827,11 +42364,11 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 204 */
+/* 207 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
- * @license Fraction.js v4.0.2 09/09/2015
+ * @license Fraction.js v4.0.4 09/09/2015
  * http://www.xarg.org/2014/03/rational-numbers-in-javascript/
  *
  * Copyright (c) 2015, Robert Eisele (robert@xarg.org)
@@ -42015,6 +42552,9 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
         case "string":
         {
           B = p1.match(/\d+|./g);
+          
+          if (B === null)
+            throwInvalidParam();
 
           if (B[A] === '-') {// Check for minus sign at the beginning
             s = -1;
@@ -42615,29 +43155,29 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
 
 
 /***/ }),
-/* 205 */
+/* 208 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
   // types
   __webpack_require__(77),
-  __webpack_require__(45),
-  __webpack_require__(207),
-  __webpack_require__(208),
-  __webpack_require__(209),
+  __webpack_require__(47),
   __webpack_require__(210),
+  __webpack_require__(211),
+  __webpack_require__(212),
+  __webpack_require__(213),
   __webpack_require__(27),
-  __webpack_require__(105),
+  __webpack_require__(106),
 
   // construction functions
-  __webpack_require__(211),
+  __webpack_require__(214),
   __webpack_require__(0),
-  __webpack_require__(212)
+  __webpack_require__(215)
 ];
 
 
 /***/ }),
-/* 206 */
+/* 209 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -42654,14 +43194,14 @@ exports.isBoolean = function(value) {
 
 
 /***/ }),
-/* 207 */
+/* 210 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var util = __webpack_require__(25);
-var DimensionError = __webpack_require__(10);
+var DimensionError = __webpack_require__(11);
 
 var array = util.array;
 var object = util.object;
@@ -42677,7 +43217,7 @@ var validateIndex = array.validateIndex;
 
 function factory (type, config, load, typed) {
   var Matrix = load(__webpack_require__(77)); // force loading Matrix (do not use via type.Matrix)
-  var equalScalar = load(__webpack_require__(11));
+  var equalScalar = load(__webpack_require__(10));
 
   /**
    * Sparse Matrix implementation. This type implements a Compressed Column Storage format
@@ -44095,7 +44635,7 @@ exports.lazy = false;  // no lazy loading, as we alter type.Matrix._storage
 
 
 /***/ }),
-/* 208 */
+/* 211 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -44103,8 +44643,8 @@ exports.lazy = false;  // no lazy loading, as we alter type.Matrix._storage
 
 function factory (type, config, load) {
   
-  var add = load(__webpack_require__(18));
-  var equalScalar = load(__webpack_require__(11));
+  var add = load(__webpack_require__(20));
+  var equalScalar = load(__webpack_require__(10));
   
   /**
    * An ordered Sparse Accumulator is a representation for a sparse vector that includes a dense array 
@@ -44243,7 +44783,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 209 */
+/* 212 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -44251,7 +44791,7 @@ exports.factory = factory;
 
 function factory (type, config, load, typed) {
   
-  var smaller = load(__webpack_require__(46));
+  var smaller = load(__webpack_require__(41));
   var larger = load(__webpack_require__(36));
   
   var oneOverLogPhi = 1.0 / Math.log((1.0 + Math.sqrt(5.0)) / 2.0);
@@ -44599,7 +45139,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 210 */
+/* 213 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -44615,9 +45155,9 @@ var isString = string.isString;
 
 function factory (type, config, load) {
 
-  var DenseMatrix = load(__webpack_require__(45));
+  var DenseMatrix = load(__webpack_require__(47));
 
-  var smaller = load(__webpack_require__(46));
+  var smaller = load(__webpack_require__(41));
 
   function ImmutableDenseMatrix(data, datatype) {
     if (!(this instanceof ImmutableDenseMatrix))
@@ -44839,7 +45379,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 211 */
+/* 214 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -44910,7 +45450,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 212 */
+/* 215 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -44978,17 +45518,17 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 213 */
+/* 216 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
   // type
-  __webpack_require__(106)
+  __webpack_require__(107)
 ];
 
 
 /***/ }),
-/* 214 */
+/* 217 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -45064,29 +45604,29 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 215 */
+/* 218 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
   // type
-  __webpack_require__(216),
-
-  // construction function
-  __webpack_require__(217),
-
-  // create new units
-  __webpack_require__(218),
-
-  // split units
   __webpack_require__(219),
 
+  // construction function
+  __webpack_require__(220),
+
+  // create new units
+  __webpack_require__(221),
+
+  // split units
+  __webpack_require__(222),
+
   // physical constants
-  __webpack_require__(220)
+  __webpack_require__(223)
 ];
 
 
 /***/ }),
-/* 216 */
+/* 219 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -45094,23 +45634,23 @@ module.exports = [
 
 var endsWith = __webpack_require__(9).endsWith;
 var clone = __webpack_require__(5).clone;
-var constants = __webpack_require__(107);
+var constants = __webpack_require__(108);
 
 function factory (type, config, load, typed, math) {
-  var add       = load(__webpack_require__(20));
+  var add       = load(__webpack_require__(16));
   var subtract  = load(__webpack_require__(21));
-  var multiply  = load(__webpack_require__(23));
-  var divide    = load(__webpack_require__(19));
-  var pow       = load(__webpack_require__(47));
-  var abs       = load(__webpack_require__(31));
-  var fix       = load(__webpack_require__(108));
-  var round     = load(__webpack_require__(109));
+  var multiply  = load(__webpack_require__(22));
+  var divide    = load(__webpack_require__(14));
+  var pow       = load(__webpack_require__(48));
+  var abs       = load(__webpack_require__(28));
+  var fix       = load(__webpack_require__(109));
+  var round     = load(__webpack_require__(110));
   var equal     = load(__webpack_require__(32));
   var isNumeric = load(__webpack_require__(80));
-  var format    = load(__webpack_require__(110));
+  var format    = load(__webpack_require__(111));
   var getTypeOf = load(__webpack_require__(81));
   var toNumber  = load(__webpack_require__(79));
-  var Complex   = load(__webpack_require__(103));
+  var Complex   = load(__webpack_require__(104));
 
   /**
    * A unit can be constructed in the following ways:
@@ -48377,7 +48917,7 @@ exports.math = true; // request access to the math namespace
 
 
 /***/ }),
-/* 217 */
+/* 220 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -48445,7 +48985,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 218 */
+/* 221 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -48537,7 +49077,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 219 */
+/* 222 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -48581,7 +49121,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 220 */
+/* 223 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var lazy = __webpack_require__(5).lazy;
@@ -48677,14 +49217,14 @@ exports.math = true;   // request access to the math namespace
 
 
 /***/ }),
-/* 221 */
+/* 224 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var object = __webpack_require__(5);
-var bigConstants = __webpack_require__(107);
+var bigConstants = __webpack_require__(108);
 
 function factory (type, config, load, typed, math) {
   // listen for changed in the configuration, automatically reload
@@ -48743,7 +49283,7 @@ function factory (type, config, load, typed, math) {
   setConstant(math, 'i', type.Complex.I);
 
   // meta information
-  setConstant(math, 'version', __webpack_require__(222));
+  setConstant(math, 'version', __webpack_require__(225));
 }
 
 // create a constant in both math and mathWithTransform
@@ -48763,32 +49303,34 @@ exports.lazy = false;  // no lazy loading of constants, the constants themselves
 exports.math = true;   // request access to the math namespace
 
 /***/ }),
-/* 222 */
+/* 225 */
 /***/ (function(module, exports) {
 
-module.exports = '3.17.0';
+module.exports = '3.20.0';
 // Note: This file is automatically generated when building math.js.
 // Changes made in this file will be overwritten.
 
 
 /***/ }),
-/* 223 */
+/* 226 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(111),
-  __webpack_require__(415),
-  __webpack_require__(421),
-  __webpack_require__(423),
+  // Note that the docs folder is called "embeddedDocs" and not "docs" to prevent issues
+  // with yarn autoclean. See https://github.com/josdejong/mathjs/issues/969
+  __webpack_require__(112),
+  __webpack_require__(419),
+  __webpack_require__(424),
+  __webpack_require__(426),
 
-  __webpack_require__(434),
-  __webpack_require__(41),
-  __webpack_require__(123)
+  __webpack_require__(437),
+  __webpack_require__(43),
+  __webpack_require__(125)
 ];
 
 
 /***/ }),
-/* 224 */
+/* 227 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -48813,7 +49355,7 @@ module.exports = {
 
 
 /***/ }),
-/* 225 */
+/* 228 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -48840,7 +49382,7 @@ module.exports = {
 
 
 /***/ }),
-/* 226 */
+/* 229 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -48865,7 +49407,7 @@ module.exports = {
 
 
 /***/ }),
-/* 227 */
+/* 230 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -48889,7 +49431,7 @@ module.exports = {
 
 
 /***/ }),
-/* 228 */
+/* 231 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -48912,7 +49454,7 @@ module.exports = {
 
 
 /***/ }),
-/* 229 */
+/* 232 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -48943,7 +49485,7 @@ module.exports = {
 
 
 /***/ }),
-/* 230 */
+/* 233 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -48974,7 +49516,7 @@ module.exports = {
 
 
 /***/ }),
-/* 231 */
+/* 234 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49004,7 +49546,7 @@ module.exports = {
 
 
 /***/ }),
-/* 232 */
+/* 235 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49029,7 +49571,7 @@ module.exports = {
 
 
 /***/ }),
-/* 233 */
+/* 236 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49050,7 +49592,7 @@ module.exports = {
 
 
 /***/ }),
-/* 234 */
+/* 237 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49074,7 +49616,7 @@ module.exports = {
 
 
 /***/ }),
-/* 235 */
+/* 238 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49100,7 +49642,7 @@ module.exports = {
 
 
 /***/ }),
-/* 236 */
+/* 239 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49118,7 +49660,7 @@ module.exports = {
 
 
 /***/ }),
-/* 237 */
+/* 240 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49138,7 +49680,7 @@ module.exports = {
 
 
 /***/ }),
-/* 238 */
+/* 241 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49157,7 +49699,7 @@ module.exports = {
 
 
 /***/ }),
-/* 239 */
+/* 242 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49176,7 +49718,7 @@ module.exports = {
 
 
 /***/ }),
-/* 240 */
+/* 243 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49195,7 +49737,7 @@ module.exports = {
 
 
 /***/ }),
-/* 241 */
+/* 244 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49214,7 +49756,7 @@ module.exports = {
 
 
 /***/ }),
-/* 242 */
+/* 245 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49233,7 +49775,7 @@ module.exports = {
 
 
 /***/ }),
-/* 243 */
+/* 246 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49252,7 +49794,7 @@ module.exports = {
 
 
 /***/ }),
-/* 244 */
+/* 247 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49270,7 +49812,7 @@ module.exports = {
 
 
 /***/ }),
-/* 245 */
+/* 248 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49288,7 +49830,7 @@ module.exports = {
 
 
 /***/ }),
-/* 246 */
+/* 249 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49307,7 +49849,7 @@ module.exports = {
 
 
 /***/ }),
-/* 247 */
+/* 250 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49326,7 +49868,7 @@ module.exports = {
 
 
 /***/ }),
-/* 248 */
+/* 251 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49345,7 +49887,7 @@ module.exports = {
 
 
 /***/ }),
-/* 249 */
+/* 252 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49363,7 +49905,7 @@ module.exports = {
 
 
 /***/ }),
-/* 250 */
+/* 253 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49381,7 +49923,7 @@ module.exports = {
 
 
 /***/ }),
-/* 251 */
+/* 254 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49409,7 +49951,7 @@ module.exports = {
 
 
 /***/ }),
-/* 252 */
+/* 255 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49432,7 +49974,7 @@ module.exports = {
 
 
 /***/ }),
-/* 253 */
+/* 256 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49455,7 +49997,7 @@ module.exports = {
 
 
 /***/ }),
-/* 254 */
+/* 257 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49478,7 +50020,7 @@ module.exports = {
 
 
 /***/ }),
-/* 255 */
+/* 258 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49503,7 +50045,30 @@ module.exports = {
 
 
 /***/ }),
-/* 256 */
+/* 259 */
+/***/ (function(module, exports) {
+
+module.exports = {
+  'name': 'rationalize',
+  'category': 'Algebra',
+  'syntax': [
+    'rationalize(expr)',
+    'rationalize(expr, scope)',
+    'rationalize(expr, scope, detailed)'
+  ],
+  'description': 'Transform a rationalizable expression in a rational fraction. If rational fraction is one variable polynomial then converts the numerator and denominator in canonical form, with decreasing exponents, returning the coefficients of numerator.',
+  'examples': [
+    'rationalize("2x/y - y/(x+1)")',
+    'rationalize("2x/y - y/(x+1)", true)',
+  ],
+  'seealso': [
+    'simplify'
+  ]
+};
+
+
+/***/ }),
+/* 260 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49523,7 +50088,7 @@ module.exports = {
 
 
 /***/ }),
-/* 257 */
+/* 261 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49544,7 +50109,7 @@ module.exports = {
 
 
 /***/ }),
-/* 258 */
+/* 262 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49565,7 +50130,7 @@ module.exports = {
 
 
 /***/ }),
-/* 259 */
+/* 263 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49584,7 +50149,7 @@ module.exports = {
 
 
 /***/ }),
-/* 260 */
+/* 264 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49609,7 +50174,7 @@ module.exports = {
 
 
 /***/ }),
-/* 261 */
+/* 265 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49640,7 +50205,7 @@ module.exports = {
 
 
 /***/ }),
-/* 262 */
+/* 266 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49661,7 +50226,7 @@ module.exports = {
 
 
 /***/ }),
-/* 263 */
+/* 267 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49685,7 +50250,7 @@ module.exports = {
 
 
 /***/ }),
-/* 264 */
+/* 268 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49711,7 +50276,7 @@ module.exports = {
 
 
 /***/ }),
-/* 265 */
+/* 269 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49736,7 +50301,7 @@ module.exports = {
 
 
 /***/ }),
-/* 266 */
+/* 270 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49761,7 +50326,7 @@ module.exports = {
 
 
 /***/ }),
-/* 267 */
+/* 271 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49784,7 +50349,7 @@ module.exports = {
 
 
 /***/ }),
-/* 268 */
+/* 272 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49809,7 +50374,7 @@ module.exports = {
 
 
 /***/ }),
-/* 269 */
+/* 273 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49831,7 +50396,7 @@ module.exports = {
 
 
 /***/ }),
-/* 270 */
+/* 274 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49852,7 +50417,7 @@ module.exports = {
 
 
 /***/ }),
-/* 271 */
+/* 275 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49873,7 +50438,7 @@ module.exports = {
 
 
 /***/ }),
-/* 272 */
+/* 276 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49895,7 +50460,7 @@ module.exports = {
 
 
 /***/ }),
-/* 273 */
+/* 277 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49915,7 +50480,7 @@ module.exports = {
 
 
 /***/ }),
-/* 274 */
+/* 278 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49943,7 +50508,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 275 */
+/* 279 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49968,7 +50533,7 @@ module.exports = {
 
 
 /***/ }),
-/* 276 */
+/* 280 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -49994,7 +50559,7 @@ module.exports = {
 
 
 /***/ }),
-/* 277 */
+/* 281 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50019,7 +50584,7 @@ module.exports = {
 
 
 /***/ }),
-/* 278 */
+/* 282 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50045,7 +50610,7 @@ module.exports = {
 
 
 /***/ }),
-/* 279 */
+/* 283 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50071,7 +50636,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 280 */
+/* 284 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50093,7 +50658,7 @@ module.exports = {
 
 
 /***/ }),
-/* 281 */
+/* 285 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50118,7 +50683,7 @@ module.exports = {
 
 
 /***/ }),
-/* 282 */
+/* 286 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50141,7 +50706,7 @@ module.exports = {
 
 
 /***/ }),
-/* 283 */
+/* 287 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50165,7 +50730,7 @@ module.exports = {
 
 
 /***/ }),
-/* 284 */
+/* 288 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50192,7 +50757,7 @@ module.exports = {
 
 
 /***/ }),
-/* 285 */
+/* 289 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50217,7 +50782,7 @@ module.exports = {
 
 
 /***/ }),
-/* 286 */
+/* 290 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50241,7 +50806,7 @@ module.exports = {
 
 
 /***/ }),
-/* 287 */
+/* 291 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50264,7 +50829,7 @@ module.exports = {
 
 
 /***/ }),
-/* 288 */
+/* 292 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50284,7 +50849,7 @@ module.exports = {
 
 
 /***/ }),
-/* 289 */
+/* 293 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50307,7 +50872,7 @@ module.exports = {
 
 
 /***/ }),
-/* 290 */
+/* 294 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50330,7 +50895,7 @@ module.exports = {
 
 
 /***/ }),
-/* 291 */
+/* 295 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50352,7 +50917,7 @@ module.exports = {
 
 
 /***/ }),
-/* 292 */
+/* 296 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50373,7 +50938,7 @@ module.exports = {
 
 
 /***/ }),
-/* 293 */
+/* 297 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50395,7 +50960,7 @@ module.exports = {
 
 
 /***/ }),
-/* 294 */
+/* 298 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50418,7 +50983,7 @@ module.exports = {
 
 
 /***/ }),
-/* 295 */
+/* 299 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50441,7 +51006,7 @@ module.exports = {
 
 
 /***/ }),
-/* 296 */
+/* 300 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50459,7 +51024,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 297 */
+/* 301 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50477,7 +51042,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 298 */
+/* 302 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50494,7 +51059,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 299 */
+/* 303 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50512,7 +51077,7 @@ module.exports = {
 
 
 /***/ }),
-/* 300 */
+/* 304 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50534,7 +51099,7 @@ module.exports = {
 
 
 /***/ }),
-/* 301 */
+/* 305 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50555,7 +51120,7 @@ module.exports = {
 
 
 /***/ }),
-/* 302 */
+/* 306 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50576,7 +51141,7 @@ module.exports = {
 
 
 /***/ }),
-/* 303 */
+/* 307 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50602,7 +51167,7 @@ module.exports = {
 
 
 /***/ }),
-/* 304 */
+/* 308 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50628,7 +51193,7 @@ module.exports = {
 
 
 /***/ }),
-/* 305 */
+/* 309 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50654,7 +51219,7 @@ module.exports = {
 
 
 /***/ }),
-/* 306 */
+/* 310 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50680,7 +51245,7 @@ module.exports = {
 
 
 /***/ }),
-/* 307 */
+/* 311 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50700,7 +51265,7 @@ module.exports = {
 
 
 /***/ }),
-/* 308 */
+/* 312 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50720,7 +51285,7 @@ module.exports = {
 
 
 /***/ }),
-/* 309 */
+/* 313 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50740,7 +51305,7 @@ module.exports = {
 
 
 /***/ }),
-/* 310 */
+/* 314 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50760,7 +51325,7 @@ module.exports = {
 
 
 /***/ }),
-/* 311 */
+/* 315 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50783,7 +51348,7 @@ module.exports = {
 
 
 /***/ }),
-/* 312 */
+/* 316 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50807,7 +51372,7 @@ module.exports = {
 
 
 /***/ }),
-/* 313 */
+/* 317 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50830,7 +51395,7 @@ module.exports = {
 
 
 /***/ }),
-/* 314 */
+/* 318 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50854,7 +51419,7 @@ module.exports = {
 
 
 /***/ }),
-/* 315 */
+/* 319 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50879,7 +51444,7 @@ module.exports = {
 
 
 /***/ }),
-/* 316 */
+/* 320 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50902,7 +51467,7 @@ module.exports = {
 
 
 /***/ }),
-/* 317 */
+/* 321 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50923,7 +51488,7 @@ module.exports = {
 
 
 /***/ }),
-/* 318 */
+/* 322 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50947,7 +51512,7 @@ module.exports = {
 
 
 /***/ }),
-/* 319 */
+/* 323 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50972,7 +51537,7 @@ module.exports = {
 
 
 /***/ }),
-/* 320 */
+/* 324 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -50997,7 +51562,7 @@ module.exports = {
 
 
 /***/ }),
-/* 321 */
+/* 325 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51017,7 +51582,7 @@ module.exports = {
 
 
 /***/ }),
-/* 322 */
+/* 326 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51040,7 +51605,7 @@ module.exports = {
 
 
 /***/ }),
-/* 323 */
+/* 327 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51058,7 +51623,7 @@ module.exports = {
 
 
 /***/ }),
-/* 324 */
+/* 328 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51080,7 +51645,7 @@ module.exports = {
 
 
 /***/ }),
-/* 325 */
+/* 329 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51101,7 +51666,7 @@ module.exports = {
 
 
 /***/ }),
-/* 326 */
+/* 330 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51119,7 +51684,7 @@ module.exports = {
 
 
 /***/ }),
-/* 327 */
+/* 331 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51148,7 +51713,7 @@ module.exports = {
 
 
 /***/ }),
-/* 328 */
+/* 332 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51168,7 +51733,7 @@ module.exports = {
 
 
 /***/ }),
-/* 329 */
+/* 333 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51199,7 +51764,7 @@ module.exports = {
 
 
 /***/ }),
-/* 330 */
+/* 334 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51224,7 +51789,7 @@ module.exports = {
 
 
 /***/ }),
-/* 331 */
+/* 335 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51246,7 +51811,7 @@ module.exports = {
 
 
 /***/ }),
-/* 332 */
+/* 336 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51270,7 +51835,7 @@ module.exports = {
 
 
 /***/ }),
-/* 333 */
+/* 337 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51293,7 +51858,7 @@ module.exports = {
 
 
 /***/ }),
-/* 334 */
+/* 338 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51316,7 +51881,7 @@ module.exports = {
 
 
 /***/ }),
-/* 335 */
+/* 339 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51347,7 +51912,7 @@ module.exports = {
 
 
 /***/ }),
-/* 336 */
+/* 340 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51368,7 +51933,7 @@ module.exports = {
 
 
 /***/ }),
-/* 337 */
+/* 341 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51391,7 +51956,7 @@ module.exports = {
 
 
 /***/ }),
-/* 338 */
+/* 342 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51419,7 +51984,7 @@ module.exports = {
 
 
 /***/ }),
-/* 339 */
+/* 343 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51437,7 +52002,7 @@ module.exports = {
 
 
 /***/ }),
-/* 340 */
+/* 344 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51458,7 +52023,7 @@ module.exports = {
 
 
 /***/ }),
-/* 341 */
+/* 345 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51479,7 +52044,7 @@ module.exports = {
 
 
 /***/ }),
-/* 342 */
+/* 346 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51497,7 +52062,7 @@ module.exports = {
 
 
 /***/ }),
-/* 343 */
+/* 347 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51514,7 +52079,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 344 */
+/* 348 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51534,7 +52099,7 @@ module.exports = {
 
 
 /***/ }),
-/* 345 */
+/* 349 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51562,7 +52127,7 @@ module.exports = {
 
 
 /***/ }),
-/* 346 */
+/* 350 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51588,7 +52153,7 @@ module.exports = {
 
 
 /***/ }),
-/* 347 */
+/* 351 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51611,7 +52176,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 348 */
+/* 352 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51636,7 +52201,7 @@ module.exports = {
 
 
 /***/ }),
-/* 349 */
+/* 353 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51665,7 +52230,7 @@ module.exports = {
 
 
 /***/ }),
-/* 350 */
+/* 354 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51687,7 +52252,7 @@ module.exports = {
 
 
 /***/ }),
-/* 351 */
+/* 355 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51714,7 +52279,7 @@ module.exports = {
 
 
 /***/ }),
-/* 352 */
+/* 356 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51742,7 +52307,7 @@ module.exports = {
 
 
 /***/ }),
-/* 353 */
+/* 357 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51768,7 +52333,7 @@ module.exports = {
 
 
 /***/ }),
-/* 354 */
+/* 358 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51795,7 +52360,7 @@ module.exports = {
 
 
 /***/ }),
-/* 355 */
+/* 359 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51821,7 +52386,7 @@ module.exports = {
 
 
 /***/ }),
-/* 356 */
+/* 360 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51849,7 +52414,7 @@ module.exports = {
 
 
 /***/ }),
-/* 357 */
+/* 361 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51870,7 +52435,7 @@ module.exports = {
 
 
 /***/ }),
-/* 358 */
+/* 362 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51892,7 +52457,7 @@ module.exports = {
 
 
 /***/ }),
-/* 359 */
+/* 363 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51913,7 +52478,7 @@ module.exports = {
 
 
 /***/ }),
-/* 360 */
+/* 364 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51935,7 +52500,7 @@ module.exports = {
 
 
 /***/ }),
-/* 361 */
+/* 365 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51957,7 +52522,7 @@ module.exports = {
 
 
 /***/ }),
-/* 362 */
+/* 366 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -51979,7 +52544,7 @@ module.exports = {
 
 
 /***/ }),
-/* 363 */
+/* 367 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52000,7 +52565,7 @@ module.exports = {
 
 
 /***/ }),
-/* 364 */
+/* 368 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52023,7 +52588,7 @@ module.exports = {
 
 
 /***/ }),
-/* 365 */
+/* 369 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52045,7 +52610,7 @@ module.exports = {
 
 
 /***/ }),
-/* 366 */
+/* 370 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52067,7 +52632,7 @@ module.exports = {
 
 
 /***/ }),
-/* 367 */
+/* 371 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52087,7 +52652,7 @@ module.exports = {
 
 
 /***/ }),
-/* 368 */
+/* 372 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52112,7 +52677,7 @@ module.exports = {
 
 
 /***/ }),
-/* 369 */
+/* 373 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52146,7 +52711,7 @@ module.exports = {
 
 
 /***/ }),
-/* 370 */
+/* 374 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52179,7 +52744,7 @@ module.exports = {
 
 
 /***/ }),
-/* 371 */
+/* 375 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52208,7 +52773,7 @@ module.exports = {
 
 
 /***/ }),
-/* 372 */
+/* 376 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52242,7 +52807,7 @@ module.exports = {
 
 
 /***/ }),
-/* 373 */
+/* 377 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52273,7 +52838,7 @@ module.exports = {
 
 
 /***/ }),
-/* 374 */
+/* 378 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52303,7 +52868,7 @@ module.exports = {
 
 
 /***/ }),
-/* 375 */
+/* 379 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52334,7 +52899,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 376 */
+/* 380 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52367,7 +52932,7 @@ module.exports = {
 
 
 /***/ }),
-/* 377 */
+/* 381 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52397,7 +52962,7 @@ module.exports = {
 
 
 /***/ }),
-/* 378 */
+/* 382 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52430,7 +52995,7 @@ module.exports = {
 
 
 /***/ }),
-/* 379 */
+/* 383 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52453,7 +53018,7 @@ module.exports = {
 
 
 /***/ }),
-/* 380 */
+/* 384 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52474,7 +53039,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 381 */
+/* 385 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52497,7 +53062,7 @@ module.exports = {
 
 
 /***/ }),
-/* 382 */
+/* 386 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52518,7 +53083,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 383 */
+/* 387 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52542,7 +53107,7 @@ module.exports = {
 
 
 /***/ }),
-/* 384 */
+/* 388 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52563,7 +53128,7 @@ module.exports = {
 
 
 /***/ }),
-/* 385 */
+/* 389 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52587,7 +53152,7 @@ module.exports = {
 
 
 /***/ }),
-/* 386 */
+/* 390 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52608,7 +53173,7 @@ module.exports = {
 
 
 /***/ }),
-/* 387 */
+/* 391 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52631,7 +53196,7 @@ module.exports = {
 
 
 /***/ }),
-/* 388 */
+/* 392 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52652,7 +53217,7 @@ module.exports = {
 
 
 /***/ }),
-/* 389 */
+/* 393 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52675,7 +53240,7 @@ module.exports = {
 
 
 /***/ }),
-/* 390 */
+/* 394 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52696,7 +53261,7 @@ module.exports = {
 
 
 /***/ }),
-/* 391 */
+/* 395 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52723,7 +53288,7 @@ module.exports = {
 
 
 /***/ }),
-/* 392 */
+/* 396 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52749,7 +53314,7 @@ module.exports = {
 
 
 /***/ }),
-/* 393 */
+/* 397 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52771,7 +53336,7 @@ module.exports = {
 
 
 /***/ }),
-/* 394 */
+/* 398 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52794,7 +53359,7 @@ module.exports = {
 
 
 /***/ }),
-/* 395 */
+/* 399 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52817,7 +53382,7 @@ module.exports = {
 
 
 /***/ }),
-/* 396 */
+/* 400 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52840,7 +53405,7 @@ module.exports = {
 
 
 /***/ }),
-/* 397 */
+/* 401 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52863,7 +53428,7 @@ module.exports = {
 
 
 /***/ }),
-/* 398 */
+/* 402 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52886,7 +53451,7 @@ module.exports = {
 
 
 /***/ }),
-/* 399 */
+/* 403 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52909,7 +53474,7 @@ module.exports = {
 
 
 /***/ }),
-/* 400 */
+/* 404 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52935,7 +53500,7 @@ module.exports = {
 
 
 /***/ }),
-/* 401 */
+/* 405 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52956,7 +53521,7 @@ module.exports = {
 
 
 /***/ }),
-/* 402 */
+/* 406 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -52981,7 +53546,7 @@ module.exports = {
 
 
 /***/ }),
-/* 403 */
+/* 407 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -53003,7 +53568,7 @@ module.exports = {
 
 
 /***/ }),
-/* 404 */
+/* 408 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -53024,7 +53589,7 @@ module.exports = {
 
 
 /***/ }),
-/* 405 */
+/* 409 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -53046,7 +53611,7 @@ module.exports = {
 
 
 /***/ }),
-/* 406 */
+/* 410 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -53068,7 +53633,7 @@ module.exports = {
 
 
 /***/ }),
-/* 407 */
+/* 411 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -53089,7 +53654,7 @@ module.exports = {
 
 
 /***/ }),
-/* 408 */
+/* 412 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -53109,7 +53674,7 @@ module.exports = {
 
 
 /***/ }),
-/* 409 */
+/* 413 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -53130,7 +53695,7 @@ module.exports = {
 
 
 /***/ }),
-/* 410 */
+/* 414 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -53155,7 +53720,7 @@ module.exports = {
 
 
 /***/ }),
-/* 411 */
+/* 415 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -53176,7 +53741,7 @@ module.exports = {
 
 
 /***/ }),
-/* 412 */
+/* 416 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -53195,7 +53760,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 413 */
+/* 417 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -53216,7 +53781,7 @@ module.exports = {
 
 
 /***/ }),
-/* 414 */
+/* 418 */
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -53237,20 +53802,20 @@ module.exports = {
 
 
 /***/ }),
-/* 415 */
+/* 419 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(416),
-  __webpack_require__(418),
-  __webpack_require__(419),
   __webpack_require__(420),
-  __webpack_require__(122)
+  __webpack_require__(422),
+  __webpack_require__(423),
+  __webpack_require__(123),
+  __webpack_require__(124)
 ];
 
 
 /***/ }),
-/* 416 */
+/* 420 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53259,7 +53824,7 @@ module.exports = [
 var deepMap = __webpack_require__(1);
 
 function factory (type, config, load, typed) {
-  var parse = load(__webpack_require__(41));
+  var parse = load(__webpack_require__(43));
 
   /**
    * Parse and compile an expression.
@@ -53313,17 +53878,17 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 417 */
+/* 421 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var errorTransform = __webpack_require__(43).transform;
+var errorTransform = __webpack_require__(44).transform;
 var setSafeProperty = __webpack_require__(13).setSafeProperty;
 
 function factory (type, config, load, typed) {
-  var subset = load(__webpack_require__(22));
+  var subset = load(__webpack_require__(23));
   var matrix = load(__webpack_require__(0));
 
   /**
@@ -53373,7 +53938,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 418 */
+/* 422 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53382,7 +53947,7 @@ exports.factory = factory;
 var deepMap = __webpack_require__(1);
 
 function factory (type, config, load, typed) {
-  var parse = load(__webpack_require__(41));
+  var parse = load(__webpack_require__(43));
 
   /**
    * Evaluate an expression.
@@ -53445,7 +54010,7 @@ exports.name = 'eval';
 exports.factory = factory;
 
 /***/ }),
-/* 419 */
+/* 423 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53454,7 +54019,7 @@ exports.factory = factory;
 var getSafeProperty = __webpack_require__(13).getSafeProperty;
 
 function factory (type, config, load, typed, math) {
-  var docs = load(__webpack_require__(111));
+  var docs = load(__webpack_require__(112));
 
   /**
    * Retrieve help on a function or data type.
@@ -53518,90 +54083,31 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 420 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-function factory (type, config, load, typed) {
-  var parse = load(__webpack_require__(41));
-
-  /**
-   * Parse an expression. Returns a node tree, which can be evaluated by
-   * invoking node.eval();
-   *
-   * Note the evaluating arbitrary expressions may involve security risks,
-   * see [http://mathjs.org/docs/expressions/security.html](http://mathjs.org/docs/expressions/security.html) for more information.
-   *
-   * Syntax:
-   *
-   *     math.parse(expr)
-   *     math.parse(expr, options)
-   *     math.parse([expr1, expr2, expr3, ...])
-   *     math.parse([expr1, expr2, expr3, ...], options)
-   *
-   * Example:
-   *
-   *     var node = math.parse('sqrt(3^2 + 4^2)');
-   *     node.compile().eval(); // 5
-   *
-   *     var scope = {a:3, b:4}
-   *     var node = math.parse('a * b'); // 12
-   *     var code = node.compile();
-   *     code.eval(scope); // 12
-   *     scope.a = 5;
-   *     code.eval(scope); // 20
-   *
-   *     var nodes = math.parse(['a = 3', 'b = 4', 'a * b']);
-   *     nodes[2].compile().eval(); // 12
-   *
-   * See also:
-   *
-   *     eval, compile
-   *
-   * @param {string | string[] | Matrix} expr          Expression to be parsed
-   * @param {{nodes: Object<string, Node>}} [options]  Available options:
-   *                                                   - `nodes` a set of custom nodes
-   * @return {Node | Node[]} node
-   * @throws {Error}
-   */
-  return typed('parse', {
-    'string | Array | Matrix': parse,
-    'string | Array | Matrix, Object': parse
-  });
-}
-
-exports.name = 'parse';
-exports.factory = factory;
-
-
-/***/ }),
-/* 421 */
+/* 424 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(114),
+  __webpack_require__(115),
   __webpack_require__(85),
-  __webpack_require__(116),
   __webpack_require__(117),
   __webpack_require__(118),
-  __webpack_require__(56),
-  __webpack_require__(83),
   __webpack_require__(119),
-  __webpack_require__(57),
-  __webpack_require__(14),
-  __webpack_require__(121),
-  __webpack_require__(65),
+  __webpack_require__(49),
+  __webpack_require__(83),
+  __webpack_require__(120),
+  __webpack_require__(59),
+  __webpack_require__(15),
+  __webpack_require__(122),
+  __webpack_require__(58),
   __webpack_require__(66),
   __webpack_require__(84),
-  __webpack_require__(42),
-  __webpack_require__(422)
+  __webpack_require__(38),
+  __webpack_require__(425)
 ];
 
 
 /***/ }),
-/* 422 */
+/* 425 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53625,31 +54131,31 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 423 */
+/* 426 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(424),
-  __webpack_require__(425),
-  __webpack_require__(426),
   __webpack_require__(427),
   __webpack_require__(428),
   __webpack_require__(429),
   __webpack_require__(430),
   __webpack_require__(431),
   __webpack_require__(432),
-  __webpack_require__(433)
+  __webpack_require__(433),
+  __webpack_require__(434),
+  __webpack_require__(435),
+  __webpack_require__(436)
 ];
 
 
 /***/ }),
-/* 424 */
+/* 427 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var errorTransform = __webpack_require__(43).transform;
+var errorTransform = __webpack_require__(44).transform;
 
 /**
  * Attach a transform function to math.range
@@ -53690,7 +54196,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 425 */
+/* 428 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53787,7 +54293,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 426 */
+/* 429 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53866,7 +54372,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 427 */
+/* 430 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53924,7 +54430,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 428 */
+/* 431 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54021,14 +54527,14 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 429 */
+/* 432 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var errorTransform = __webpack_require__(43).transform;
-var isCollection = __webpack_require__(48);
+var errorTransform = __webpack_require__(44).transform;
+var isCollection = __webpack_require__(50);
 
 /**
  * Attach a transform function to math.max
@@ -54038,7 +54544,7 @@ var isCollection = __webpack_require__(48);
  * from one-based to zero based
  */
 function factory (type, config, load, typed) {
-  var max = load(__webpack_require__(124));
+  var max = load(__webpack_require__(126));
 
   return typed('max', {
     '...any': function (args) {
@@ -54069,14 +54575,14 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 430 */
+/* 433 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var errorTransform = __webpack_require__(43).transform;
-var isCollection = __webpack_require__(48);
+var errorTransform = __webpack_require__(44).transform;
+var isCollection = __webpack_require__(50);
 
 /**
  * Attach a transform function to math.mean
@@ -54086,7 +54592,7 @@ var isCollection = __webpack_require__(48);
  * from one-based to zero based
  */
 function factory (type, config, load, typed) {
-  var mean = load(__webpack_require__(125));
+  var mean = load(__webpack_require__(127));
 
   return typed('mean', {
     '...any': function (args) {
@@ -54117,14 +54623,14 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 431 */
+/* 434 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var errorTransform = __webpack_require__(43).transform;
-var isCollection = __webpack_require__(48);
+var errorTransform = __webpack_require__(44).transform;
+var isCollection = __webpack_require__(50);
 
 /**
  * Attach a transform function to math.min
@@ -54134,7 +54640,7 @@ var isCollection = __webpack_require__(48);
  * from one-based to zero based
  */
 function factory (type, config, load, typed) {
-  var min = load(__webpack_require__(128));
+  var min = load(__webpack_require__(130));
 
   return typed('min', {
     '...any': function (args) {
@@ -54165,7 +54671,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 432 */
+/* 435 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54178,7 +54684,7 @@ exports.factory = factory;
  * This transform creates a range which includes the end value
  */
 function factory (type, config, load, typed) {
-  var range = load(__webpack_require__(129));
+  var range = load(__webpack_require__(131));
 
   return typed('range', {
     '...any': function (args) {
@@ -54200,13 +54706,13 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 433 */
+/* 436 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var errorTransform = __webpack_require__(43).transform;
+var errorTransform = __webpack_require__(44).transform;
 
 /**
  * Attach a transform function to math.subset
@@ -54215,7 +54721,7 @@ var errorTransform = __webpack_require__(43).transform;
  * This transform creates a range which includes the end value
  */
 function factory (type, config, load, typed) {
-  var subset = load(__webpack_require__(22));
+  var subset = load(__webpack_require__(23));
 
   return typed('subset', {
     '...any': function (args) {
@@ -54235,7 +54741,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 434 */
+/* 437 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54245,7 +54751,7 @@ var object = __webpack_require__(5);
 var string = __webpack_require__(9);
 
 function factory (type, config, load, typed) {
-  var parser = load(__webpack_require__(122))();
+  var parser = load(__webpack_require__(124))();
 
   /**
    * Documentation object
@@ -54360,67 +54866,71 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 435 */
+/* 438 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(436),
-  __webpack_require__(457),
-  __webpack_require__(476),
-  __webpack_require__(489),
-  __webpack_require__(493),
-  __webpack_require__(497),
-  __webpack_require__(500),
-  __webpack_require__(504),
-  __webpack_require__(517),
-  __webpack_require__(526),
-  __webpack_require__(529),
-  __webpack_require__(537),
+  __webpack_require__(439),
+  __webpack_require__(459),
+  __webpack_require__(478),
+  __webpack_require__(491),
+  __webpack_require__(495),
+  __webpack_require__(499),
+  __webpack_require__(502),
+  __webpack_require__(506),
+  __webpack_require__(519),
+  __webpack_require__(528),
+  __webpack_require__(531),
   __webpack_require__(539),
-  __webpack_require__(545),
+  __webpack_require__(541),
   __webpack_require__(547),
-  __webpack_require__(572),
-  __webpack_require__(574)
+  __webpack_require__(549),
+  __webpack_require__(574),
+  __webpack_require__(576)
 ];
 
 
 /***/ }),
-/* 436 */
+/* 439 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(437),
+  __webpack_require__(440),
 
   // simplify
-  __webpack_require__(130),
+  __webpack_require__(87),
 
+  // polynomial 
+  __webpack_require__(442),
+    
+  
   // decomposition
-  __webpack_require__(441),
-  __webpack_require__(136),
-  __webpack_require__(137),
+  __webpack_require__(443),
+  __webpack_require__(139),
+  __webpack_require__(140),
 
   // solver
-  __webpack_require__(142),
-  __webpack_require__(455),
-  __webpack_require__(143)
+  __webpack_require__(145),
+  __webpack_require__(457),
+  __webpack_require__(146)
 ];
 
 
 /***/ }),
-/* 437 */
+/* 440 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 function factory (type, config, load, typed) {
-  var parse = load(__webpack_require__(41));
-  var simplify = load(__webpack_require__(130));
-  var ConstantNode = load(__webpack_require__(56));
-  var FunctionNode = load(__webpack_require__(57));
-  var OperatorNode = load(__webpack_require__(65));
+  var parse = load(__webpack_require__(43));
+  var simplify = load(__webpack_require__(87));
+  var ConstantNode = load(__webpack_require__(49));
+  var FunctionNode = load(__webpack_require__(59));
+  var OperatorNode = load(__webpack_require__(58));
   var ParenthesisNode = load(__webpack_require__(66));
-  var SymbolNode = load(__webpack_require__(42));
+  var SymbolNode = load(__webpack_require__(38));
 
   /**
    * Takes the derivative of an expression expressed in parser Nodes.
@@ -54981,6 +55491,10 @@ function factory (type, config, load, typed) {
 
       switch (node.op) {
         case '+':
+          // d/dx(sum(f(x)) = sum(f'(x))
+          return new OperatorNode(node.op, node.fn, node.args.map(function(arg) {
+            return _derivative(arg, constNodes);
+          }));
         case '-':
           // d/dx(+/-f(x)) = +/-f'(x)
           if (node.args.length == 1) {
@@ -54994,19 +55508,32 @@ function factory (type, config, load, typed) {
           ]);
         case '*':
           // d/dx(c*f(x)) = c*f'(x)
-          if (constNodes[arg1] !== undefined || constNodes[arg2] !== undefined) {
-            var newArgs = (constNodes[arg1] !== undefined)
-              ? [arg1.clone(), _derivative(arg2, constNodes)]
-              : [arg2.clone(), _derivative(arg1, constNodes)];
+          var constantTerms = node.args.filter(function(arg) {
+            return constNodes[arg] !== undefined;
+          });
+
+          if (constantTerms.length > 0) {
+            var nonConstantTerms = node.args.filter(function(arg) {
+              return constNodes[arg] === undefined;
+            });
+
+            var nonConstantNode = nonConstantTerms.length === 1
+              ? nonConstantTerms[0]
+              : new OperatorNode('*', 'multiply', nonConstantTerms);
+
+            var newArgs = constantTerms.concat(_derivative(nonConstantNode, constNodes));
 
             return new OperatorNode('*', 'multiply', newArgs);
           }
 
           // Product Rule, d/dx(f(x)*g(x)) = f'(x)*g(x) + f(x)*g'(x)
-          return new OperatorNode('+', 'add', [
-            new OperatorNode('*', 'multiply', [_derivative(arg1, constNodes), arg2.clone()]),
-            new OperatorNode('*', 'multiply', [arg1.clone(), _derivative(arg2, constNodes)])
-          ]);
+          return new OperatorNode('+', 'add', node.args.map(function(argOuter) {
+            return new OperatorNode('*', 'multiply', node.args.map(function(argInner) {
+              return (argInner === argOuter)
+                ? _derivative(argInner, constNodes)
+                : argInner.clone();
+            }));
+          }));
         case '/':
           // d/dx(f(x) / c) = f'(x) / c
           if (constNodes[arg2] !== undefined) {
@@ -55135,423 +55662,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 438 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var digits = __webpack_require__(3).digits;
-// TODO this could be improved by simplifying seperated constants under associative and commutative operators
-function factory(type, config, load, typed, math) {
-  var util = load(__webpack_require__(131));
-  var isCommutative = util.isCommutative;
-  var isAssociative = util.isAssociative;
-  var allChildren = util.allChildren;
-  var createMakeNodeFunction = util.createMakeNodeFunction;
-  var ConstantNode = math.expression.node.ConstantNode;
-  var OperatorNode = math.expression.node.OperatorNode;
-
-  function simplifyConstant(expr) {
-    var res = foldFraction(expr);
-    return type.isNode(res) ? res : _toNode(res);
-  }
-
-  function _eval(fnname, args) {
-    try {
-      return _toNumber(math[fnname].apply(null, args));
-    }
-    catch (ignore) {
-      // sometimes the implicit type conversion causes the evaluation to fail, so we'll try again after removing Fractions
-      args = args.map(function(x){
-        if (type.isFraction(x)) {
-          return x.valueOf();
-        }
-        return x;
-      });
-      return _toNumber(math[fnname].apply(null, args));
-    }
-  }
-
-  var _toNode = typed({
-    'Fraction': _fractionToNode,
-    'number': function(n) {
-      if (n < 0) {
-        return unaryMinusNode(new ConstantNode(-n));
-      }
-      return new ConstantNode(n);
-    },
-    'BigNumber': function(n) {
-      if (n < 0) {
-        return unaryMinusNode(new ConstantNode(n.negated().toString(), 'number'));
-      }
-      return new ConstantNode(n.toString(), 'number');
-    },
-    'Complex': function(s) {
-      throw 'Cannot convert Complex number to Node';
-    }
-  });
-
-  // convert a number to a fraction only if it can be expressed exactly
-  function _exactFraction(n) {
-    if (isFinite(n)) {
-      var f = math.fraction(n);
-      if (f.valueOf() === n) {
-        return f;
-      }
-    }
-    return n;
-  }
-
-  // Convert numbers to a preferred number type in preference order: Fraction, number, Complex
-  // BigNumbers are left alone
-  var _toNumber = typed({
-    'string': function(s) {
-      if (config.number === 'BigNumber') {
-        return math.bignumber(s);
-      }
-      else if (config.number === 'Fraction') {
-        return math.fraction(s);
-      }
-      else {
-        return _exactFraction(parseFloat(s));
-      }
-    },
-
-    'Fraction': function(s) { return s; },
-
-    'BigNumber': function(s) { return s; },
-
-    'number': function(s) {
-      return _exactFraction(s);
-    },
-
-    'Complex': function(s) {
-      if (s.im !== 0) {
-        return s;
-      }
-      return _exactFraction(s.re);
-    },
-  });
-
-  function unaryMinusNode(n) {
-    return new OperatorNode('-', 'unaryMinus', [n]);
-  }
-
-  function _fractionToNode(f) {
-    var n;
-    var vn = f.s*f.n;
-    if (vn < 0) {
-      n = new OperatorNode('-', 'unaryMinus', [new ConstantNode(-vn)])
-    }
-    else {
-      n = new ConstantNode(vn);
-    }
-
-    if (f.d === 1) {
-      return n;
-    }
-    return new OperatorNode('/', 'divide', [n, new ConstantNode(f.d)]);
-  }
-
-  /*
-   * Create a binary tree from a list of Fractions and Nodes.
-   * Tries to fold Fractions by evaluating them until the first Node in the list is hit, so
-   * `args` should be sorted to have the Fractions at the start (if the operator is commutative).
-   * @param args - list of Fractions and Nodes
-   * @param fn - evaluator for the binary operation evaluator that accepts two Fractions
-   * @param makeNode - creates a binary OperatorNode/FunctionNode from a list of child Nodes
-   * if args.length is 1, returns args[0]
-   * @return - Either a Node representing a binary expression or Fraction
-   */
-  function foldOp(fn, args, makeNode) {
-    return args.reduce(function(a, b) {
-      if (!type.isNode(a) && !type.isNode(b)) {
-        try {
-          return _eval(fn, [a,b]);
-        }
-        catch (ignoreandcontinue) {}
-        a = _toNode(a);
-        b = _toNode(b);
-      }
-      else if (!type.isNode(a)) {
-        a = _toNode(a);
-      }
-      else if (!type.isNode(b)) {
-        b = _toNode(b);
-      }
-
-      return makeNode([a, b]);
-    });
-  }
-
-  // destroys the original node and returns a folded one
-  function foldFraction(node) {
-    switch(node.type) {
-      case 'SymbolNode':
-        return node;
-      case 'ConstantNode':
-        if (node.valueType === 'number') {
-          return _toNumber(node.value);
-        }
-        return node;
-      case 'FunctionNode':
-        if (math[node.name] && math[node.name].rawArgs) {
-          return node;
-        }
-        /* falls through */
-      case 'OperatorNode':
-        var fn = node.fn.toString();
-        var args;
-        var res;
-        var makeNode = createMakeNodeFunction(node);
-        if (node.args.length === 1) {
-          args = [foldFraction(node.args[0])];
-          if (!type.isNode(args[0])) {
-            res = _eval(fn, args);
-          }
-          else {
-            res = makeNode(args);
-          }
-        }
-        else if (isAssociative(node)) {
-          args = allChildren(node);
-          args = args.map(foldFraction);
-
-          if (isCommutative(fn)) {
-            // commutative binary operator
-            var consts = [], vars = [];
-
-            for (var i=0; i < args.length; i++) {
-              if (!type.isNode(args[i])) {
-                consts.push(args[i]);
-              }
-              else {
-                vars.push(args[i]);
-              }
-            }
-
-            if (consts.length > 1) {
-              res = foldOp(fn, consts, makeNode);
-              vars.unshift(res);
-              res = foldOp(fn, vars, makeNode);
-            }
-            else {
-              // we won't change the children order since it's not neccessary
-              res = foldOp(fn, args, makeNode);
-            }
-          }
-          else {
-            // non-commutative binary operator
-            res = foldOp(fn, args, makeNode);
-          }
-        }
-        else {
-          // non-associative binary operator
-          args = node.args.map(foldFraction);
-          res = foldOp(fn, args, makeNode);
-        }
-        return res;
-      case 'ParenthesisNode':
-        // remove the uneccessary parenthesis
-        return foldFraction(node.content);
-      case 'AccessorNode':
-        /* falls through */
-      case 'ArrayNode':
-        /* falls through */
-      case 'AssignmentNode':
-        /* falls through */
-      case 'BlockNode':
-        /* falls through */
-      case 'FunctionAssignmentNode':
-        /* falls through */
-      case 'IndexNode':
-        /* falls through */
-      case 'ObjectNode':
-        /* falls through */
-      case 'RangeNode':
-        /* falls through */
-      case 'UpdateNode':
-        /* falls through */
-      case 'ConditionalNode':
-        /* falls through */
-      default:
-        throw 'Unimplemented node type in simplifyConstant: '+node.type;
-    }
-  }
-
-  return simplifyConstant;
-}
-
-exports.math = true;
-exports.name = 'simplifyConstant';
-exports.path = 'algebra.simplify';
-exports.factory = factory;
-
-
-/***/ }),
-/* 439 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-function factory(type, config, load, typed, math) {
-  var ConstantNode = math.expression.node.ConstantNode;
-  var OperatorNode = math.expression.node.OperatorNode;
-  var FunctionNode = math.expression.node.FunctionNode;
-
-  var node0 = new ConstantNode(0);
-  var node1 = new ConstantNode(1);
-
-  /**
-   * simplifyCore() performs single pass simplification suitable for
-   * applications requiring ultimate performance. In contrast, simplify()
-   * extends simplifyCore() with additional passes to provide deeper
-   * simplification.
-   *
-   * Syntax:
-   *
-   *     simplify.simpifyCore(expr)
-   *
-   * Examples:
-   *
-   *     var f = math.parse('2 * 1 * x ^ (2 - 1)');
-   *     math.simplify.simpifyCore(f);                          // Node {2 * x}
-   *     math.simplify('2 * 1 * x ^ (2 - 1)', [math.simplify.simpifyCore]); // Node {2 * x};
-   *
-   * See also:
-   *
-   *     derivative
-   *
-   * @param {Node} node
-   *     The expression to be simplified
-   */
-  function simplifyCore(node) {
-    if (type.isOperatorNode(node) && node.args.length <= 2) {
-      var a0 = simplifyCore(node.args[0]);
-      var a1 = node.args[1] && simplifyCore(node.args[1]);
-      if (node.op === "+") {
-          if (node.args.length === 1) {
-            return node.args[0];
-          }
-          if (type.isConstantNode(a0)) {
-              if (a0.value === "0") {
-                  return a1;
-              } else if (type.isConstantNode(a1) && a0.value && a0.value.length < 5 && a1.value && a1.value.length < 5) {
-                  return new ConstantNode(Number(a0.value) + Number(a1.value));
-              }
-          }
-          if (type.isConstantNode(a1) && a1.value === "0") {
-              return a0;
-          }
-          if (node.args.length === 2 && type.isOperatorNode(a1) && a1.op === '-' && a1.fn === 'unaryMinus') {
-              return new OperatorNode('-', 'subtract', [a0,a1.args[0]]);
-          }
-          return new OperatorNode(node.op, node.fn, a1 ? [a0,a1] : [a0]);
-      } else if (node.op === "-") {
-          if (type.isConstantNode(a0) && a1) {
-              if (type.isConstantNode(a1) && a0.value && a0.value.length < 5 && a1.value && a1.value.length < 5) {
-                  return new ConstantNode(Number(a0.value) - Number(a1.value));
-              } else if (a0.value === "0") {
-                  return new OperatorNode("-", "unaryMinus", [a1]);
-              }
-          }
-          if (node.fn === "subtract" && node.args.length === 2) {
-              if (type.isConstantNode(a1) && a1.value === "0") {
-                  return a0;
-              }
-              if (type.isOperatorNode(a1) && a1.fn === "unaryMinus") {
-                  return simplifyCore(new OperatorNode("+", "add", [a0, a1.args[0]]));
-              }
-              return new OperatorNode(node.op, node.fn, [a0,a1]);
-          } else if (node.fn === "unaryMinus") {
-              if (type.isOperatorNode(a0)) {
-                  if (a0.fn === 'unaryMinus') {
-                      return a0.args[0];
-                  }
-              }
-              return new OperatorNode(node.op, node.fn, [a0]);
-          }
-          throw new Error('never happens');
-      } else if (node.op === "*") {
-          if (type.isConstantNode(a0)) {
-              if (a0.value === "0") {
-                  return node0;
-              } else if (a0.value === "1") {
-                  return a1;
-              } else if (type.isConstantNode(a1) && a0.value && a0.value.length < 5 && a1.value && a1.value.length < 5) {
-                  return new ConstantNode(Number(a0.value) * Number(a1.value));
-              }
-          }
-          if (type.isConstantNode(a1)) {
-              if (a1.value === "0") {
-                  return node0;
-              } else if (a1.value === "1") {
-                  return a0;
-              } else if (type.isOperatorNode(a0) && a0.op === node.op) {
-                  var a00 = a0.args[0];
-                  if (type.isConstantNode(a00) && a1.value && a1.value.length < 5 && a00.value && a00.value.length < 5) {
-                      var a00_a1 =  new ConstantNode(Number(a0.args[0].value) * Number(a1.value));
-                      return new OperatorNode(node.op, node.fn, [a00_a1, a0.args[1]]); // constants on left
-                  }
-              }
-              return new OperatorNode(node.op, node.fn, [a1, a0]); // constants on left
-          }
-          return new OperatorNode(node.op, node.fn, [a0, a1]);
-      } else if (node.op === "/") {
-          if (type.isConstantNode(a0)) {
-              if (a0.value === "0") {
-                  return node0;
-              } else if (type.isConstantNode(a1) && a0.value && a0.value.length < 5 && (a1.value === "1" || a1.value==="2" || a1.value==="4")) {
-                  return new ConstantNode(Number(a0.value) / Number(a1.value));
-              }
-          }
-          return new OperatorNode(node.op, node.fn, [a0, a1]);
-      } else if (node.op === "^") {
-          if (type.isConstantNode(a1)) {
-              if (a1.value === "0") {
-                  return node1;
-              } else if (a1.value === "1") {
-                  return a0;
-              } else if (type.isConstantNode(a1) && a0.value && a0.value.length < 5 && a1.value && a1.value.length < 2) { // fold constant
-                  return new ConstantNode(
-                      math.pow(Number(a0.value), Number(a1.value)));
-              }
-          }
-          return new OperatorNode(node.op, node.fn, [a0, a1]);
-      }
-    } else if (type.isParenthesisNode(node)) {
-        var c = simplifyCore(node.content);
-        if (type.isParenthesisNode(c) || type.isSymbolNode(c) || type.isConstantNode(c)) {
-            return c;
-        }
-        return new ParenthesisNode(c);
-    } else if (type.isFunctionNode(node)) {
-          var args = node.args.map(simplifyCore);
-          if (args.length === 1) {
-              if (type.isParenthesisNode(args[0])) {
-                  args[0] = args[0].content;
-              }
-          }
-          return new FunctionNode(simplifyCore(node.fn), args);
-    } else {
-        // cannot simplify
-    }
-    return node;
-  }
-
-  return simplifyCore;
-}
-
-exports.math = true;
-exports.name = 'simplifyCore';
-exports.path = 'algebra.simplify';
-exports.factory = factory;
-
-
-/***/ }),
-/* 440 */
+/* 441 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55617,7 +55728,620 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 441 */
+/* 442 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function factory (type, config, load, typed) {
+  var simplify = load(__webpack_require__(87));
+  var simplifyCore = load(__webpack_require__(134));  
+  var simplifyConstant = load(__webpack_require__(132));  
+  var ArgumentsError = __webpack_require__(46);
+  var parse = load(__webpack_require__(123));
+  var number = __webpack_require__(3)
+  var ConstantNode = load(__webpack_require__(49));
+  var OperatorNode = load(__webpack_require__(58));
+  var SymbolNode = load(__webpack_require__(38));
+
+  /**
+   * Transform a rationalizable expression in a rational fraction. 
+   * If rational fraction is one variable polynomial then converts
+   * the numerator and denominator in canonical form, with decreasing
+   * exponents, returning the coefficients of numerator. 
+   *
+   * Syntax:
+   *
+   *     rationalize(expr)
+   *     rationalize(expr, detailed)
+   *     rationalize(expr, scope)
+   *     rationalize(expr, scope, detailed)
+   *
+   * Examples:
+   *
+   *     math.rationalize('sin(x)+y')  //  Error: There is an unsolved function call
+   *     math.rationalize('2x/y - y/(x+1)')  // (2*x^2-y^2+2*x)/(x*y+y)
+   *     math.rationalize('(2x+1)^6')  
+   *                   //     64*x^6+192*x^5+240*x^4+160*x^3+60*x^2+12*x+1
+   *     math.rationalize('2x/( (2x-1) / (3x+2) ) - 5x/ ( (3x+4) / (2x^2-5) ) + 3') 
+   *                   //    -20*x^4+28*x^3+104*x^2+6*x-12)/(6*x^2+5*x-4)
+   *     math.rationalize('x/(1-x)/(x-2)/(x-3)/(x-4) + 2x/ ( (1-2x)/(2-3x) )/ ((3-4x)/(4-5x) )') =
+   *                   //  (-30*x^7+344*x^6-1506*x^5+3200*x^4-3472*x^3+1846*x^2-381*x)/
+   *                   //   (-8*x^6+90*x^5-383*x^4+780*x^3-797*x^2+390*x-72)
+   *
+   *     math.rationalize('x+x+x+y',{y:1}) // 3*x+1
+   *     math.rationalize('x+x+x+y',{})    // 3*x+y
+   *     ret = math.rationalize('x+x+x+y',{},true) 
+   *                          // ret.expression=3*x+y,  ret.variables = ["x","y"]
+   *     ret = math.rationalize('-2+5x^2',{},true) 
+   *                          // ret.expression=5*x^2-2,  ret.variables = ["x"], ret.coefficients=[-2,0,5]
+   *
+   * See also:
+   * 
+   *     simplify
+   * 
+   * @param  {Node|string} expr    The expression to check if is a polynomial expression
+   * @param  {Object|boolean}      optional scope of expression or true for already evaluated rational expression at input
+   * @param  {Boolean}  detailed   optional True if return an object, false if return expression node (default) 
+   *
+   * @return {Object | Expression Node}    The rational polynomial of `expr` or na object
+   *            {Object}
+   *              {Expression Node} expression: node simplified expression
+   *              {Expression Node} numerator: simplified numerator of expression
+   *              {Expression Node | boolean} denominator: simplified denominator or false (if there is no denominator)
+   *              {Array}           variables:  variable names
+   *              {Array}           coefficients: coefficients of numerator sorted by increased exponent 
+   *           {Expression Node}  node simplified expression
+   *   
+   */
+  var rationalize = typed('rationalize', {
+    'string': function (expr) {
+       return rationalize(parse(expr), {}, false);  
+    },
+
+    'string, boolean': function (expr, detailed) {
+       return rationalize(parse(expr), {} , detailed); 
+    },
+
+    'string, Object': function (expr, scope) {
+       return rationalize(parse(expr), scope, false);  
+    },
+
+    'string, Object, boolean': function (expr, scope, detailed) {
+       return rationalize(parse(expr), scope, detailed); 
+    },
+
+    'Node': function (expr) {
+       return rationalize(expr, {}, false);
+    },
+
+    'Node, boolean': function (expr, detailed) {
+      return rationalize(expr, {}, detailed);
+    },
+
+    'Node, Object': function (expr, scope) {
+      return rationalize(expr, scope, false);
+    },
+
+    'Node, Object, boolean': function (expr, scope, detailed) {
+
+      var polyRet = polynomial(expr, scope, true)  // Check if expression is a rationalizable polynomial
+      var nVars =  polyRet.variables.length;
+      var expr = polyRet.expression;         
+           
+      if (nVars>=1) {   // If expression in not a constant
+        var setRules = rulesRationalize();   // Rules for change polynomial in near canonical form
+        expr = expandPower(expr);              // First expand power of polynomials (cannot be made from rules!)
+        var redoInic = true;   // If has change after start, redo the beginning
+        var s = "";            // New expression
+        var sBefore;           // Previous expression
+        var rules;  
+        var eDistrDiv = true  
+
+        expr = simplify(expr, setRules.firstRules);  // Apply the initial rules, including succ div rules
+        s = expr.toString();
+
+
+        while (true) {                  // Apply alternately  successive division rules and distr.div.rules
+          rules = eDistrDiv ? setRules.distrDivRules : setRules.sucDivRules
+          expr = simplify(expr,rules);         // until no more changes
+          eDistrDiv = ! eDistrDiv;    // Swap between Distr.Div and Succ. Div. Rules
+          
+          s = expr.toString();
+          if (s===sBefore) break   // No changes : end of the loop
+          
+          redoInic = true;
+          sBefore = s;
+        }  
+       
+        if (redoInic)  {         // Apply first rules again without succ div rules (if there are changes)
+          expr = simplify(expr,setRules.firstRulesAgain); 
+        }
+        expr = simplify(expr,setRules.finalRules);  // Aplly final rules 
+
+      }  // NVars >= 1
+
+      var coefficients=[];
+      var retRationalize = {};
+
+      if (expr.type==='OperatorNode'  &&  expr.op==='/')  {   // Separate numerator from denominator
+          if (nVars==1)  {
+             expr.args[0] = polyToCanonical(expr.args[0],coefficients);
+             expr.args[1] = polyToCanonical(expr.args[1]);
+          }
+          if (detailed) {
+            retRationalize.numerator = expr.args[0];
+            retRationalize.denominator = expr.args[1];
+          }
+        } else {
+          if (nVars==1) expr = polyToCanonical(expr,coefficients);
+          if (detailed) { 
+            retRationalize.numerator = expr;
+            retRationalize.denominator = null 
+          }
+      }
+       // nVars
+
+      if (! detailed) return expr;
+      retRationalize.coefficients = coefficients;
+      retRationalize.variables = polyRet.variables;
+      retRationalize.expression = expr;
+      return retRationalize;
+    }  // ^^^^^^^ end of rationalize ^^^^^^^^
+  });  // end of typed rationalize
+
+  /**
+   *  Function to simplify an expression using an optional scope and
+   *  return it if the expression is a polynomial expression, i.e. 
+   *  an expression with one or more variables and the operators
+   *  +, -, *, and ^, where the exponent can only be a positive integer. 
+   *
+   * Syntax:
+   *
+   *     polynomial(expr,scope,extended)
+   *
+   * @param  {Node | string} expr     The expression to simplify and check if is polynomial expression
+   * @param  {object} scope           Optional scope for expression simplification
+   * @param  {boolean} extended       Optional. Default is false. When true allows divide operator.
+   *
+   *
+   * @return {Object} 
+   *            {Object} node:   node simplified expression
+   *            {Array}  variables:  variable names
+   */             
+  function polynomial (expr, scope, extended) {
+    var variables = [];
+    var node = simplify(expr,scope);  // Resolves any variables and functions with all defined parameters   
+    extended = !! extended
+
+    var oper = '+-*' + (extended ? '/' : '');
+    recPoly(node) 
+    var retFunc ={};
+    retFunc.expression = node;
+    retFunc.variables = variables;
+    return retFunc; 
+
+    //-------------------------------------------------------------------------------------------------------
+
+    /**
+     *  Function to simplify an expression using an optional scope and
+     *  return it if the expression is a polynomial expression, i.e. 
+     *  an expression with one or more variables and the operators
+     *  +, -, *, and ^, where the exponent can only be a positive integer. 
+     *
+     * Syntax:
+     *
+     *     recPoly(node)
+     *
+     *
+     * @param  {Node} node               The current sub tree expression in recursion
+     *
+     * @return                           nothing, throw an exception if error
+     */
+    function recPoly(node) {
+      var tp = node.type;  // node type
+      if (tp==='FunctionNode') 
+        throw new ArgumentsError('There is an unsolved function call')   // No function call in polynomial expression
+      else if (tp==='OperatorNode')  {
+        if (node.op==='^')  {
+          if (node.args[1].type!=='ConstantNode' ||  ! number.isInteger(parseFloat(node.args[1].value)))
+            throw new ArgumentsError('There is a non-integer exponent');
+          else
+            recPoly(node.args[0]);      
+        } else  { 
+            if (oper.indexOf(node.op) === -1) throw new ArgumentsError('Operator ' + node.op + ' invalid in polynomial expression');
+            for (var i=0;i<node.args.length;i++) { 
+              recPoly(node.args[i]);
+            }
+        } // type of operator
+
+      } else if (tp==='SymbolNode')  {
+         var name = node.name;   // variable name
+         var pos = variables.indexOf(name); 
+         if (pos===-1)    // new variable in expression
+           variables.push(name);        
+
+      } else if (tp==='ParenthesisNode') 
+         recPoly(node.content);
+
+      else if (tp!=='ConstantNode')   
+         throw new ArgumentsError('type ' + tp + ' is not allowed in polynomial expression')
+         
+    }  // end of recPoly
+
+  }  // end of polynomial 
+
+
+  //---------------------------------------------------------------------------------------
+  /**
+   * Return a rule set to rationalize an polynomial expression in rationalize
+   *
+   * Syntax:
+   *
+   *     rulesRationalize()
+   *
+   * @return {array}        rule set to rationalize an polynomial expression 
+   */
+  function rulesRationalize() {
+    var oldRules = [simplifyCore,  // sCore
+                {l:"n+n",r:"2*n"},
+                {l:"n+-n",r:"0"},
+                simplifyConstant,  // sConstant
+                {l:"n*(n1^-1)",r:"n/n1"},
+                {l:"n*n1^-n2",r:"n/n1^n2"},
+                {l:"n1^-1",r:"1/n1"},
+                {l:"n*(n1/n2)",r:"(n*n1)/n2"},
+                {l:"1*n",r:"n"}]
+
+    var rulesFirst = [
+       { l: '(-n1)/(-n2)', r: 'n1/n2' },  // Unary division
+       { l: '(-n1)*(-n2)', r: 'n1*n2' },  // Unary multiplication
+       { l: 'n1--n2', r:'n1+n2'},        // '--' elimination
+       { l: 'n1-n2', r:'n1+(-n2)'} ,      // Subtraction turn into add with un�ry minus    
+       { l:'(n1+n2)*n3', r:'(n1*n3 + n2*n3)' },     // Distributive 1 
+       { l:'n1*(n2+n3)', r:'(n1*n2+n1*n3)' },       // Distributive 2 
+       { l: 'c1*n + c2*n', r:'(c1+c2)*n'} ,       // Joining constants
+       { l: '-v*-c', r:'c*v'} ,          // Inversion constant and variable 1
+       { l: '-v*c', r:'-c*v'} ,          // Inversion constant and variable 2
+       { l: 'v*-c', r:'-c*v'} ,          // Inversion constant and variable 3
+       { l: 'v*c', r:'c*v'} ,            // Inversion constant and variable 4
+       { l: '-(-n1*n2)', r:'(n1*n2)'} ,  // Unary propagation
+       { l: '-(n1*n2)', r:'(-n1*n2)'} ,  // Unary propagation
+       { l: '-(-n1+n2)', r:'(n1-n2)'} ,  // Unary propagation
+       { l: '-(n1+n2)', r:'(-n1-n2)'} ,  // Unary propagation
+       { l: '(n1^n2)^n3', r:'(n1^(n2*n3))'} ,  // Power to Power
+       { l: '-(-n1/n2)', r:'(n1/n2)'} ,   // Division and Unary
+       { l: '-(n1/n2)', r:'(-n1/n2)'} ];   // Divisao and Unary
+
+    var rulesDistrDiv=[
+       { l:'(n1/n2 + n3/n4)', r:'((n1*n4 + n3*n2)/(n2*n4))' },  // Sum of fractions
+       { l:'(n1/n2 + n3)', r:'((n1 + n3*n2)/n2)' }, // Sum fraction with number 1
+       { l:'(n1 + n2/n3)', r:'((n1*n3 + n2)/n3)' }  ];  // Sum fraction with number 1
+
+    var rulesSucDiv=[
+       { l:'(n1/(n2/n3))', r:'((n1*n3)/n2)'} , // Division simplification
+       { l:'(n1/n2/n3)', r:'(n1/(n2*n3))' } ]
+
+    var setRules={};   // rules set in 4 steps. 
+
+        // All rules => infinite loop
+        // setRules.allRules =oldRules.concat(rulesFirst,rulesDistrDiv,rulesSucDiv);  
+
+    setRules.firstRules =oldRules.concat(rulesFirst,rulesSucDiv);  // First rule set
+    setRules.distrDivRules = rulesDistrDiv;                  // Just distr. div. rules  
+    setRules.sucDivRules = rulesSucDiv;                      // Jus succ. div. rules
+    setRules.firstRulesAgain = oldRules.concat(rulesFirst);  // Last rules set without succ. div. 
+
+           // Division simplification
+          
+         // Second rule set. 
+          // There is no aggregate expression with parentesis, but the only variable can be scattered. 
+    setRules.finalRules=[ simplifyCore,                // simplify.rules[0]
+       { l: 'n*-n', r: '-n^2' },                // Joining multiply with power 1
+       { l: 'n*n', r: 'n^2' },                  // Joining multiply with power 2
+        simplifyConstant,                              // simplify.rules[14] old 3rd index in oldRules
+       { l: 'n*-n^n1', r: '-n^(n1+1)' },        // Joining multiply with power 3
+       { l: 'n*n^n1', r: 'n^(n1+1)' },          // Joining multiply with power 4
+       { l: 'n^n1*-n^n2', r: '-n^(n1+n2)' },    // Joining multiply with power 5
+       { l: 'n^n1*n^n2', r: 'n^(n1+n2)' },      // Joining multiply with power 6
+       { l: 'n^n1*-n', r: '-n^(n1+1)' },        // Joining multiply with power 7
+       { l: 'n^n1*n', r: 'n^(n1+1)' },          // Joining multiply with power 8
+       { l: 'n^n1/-n', r: '-n^(n1-1)' },        // Joining multiply with power 8
+       { l: 'n^n1/n', r: 'n^(n1-1)' },          // Joining division with power 1
+       { l: 'n/-n^n1', r: '-n^(1-n1)' },        // Joining division with power 2
+       { l: 'n/n^n1', r: 'n^(1-n1)' },          // Joining division with power 3
+       { l: 'n^n1/-n^n2', r: 'n^(n1-n2)' },     // Joining division with power 4
+       { l: 'n^n1/n^n2', r: 'n^(n1-n2)' },      // Joining division with power 5
+       { l: 'n1+(-n2*n3)', r: 'n1-n2*n3' },     // Solving useless parenthesis 1 
+       { l: 'v*(-c)', r: '-c*v' },              // Solving useless unary 2 
+       { l: 'n1+-n2', r: 'n1-n2' },             // Solving +- together (new!)
+       { l: 'v*c', r: 'c*v' },                  // inversion constant with variable
+       { l: '(n1^n2)^n3', r:'(n1^(n2*n3))'},    // Power to Power
+       
+    ];                    
+    return setRules;
+  } // End rulesRationalize
+
+  //---------------------------------------------------------------------------------------
+  /**
+   *  Expand recursively a tree node for handling with expressions with exponents
+   *  (it's not for constants, symbols or functions with exponents)
+   *  PS: The other parameters are internal for recursion
+   *
+   * Syntax:
+   *
+   *     expandPower(node)
+   *
+   * @param  {Node} node         Current expression node
+   * @param  {node} parent       Parent current node inside the recursion
+   * @param  (int}               Parent number of chid inside the rercursion 
+   *
+   * @return {node}        node expression with all powers expanded. 
+   */
+  function expandPower(node,parent,indParent) {
+    var tp = node.type; 
+    var internal = (arguments.length>1)   // TRUE in internal calls
+
+    if (tp==='OperatorNode') { 
+      var does = false;
+      if (node.op==='^')  {   // First operator: Parenthesis or UnaryMinus
+        if ( ( node.args[0].type==='ParenthesisNode' ||  
+            node.args[0].type==='OperatorNode' ) 
+            && (node.args[1].type==='ConstantNode') )  {   // Second operator: Constant
+          var val = parseFloat(node.args[1].value);
+          does = (val>=2 && number.isInteger(val));  
+        }
+      } 
+
+      if (does)  {  // Exponent >= 2 
+          //Before:
+          //            operator A --> Subtree
+          // parent pow 
+          //            constant
+          //
+        if (val>2)     {  // Exponent > 2, 
+          //AFTER:  (exponent > 2)
+          //             operator A --> Subtree
+          // parent  * 
+          //                 deep clone (operator A --> Subtree
+          //             pow     
+          //                 constant - 1
+          //
+           var nEsqTopo = node.args[0];  
+           var nDirTopo = new OperatorNode('^', 'pow', [node.args[0].cloneDeep(),new ConstantNode(val-1)]);
+           node = new OperatorNode('*', 'multiply', [nEsqTopo, nDirTopo]);
+        } else   // Expo = 2 - no power
+
+            //AFTER:  (exponent =  2)
+            //             operator A --> Subtree
+            // parent   oper 
+            //            deep clone (operator A --> Subtree)    
+            //                            
+           node = new OperatorNode('*', 'multiply', [node.args[0], node.args[0].cloneDeep()]);
+        
+        if (internal)       // Change parent references in internal recursive calls
+          if (indParent==='content')
+            parent.content = node;
+          else
+            parent.args[indParent] = node
+      } // does
+    } // Operator Node
+
+    if (tp==='ParenthesisNode' )  // Recursion 
+           expandPower(node.content,node,'content');  
+    else if (tp!=='ConstantNode' && tp!=='SymbolNode')  
+      for (var i=0;i<node.args.length;i++)  
+         expandPower(node.args[i],node,i);
+        
+      
+    if (! internal ) return node   // return the root node
+
+  }  // End expandPower
+
+
+  //---------------------------------------------------------------------------------------
+  /**
+   * Auxilary function for rationalize
+   * Convert near canonical polynomial in one variable in a canonical polynomial
+   * with one term for each exponent in decreasing order
+   *
+   * Syntax:
+   *
+   *     polyToCanonical(node [, coefficients])
+   *
+   * @param  {Node | string} expr       The near canonical polynomial expression to convert in a a canonical polynomial expression
+   * 
+   *        The string or tree expression needs to be at below syntax, with free spaces:
+   *         (  (^(-)? | [+-]? )cte (*)? var (^expo)?  | cte )+
+   *       Where 'var' is one variable with any valid name
+   *             'cte' are real numeric constants with any value. It can be omitted if equal than 1
+   *             'expo' are integers greater than 0. It can be omitted if equal than 1.
+   *
+   * @param  {array}   coefficients             Optional returns coefficients sorted by increased exponent 
+   *
+   *
+   * @return {node}        new node tree with one variable polynomial or string error. 
+   */
+  function polyToCanonical(node,coefficients) {
+    var i;
+
+    if (coefficients===undefined)
+       coefficients = []; // coefficients.
+
+    coefficients[0] = 0;   // index is the exponent
+    var o = {};
+    o.cte=1; 
+    o.oper='+'; 
+
+     // fire: mark with * or ^ when finds * or ^ down tree, reset to "" with + and -. 
+     //       It is used to deduce the exponent: 1 for *, 0 for "". 
+    o.fire='';  
+
+    var maxExpo=0;   // maximum exponent
+    var varname='';  // var name 
+
+    recurPol(node,null,o);    
+    maxExpo = coefficients.length-1;
+    var first=true;
+
+    for (i=maxExpo;i>=0 ;i--)  {
+      if (coefficients[i]===0)  continue;
+      var n1  = new ConstantNode(
+                      first ? coefficients[i] : Math.abs(coefficients[i]));
+      var op = coefficients[i]<0  ? '-' : '+';
+
+      if (i>0)   {  // Is not a constant without variable 
+        var n2 = new SymbolNode(varname);    
+        if (i>1)  {
+          var n3 =  new ConstantNode(i);     
+          n2 = new OperatorNode('^', 'pow', [n2, n3]); 
+        }
+        if (coefficients[i]===-1  && first) 
+          n1 = new OperatorNode('-', 'unaryMinus', [n2]);          
+        else if (Math.abs(coefficients[i])===1)  
+          n1 = n2;
+        else
+          n1 = new OperatorNode('*', 'multiply', [n1, n2]); 
+      }
+
+      var no;
+      if (first)   
+        no = n1;
+      else if (op==='+')
+        no = new OperatorNode('+', 'add', [no, n1]);
+      else
+        no = new OperatorNode('-', 'subtract', [no, n1]);
+
+      first = false;
+    }  // for 
+
+    if (first) 
+      return new ConstantNode(0);
+    else
+      return no;
+
+    /**
+     * Recursive auxilary function inside polyToCanonical for
+     * converting expression in canonical form
+     *
+     * Syntax:
+     *
+     *     recurPol(node, noPai, obj)
+     *
+     * @param  {Node} node        The current subpolynomial expression 
+     * @param  {Node | Null}  noPai   The current parent node
+     * @param  {object}    obj        Object with many internal flags
+     *
+     * @return {}                    No return. If error, throws an exception
+     */
+    function recurPol(node,noPai,o) {
+
+      var tp = node.type; 
+      if (tp==='FunctionNode')            // ***** FunctionName *****
+                // No function call in polynomial expression
+        throw new ArgumentsError('There is an unsolved function call')
+
+      else if (tp==='OperatorNode')  {    // ***** OperatorName *****
+        if ('+-*^'.indexOf(node.op) === -1) throw new ArgumentsError('Operator ' + node.op + ' invalid');
+
+        if (noPai!==null)  {
+            // -(unary),^  : children of *,+,-
+          if ( (node.fn==='unaryMinus' || node.fn==='pow') && noPai.fn !=='add' &&  
+                                noPai.fn!=='subtract'  &&  noPai.fn!=='multiply' )
+            throw new ArgumentsError('Invalid ' + node.op +  ' placing')
+
+            // -,+,* : children of +,- 
+          if ((node.fn==='subtract' || node.fn==='add' || node.fn==='multiply')  && 
+              noPai.fn!=='add' &&  noPai.fn!=='subtract' )
+            throw new ArgumentsError('Invalid ' + node.op +  ' placing'); 
+        
+           // -,+ : first child
+        if ((node.fn==='subtract' || node.fn==='add' ||                
+            node.fn==='unaryMinus' )  && o.noFil!==0 )                  
+            throw new ArgumentsError('Invalid ' + node.op +  ' placing')
+         } // Has parent    
+
+        // Firers: ^,*       Old:   ^,&,-(unary): firers
+        if (node.op==='^' || node.op==='*') o.fire = node.op;
+
+        for (var i=0;i<node.args.length;i++)  {
+           // +,-: reset fire
+          if (node.fn==='unaryMinus') o.oper='-';
+          if (node.op==='+' || node.fn==='subtract' ) {    
+            o.fire = '';  
+            o.cte = 1;   // default if there is no constant
+            o.oper = (i===0 ? '+' : node.op);
+          }
+          o.noFil = i;  // number of son
+          recurPol(node.args[i],node,o);
+        } // for in children
+
+      } else if (tp==='SymbolNode') {      // ***** SymbolName *****
+        if (node.name !== varname && varname!=='')
+          throw new ArgumentsError('There is more than one variable')
+        varname = node.name;   
+        if (noPai === null)  {
+            coefficients[1] = 1; 
+            return;
+        }   
+
+          // ^: Symbol is First child
+        if (noPai.op==='^' && o.noFil!==0 ) 
+           throw new ArgumentsError('In power the variable should be the first parameter')
+
+          // *: Symbol is Second child 
+        if (noPai.op==='*' && o.noFil!==1 ) 
+           throw new ArgumentsError('In multiply the variable should be the second parameter')
+
+          // Symbol: firers '',* => it means there is no exponent above, so it's 1 (cte * var) 
+        if (o.fire==='' || o.fire==='*' )   {
+          if (maxExpo<1) coefficients[1]=0;
+          coefficients[1] += o.cte* (o.oper==='+'  ? 1 : -1);
+          maxExpo = Math.max(1,maxExpo);
+        }
+
+      } else if (tp==='ConstantNode') {
+        var valor =  parseFloat(node.value);
+        if (noPai === null)  {
+          coefficients[0] = valor;
+          return;
+        }   
+        if (noPai.op==='^')  {
+           // cte: second  child of power
+          if (o.noFil!==1) throw new ArgumentsError('Constant cannot be powered')
+
+          if (! number.isInteger(valor) || valor<=0 )
+            throw new ArgumentsError('Non-integer exponent is not allowed');
+
+          for (var i=maxExpo+1;i<valor;i++) coefficients[i]=0;
+          if (valor>maxExpo) coefficients[valor]=0;
+          coefficients[valor] += o.cte * (o.oper==='+' ? 1 : -1) 
+          maxExpo = Math.max(valor,maxExpo);
+          return;
+        }
+        o.cte = valor;
+
+        // Cte: firer '' => There is no exponent and no multiplication, so the exponent is 0. 
+        if (o.fire==='')  
+          coefficients[0] += o.cte * (o.oper==='+'? 1 : -1);
+
+
+      } else 
+         throw new ArgumentsError('Type ' + tp + ' is not allowed');
+      return;
+    } // End of recurPol
+ 
+  } // End of polyToCanonical
+
+  return rationalize;
+} // end of factory
+
+exports.name = 'rationalize';
+exports.factory = factory;
+
+/***/ }),
+/* 443 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55626,23 +56350,23 @@ exports.factory = factory;
 function factory (type, config, load, typed) {
 
   var matrix = load(__webpack_require__(0));
-  var zeros = load(__webpack_require__(40));
-  var eye = load(__webpack_require__(64));
-  var clone = load(__webpack_require__(132));
+  var zeros = load(__webpack_require__(42));
+  var eye = load(__webpack_require__(65));
+  var clone = load(__webpack_require__(135));
   
-  var isZero = load(__webpack_require__(87));
-  var isPositive = load(__webpack_require__(58));
-  var unequal = load(__webpack_require__(133));
+  var isZero = load(__webpack_require__(88));
+  var isPositive = load(__webpack_require__(60));
+  var unequal = load(__webpack_require__(136));
     
-  var abs = load(__webpack_require__(31));
-  var sign = load(__webpack_require__(134));
-  var sqrt = load(__webpack_require__(59));
-  var conj = load(__webpack_require__(135));
+  var abs = load(__webpack_require__(28));
+  var sign = load(__webpack_require__(137));
+  var sqrt = load(__webpack_require__(52));
+  var conj = load(__webpack_require__(138));
   
-  var unaryMinus = load(__webpack_require__(39)); 
-  var addScalar = load(__webpack_require__(20));  
-  var divideScalar = load(__webpack_require__(19));
-  var multiplyScalar = load(__webpack_require__(23));  
+  var unaryMinus = load(__webpack_require__(37)); 
+  var addScalar = load(__webpack_require__(16));  
+  var divideScalar = load(__webpack_require__(14));
+  var multiplyScalar = load(__webpack_require__(22));  
   var subtract = load(__webpack_require__(21));
     
   
@@ -55883,7 +56607,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 442 */
+/* 444 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55891,11 +56615,11 @@ exports.factory = factory;
 
 function factory (type, config, load) {
 
-  var cs_amd = load(__webpack_require__(443));
-  var cs_permute = load(__webpack_require__(445));
-  var cs_etree = load(__webpack_require__(446));
-  var cs_post = load(__webpack_require__(447));
-  var cs_counts = load(__webpack_require__(448));
+  var cs_amd = load(__webpack_require__(445));
+  var cs_permute = load(__webpack_require__(447));
+  var cs_etree = load(__webpack_require__(448));
+  var cs_post = load(__webpack_require__(449));
+  var cs_counts = load(__webpack_require__(450));
 
   /**
    * Symbolic ordering and analysis for QR and LU decompositions.
@@ -56053,7 +56777,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 443 */
+/* 445 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -56061,11 +56785,11 @@ exports.factory = factory;
 
 function factory (type, config, load) {
 
-  var cs_flip = load(__webpack_require__(88));
-  var cs_fkeep = load(__webpack_require__(444));
-  var cs_tdfs = load(__webpack_require__(138));
+  var cs_flip = load(__webpack_require__(89));
+  var cs_fkeep = load(__webpack_require__(446));
+  var cs_tdfs = load(__webpack_require__(141));
   
-  var add       = load(__webpack_require__(18));
+  var add       = load(__webpack_require__(20));
   var multiply  = load(__webpack_require__(12));
   var transpose = load(__webpack_require__(70));
 
@@ -56633,7 +57357,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 444 */
+/* 446 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -56705,7 +57429,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 445 */
+/* 447 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -56783,7 +57507,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 446 */
+/* 448 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -56866,7 +57590,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 447 */
+/* 449 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -56874,7 +57598,7 @@ exports.factory = factory;
 
 function factory (type, config, load) {
 
-  var cs_tdfs = load(__webpack_require__(138));
+  var cs_tdfs = load(__webpack_require__(141));
 
   /**
    * Post order a tree of forest
@@ -56932,7 +57656,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 448 */
+/* 450 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -56942,7 +57666,7 @@ function factory (type, config, load) {
 
   var transpose = load(__webpack_require__(70));
   
-  var cs_leaf = load(__webpack_require__(449));
+  var cs_leaf = load(__webpack_require__(451));
 
   /**
    * Computes the column counts using the upper triangular part of A.
@@ -57060,7 +57784,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 449 */
+/* 451 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57133,7 +57857,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 450 */
+/* 452 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57141,14 +57865,14 @@ exports.factory = factory;
 
 function factory (type, config, load) {
 
-  var abs = load(__webpack_require__(31));
-  var divideScalar = load(__webpack_require__(19));
+  var abs = load(__webpack_require__(28));
+  var divideScalar = load(__webpack_require__(14));
   var multiply = load(__webpack_require__(12));
   
   var larger = load(__webpack_require__(36));
-  var largerEq = load(__webpack_require__(139));
+  var largerEq = load(__webpack_require__(142));
   
-  var cs_spsolve = load(__webpack_require__(451));
+  var cs_spsolve = load(__webpack_require__(453));
 
   var SparseMatrix = type.SparseMatrix;
 
@@ -57318,7 +58042,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 451 */
+/* 453 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57326,11 +58050,11 @@ exports.factory = factory;
 
 function factory (type, config, load) {
 
-  var divideScalar = load(__webpack_require__(19));
+  var divideScalar = load(__webpack_require__(14));
   var multiply = load(__webpack_require__(12));
   var subtract = load(__webpack_require__(21));
 
-  var cs_reach = load(__webpack_require__(452));
+  var cs_reach = load(__webpack_require__(454));
 
   /**
    * The function cs_spsolve() computes the solution to G * x = bk, where bk is the
@@ -57411,7 +58135,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 452 */
+/* 454 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57419,9 +58143,9 @@ exports.factory = factory;
 
 function factory (type, config, load) {
 
-  var cs_dfs = load(__webpack_require__(453));
-  var cs_marked = load(__webpack_require__(140));
-  var cs_mark = load(__webpack_require__(141));
+  var cs_dfs = load(__webpack_require__(455));
+  var cs_marked = load(__webpack_require__(143));
+  var cs_mark = load(__webpack_require__(144));
 
   /**
    * The cs_reach function computes X = Reach(B), where B is the nonzero pattern of the n-by-1 
@@ -57479,7 +58203,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 453 */
+/* 455 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57487,9 +58211,9 @@ exports.factory = factory;
 
 function factory (type, config, load) {
 
-  var cs_marked = load(__webpack_require__(140));
-  var cs_mark   = load(__webpack_require__(141));
-  var cs_unflip = load(__webpack_require__(454));
+  var cs_marked = load(__webpack_require__(143));
+  var cs_mark   = load(__webpack_require__(144));
+  var cs_unflip = load(__webpack_require__(456));
 
   /**
    * Depth-first search computes the nonzero pattern xi of the directed graph G (Matrix) starting
@@ -57571,7 +58295,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 454 */
+/* 456 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57579,7 +58303,7 @@ exports.factory = factory;
 
 function factory (type, config, load) {
 
-  var cs_flip = load(__webpack_require__(88));
+  var cs_flip = load(__webpack_require__(89));
   
   /**
    * Flips the value if it is negative of returns the same value otherwise.
@@ -57602,7 +58326,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 455 */
+/* 457 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57613,14 +58337,14 @@ var isArray = Array.isArray;
 function factory (type, config, load, typed) {
   
   var matrix = load(__webpack_require__(0));
-  var lup = load(__webpack_require__(136));
-  var slu = load(__webpack_require__(137));
-  var cs_ipvec = load(__webpack_require__(456));
+  var lup = load(__webpack_require__(139));
+  var slu = load(__webpack_require__(140));
+  var cs_ipvec = load(__webpack_require__(458));
 
-  var solveValidation = load(__webpack_require__(89));
+  var solveValidation = load(__webpack_require__(90));
 
-  var usolve = load(__webpack_require__(143));
-  var lsolve = load(__webpack_require__(142));
+  var usolve = load(__webpack_require__(146));
+  var lsolve = load(__webpack_require__(145));
 
   /**
    * Solves the linear system `A * x = b` where `A` is an [n x n] matrix and `b` is a [n] column vector.
@@ -57642,7 +58366,7 @@ function factory (type, config, load, typed) {
    *
    *    var a = [[-2, 3], [2, 1]];
    *    var b = [11, 9];
-   *    var x = lusolve(a, b);  // [[-5.5], [20]]
+   *    var x = math.lusolve(a, b);  // [[2], [5]]
    *
    * See also:
    *
@@ -57734,7 +58458,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 456 */
+/* 458 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57782,46 +58506,46 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 457 */
+/* 459 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(31),
-  __webpack_require__(18),
+  __webpack_require__(28),
   __webpack_require__(20),
-  __webpack_require__(458),
-  __webpack_require__(459),
+  __webpack_require__(16),
   __webpack_require__(460),
-  __webpack_require__(49),
-  __webpack_require__(144),
   __webpack_require__(461),
   __webpack_require__(462),
+  __webpack_require__(51),
+  __webpack_require__(147),
   __webpack_require__(463),
-  __webpack_require__(108),
   __webpack_require__(464),
   __webpack_require__(465),
+  __webpack_require__(109),
   __webpack_require__(466),
   __webpack_require__(467),
-  __webpack_require__(146),
+  __webpack_require__(468),
   __webpack_require__(469),
-  __webpack_require__(470),
-  __webpack_require__(12),
+  __webpack_require__(149),
   __webpack_require__(471),
   __webpack_require__(472),
-  __webpack_require__(47),
-  __webpack_require__(109),
-  __webpack_require__(134),
-  __webpack_require__(59),
+  __webpack_require__(12),
   __webpack_require__(473),
-  __webpack_require__(21),
-  __webpack_require__(39),
   __webpack_require__(474),
-  __webpack_require__(475)
+  __webpack_require__(48),
+  __webpack_require__(110),
+  __webpack_require__(137),
+  __webpack_require__(52),
+  __webpack_require__(475),
+  __webpack_require__(21),
+  __webpack_require__(37),
+  __webpack_require__(476),
+  __webpack_require__(477)
 ];
 
 
 /***/ }),
-/* 458 */
+/* 460 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57830,8 +58554,8 @@ module.exports = [
 var deepMap = __webpack_require__(1);
 
 function factory (type, config, load, typed) {
-  var unaryMinus = load(__webpack_require__(39));
-  var isNegative = load(__webpack_require__(60));
+  var unaryMinus = load(__webpack_require__(37));
+  var isNegative = load(__webpack_require__(61));
   var matrix = load(__webpack_require__(0));
 
   /**
@@ -58013,7 +58737,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 459 */
+/* 461 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -58081,7 +58805,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 460 */
+/* 462 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -58152,7 +58876,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 461 */
+/* 463 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -58161,12 +58885,12 @@ exports.factory = factory;
 function factory (type, config, load, typed) {
 
   var matrix = load(__webpack_require__(0));
-  var multiplyScalar = load(__webpack_require__(23));
+  var multiplyScalar = load(__webpack_require__(22));
   var latex = __webpack_require__(4);
 
   var algorithm02 = load(__webpack_require__(24));
-  var algorithm09 = load(__webpack_require__(145));
-  var algorithm11 = load(__webpack_require__(17));
+  var algorithm09 = load(__webpack_require__(148));
+  var algorithm11 = load(__webpack_require__(19));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
 
@@ -58302,7 +59026,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 462 */
+/* 464 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -58311,13 +59035,13 @@ exports.factory = factory;
 function factory (type, config, load, typed) {
 
   var matrix = load(__webpack_require__(0));
-  var pow = load(__webpack_require__(47));
+  var pow = load(__webpack_require__(48));
   var latex = __webpack_require__(4);
 
-  var algorithm03 = load(__webpack_require__(15));
+  var algorithm03 = load(__webpack_require__(17));
   var algorithm07 = load(__webpack_require__(26));
-  var algorithm11 = load(__webpack_require__(17));
-  var algorithm12 = load(__webpack_require__(16));
+  var algorithm11 = load(__webpack_require__(19));
+  var algorithm12 = load(__webpack_require__(18));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
 
@@ -58450,7 +59174,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 463 */
+/* 465 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -58514,7 +59238,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 464 */
+/* 466 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -58581,7 +59305,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 465 */
+/* 467 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -58595,7 +59319,7 @@ function factory (type, config, load, typed) {
 
   var algorithm01 = load(__webpack_require__(35));
   var algorithm04 = load(__webpack_require__(78));
-  var algorithm10 = load(__webpack_require__(38));
+  var algorithm10 = load(__webpack_require__(40));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
 
@@ -58787,7 +59511,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 466 */
+/* 468 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -58796,13 +59520,13 @@ exports.factory = factory;
 var flatten = __webpack_require__(2).flatten;
 
 function factory (type, config, load, typed) {
-  var abs = load(__webpack_require__(31));
-  var add = load(__webpack_require__(20));
-  var divide = load(__webpack_require__(19));
-  var multiply = load(__webpack_require__(23));
-  var sqrt = load(__webpack_require__(59));
-  var smaller = load(__webpack_require__(46));
-  var isPositive = load(__webpack_require__(58));
+  var abs = load(__webpack_require__(28));
+  var add = load(__webpack_require__(16));
+  var divide = load(__webpack_require__(14));
+  var multiply = load(__webpack_require__(22));
+  var sqrt = load(__webpack_require__(52));
+  var smaller = load(__webpack_require__(41));
+  var isPositive = load(__webpack_require__(60));
 
   /**
    * Calculate the hypotenusa of a list with values. The hypotenusa is defined as:
@@ -58878,7 +59602,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 467 */
+/* 469 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -58892,7 +59616,7 @@ function factory (type, config, load, typed) {
 
   var algorithm02 = load(__webpack_require__(24));
   var algorithm06 = load(__webpack_require__(71));
-  var algorithm11 = load(__webpack_require__(17));
+  var algorithm11 = load(__webpack_require__(19));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
 
@@ -59099,7 +59823,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 468 */
+/* 470 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -59170,7 +59894,7 @@ module.exports = function scatter(a, j, w, x, u, mark, c, f, inverse, update, va
 
 
 /***/ }),
-/* 469 */
+/* 471 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -59255,7 +59979,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 470 */
+/* 472 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -59267,10 +59991,10 @@ function factory (type, config, load, typed) {
   var latex = __webpack_require__(4);
 
   var algorithm02 = load(__webpack_require__(24));
-  var algorithm03 = load(__webpack_require__(15));
-  var algorithm05 = load(__webpack_require__(63));
-  var algorithm11 = load(__webpack_require__(17));
-  var algorithm12 = load(__webpack_require__(16));
+  var algorithm03 = load(__webpack_require__(17));
+  var algorithm05 = load(__webpack_require__(64));
+  var algorithm11 = load(__webpack_require__(19));
+  var algorithm12 = load(__webpack_require__(18));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
   
@@ -59446,7 +60170,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 471 */
+/* 473 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -59454,16 +60178,16 @@ exports.factory = factory;
 
 function factory (type, config, load, typed) {
   
-  var abs         = load(__webpack_require__(31));
-  var add         = load(__webpack_require__(18));
-  var pow         = load(__webpack_require__(47));
-  var sqrt        = load(__webpack_require__(59));
+  var abs         = load(__webpack_require__(28));
+  var add         = load(__webpack_require__(20));
+  var pow         = load(__webpack_require__(48));
+  var sqrt        = load(__webpack_require__(52));
   var multiply    = load(__webpack_require__(12));
-  var equalScalar = load(__webpack_require__(11));
+  var equalScalar = load(__webpack_require__(10));
   var larger      = load(__webpack_require__(36));
-  var smaller     = load(__webpack_require__(46));
+  var smaller     = load(__webpack_require__(41));
   var matrix      = load(__webpack_require__(0));
-  var trace       = load(__webpack_require__(147));
+  var trace       = load(__webpack_require__(150));
   var transpose   = load(__webpack_require__(70));
 
 
@@ -59668,7 +60392,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 472 */
+/* 474 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -59681,7 +60405,7 @@ function factory (type, config, load, typed) {
   var algorithm01 = load(__webpack_require__(35));
   var algorithm02 = load(__webpack_require__(24));
   var algorithm06 = load(__webpack_require__(71));
-  var algorithm11 = load(__webpack_require__(17));
+  var algorithm11 = load(__webpack_require__(19));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
 
@@ -59974,7 +60698,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 473 */
+/* 475 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -60046,7 +60770,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 474 */
+/* 476 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -60125,7 +60849,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 475 */
+/* 477 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -60269,29 +60993,29 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 476 */
+/* 478 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(477),
   __webpack_require__(479),
-  __webpack_require__(480),
+  __webpack_require__(481),
   __webpack_require__(482),
   __webpack_require__(484),
   __webpack_require__(486),
-  __webpack_require__(488)
+  __webpack_require__(488),
+  __webpack_require__(490)
 ];
 
 
 /***/ }),
-/* 477 */
+/* 479 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var isInteger = __webpack_require__(3).isInteger;
-var bigBitAnd = __webpack_require__(478);
+var bigBitAnd = __webpack_require__(480);
 
 function factory (type, config, load, typed) {
   var latex = __webpack_require__(4);
@@ -60300,7 +61024,7 @@ function factory (type, config, load, typed) {
 
   var algorithm02 = load(__webpack_require__(24));
   var algorithm06 = load(__webpack_require__(71));
-  var algorithm11 = load(__webpack_require__(17));
+  var algorithm11 = load(__webpack_require__(19));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
   
@@ -60440,10 +61164,10 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 478 */
+/* 480 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var bitwise = __webpack_require__(90);
+var bitwise = __webpack_require__(91);
 
 /**
  * Bitwise and for Bignumbers
@@ -60514,14 +61238,14 @@ module.exports = function bitAnd(x, y) {
 
 
 /***/ }),
-/* 479 */
+/* 481 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var deepMap = __webpack_require__(1);
-var bigBitNot = __webpack_require__(91);
+var bigBitNot = __webpack_require__(92);
 var isInteger = __webpack_require__(3).isInteger;
 
 function factory (type, config, load, typed) {
@@ -60577,14 +61301,14 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 480 */
+/* 482 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var isInteger = __webpack_require__(3).isInteger;
-var bigBitOr = __webpack_require__(481);
+var bigBitOr = __webpack_require__(483);
 
 function factory (type, config, load, typed) {
   var latex = __webpack_require__(4);
@@ -60593,7 +61317,7 @@ function factory (type, config, load, typed) {
 
   var algorithm01 = load(__webpack_require__(35));
   var algorithm04 = load(__webpack_require__(78));
-  var algorithm10 = load(__webpack_require__(38));
+  var algorithm10 = load(__webpack_require__(40));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
   
@@ -60733,10 +61457,10 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 481 */
+/* 483 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var bitwise = __webpack_require__(90);
+var bitwise = __webpack_require__(91);
 
 /**
  * Bitwise OR for BigNumbers
@@ -60792,23 +61516,23 @@ module.exports = function bitOr (x, y) {
 
 
 /***/ }),
-/* 482 */
+/* 484 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var isInteger = __webpack_require__(3).isInteger;
-var bigBitXor = __webpack_require__(483);
+var bigBitXor = __webpack_require__(485);
 
 function factory (type, config, load, typed) {
   var latex = __webpack_require__(4);
 
   var matrix = load(__webpack_require__(0));
 
-  var algorithm03 = load(__webpack_require__(15));
+  var algorithm03 = load(__webpack_require__(17));
   var algorithm07 = load(__webpack_require__(26));
-  var algorithm12 = load(__webpack_require__(16));
+  var algorithm12 = load(__webpack_require__(18));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
 
@@ -60948,11 +61672,11 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 483 */
+/* 485 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var bitwise = __webpack_require__(90);
-var bitNot = __webpack_require__(91);
+var bitwise = __webpack_require__(91);
+var bitNot = __webpack_require__(92);
 
 /**
  * Bitwise XOR for BigNumbers
@@ -61014,27 +61738,27 @@ module.exports = function bitXor(x, y) {
 
 
 /***/ }),
-/* 484 */
+/* 486 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var isInteger = __webpack_require__(3).isInteger;
-var bigLeftShift = __webpack_require__(485);
+var bigLeftShift = __webpack_require__(487);
 
 function factory (type, config, load, typed) {
   var latex = __webpack_require__(4);
 
   var matrix = load(__webpack_require__(0));
-  var equalScalar = load(__webpack_require__(11));
-  var zeros = load(__webpack_require__(40));
+  var equalScalar = load(__webpack_require__(10));
+  var zeros = load(__webpack_require__(42));
 
   var algorithm01 = load(__webpack_require__(35));
   var algorithm02 = load(__webpack_require__(24));
-  var algorithm08 = load(__webpack_require__(92));
-  var algorithm10 = load(__webpack_require__(38));
-  var algorithm11 = load(__webpack_require__(17));
+  var algorithm08 = load(__webpack_require__(93));
+  var algorithm10 = load(__webpack_require__(40));
+  var algorithm11 = load(__webpack_require__(19));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
 
@@ -61183,7 +61907,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 485 */
+/* 487 */
 /***/ (function(module, exports) {
 
 
@@ -61230,27 +61954,27 @@ module.exports = function leftShift (x, y) {
 
 
 /***/ }),
-/* 486 */
+/* 488 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var isInteger = __webpack_require__(3).isInteger;
-var bigRightArithShift = __webpack_require__(487);
+var bigRightArithShift = __webpack_require__(489);
 
 function factory (type, config, load, typed) {
   var latex = __webpack_require__(4);
   
   var matrix = load(__webpack_require__(0));
-  var equalScalar = load(__webpack_require__(11));
-  var zeros = load(__webpack_require__(40));
+  var equalScalar = load(__webpack_require__(10));
+  var zeros = load(__webpack_require__(42));
 
   var algorithm01 = load(__webpack_require__(35));
   var algorithm02 = load(__webpack_require__(24));
-  var algorithm08 = load(__webpack_require__(92));
-  var algorithm10 = load(__webpack_require__(38));
-  var algorithm11 = load(__webpack_require__(17));
+  var algorithm08 = load(__webpack_require__(93));
+  var algorithm10 = load(__webpack_require__(40));
+  var algorithm11 = load(__webpack_require__(19));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
 
@@ -61399,7 +62123,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 487 */
+/* 489 */
 /***/ (function(module, exports) {
 
 /*
@@ -61452,7 +62176,7 @@ module.exports = function rightArithShift (x, y) {
 
 
 /***/ }),
-/* 488 */
+/* 490 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -61464,14 +62188,14 @@ function factory (type, config, load, typed) {
   var latex = __webpack_require__(4);
 
   var matrix = load(__webpack_require__(0));
-  var equalScalar = load(__webpack_require__(11));
-  var zeros = load(__webpack_require__(40));
+  var equalScalar = load(__webpack_require__(10));
+  var zeros = load(__webpack_require__(42));
 
   var algorithm01 = load(__webpack_require__(35));
   var algorithm02 = load(__webpack_require__(24));
-  var algorithm08 = load(__webpack_require__(92));
-  var algorithm10 = load(__webpack_require__(38));
-  var algorithm11 = load(__webpack_require__(17));
+  var algorithm08 = load(__webpack_require__(93));
+  var algorithm10 = load(__webpack_require__(40));
+  var algorithm11 = load(__webpack_require__(19));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
   
@@ -61621,29 +62345,29 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 489 */
+/* 491 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(490),
-  __webpack_require__(491),
-  __webpack_require__(148),
-  __webpack_require__(492)
+  __webpack_require__(492),
+  __webpack_require__(493),
+  __webpack_require__(151),
+  __webpack_require__(494)
 ];
 
 
 /***/ }),
-/* 490 */
+/* 492 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 function factory (type, config, load, typed) {
-  var add = load(__webpack_require__(18));
-  var stirlingS2 = load(__webpack_require__(148));
-  var isNegative = load(__webpack_require__(60));
-  var isInteger = load(__webpack_require__(50));
+  var add = load(__webpack_require__(20));
+  var stirlingS2 = load(__webpack_require__(151));
+  var isNegative = load(__webpack_require__(61));
+  var isInteger = load(__webpack_require__(53));
 
   /**
    * The Bell Numbers count the number of partitions of a set. A partition is a pairwise disjoint subset of S whose union is S.
@@ -61693,7 +62417,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 491 */
+/* 493 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -61701,9 +62425,9 @@ exports.factory = factory;
 
 function factory (type, config, load, typed) {
   var combinations = load(__webpack_require__(73));
-  var add = load(__webpack_require__(20));
-  var isPositive = load(__webpack_require__(58));
-  var isInteger = load(__webpack_require__(50));
+  var add = load(__webpack_require__(16));
+  var isPositive = load(__webpack_require__(60));
+  var isInteger = load(__webpack_require__(53));
   var larger = load(__webpack_require__(36));
 
   /**
@@ -61751,19 +62475,19 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 492 */
+/* 494 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 function factory (type, config, load, typed) {
-  var add = load(__webpack_require__(18));
-  var divide = load(__webpack_require__(49));
+  var add = load(__webpack_require__(20));
+  var divide = load(__webpack_require__(51));
   var multiply = load(__webpack_require__(12));
   var combinations = load(__webpack_require__(73));
-  var isNegative = load(__webpack_require__(60));
-  var isInteger = load(__webpack_require__(50));
+  var isNegative = load(__webpack_require__(61));
+  var isInteger = load(__webpack_require__(53));
 
 
   /**
@@ -61809,19 +62533,19 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 493 */
+/* 495 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(494),
-  __webpack_require__(135),
-  __webpack_require__(495),
-  __webpack_require__(496)
+  __webpack_require__(496),
+  __webpack_require__(138),
+  __webpack_require__(497),
+  __webpack_require__(498)
 ];
 
 
 /***/ }),
-/* 494 */
+/* 496 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -61887,7 +62611,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 495 */
+/* 497 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -61951,7 +62675,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 496 */
+/* 498 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -62015,17 +62739,17 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 497 */
+/* 499 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(498),
-  __webpack_require__(499)
+  __webpack_require__(500),
+  __webpack_require__(501)
 ];
 
 
 /***/ }),
-/* 498 */
+/* 500 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -62033,11 +62757,16 @@ module.exports = [
 
 function factory (type, config, load, typed) {
 
-  var abs = load(__webpack_require__(31));
-  var add = load(__webpack_require__(18));
+  var abs = load(__webpack_require__(28));
+  var add = load(__webpack_require__(20));
+  var addScalar = load(__webpack_require__(16));
   var matrix = load(__webpack_require__(0));
   var multiply = load(__webpack_require__(12));
+  var multiplyScalar = load(__webpack_require__(22));
+  var divideScalar = load(__webpack_require__(14));
   var subtract = load(__webpack_require__(21));
+  var smaller = load(__webpack_require__(41));
+  var equalScalar = load(__webpack_require__(10));
 
   /**
    * Calculates the point of intersection of two lines in two or three dimensions
@@ -62068,8 +62797,8 @@ function factory (type, config, load, typed) {
    */
   var intersect = typed('intersect', {
     'Array, Array, Array': function (x, y, plane) {
-      if (!_3d(x)) { throw new TypeError('Array with 3 numbers expected for first argument'); }
-      if (!_3d(y)) { throw new TypeError('Array with 3 numbers expected for second argument'); }
+      if (!_3d(x)) { throw new TypeError('Array with 3 numbers or BigNumbers expected for first argument'); }
+      if (!_3d(y)) { throw new TypeError('Array with 3 numbers or BigNumbers expected for second argument'); }
       if (!_4d(plane)) { throw new TypeError('Array with 4 numbers expected as third argument'); }
 
       return _intersectLinePlane(x[0], x[1], x[2], y[0], y[1], y[2], plane[0], plane[1], plane[2], plane[3]);
@@ -62077,18 +62806,18 @@ function factory (type, config, load, typed) {
 
     'Array, Array, Array, Array': function (w, x, y, z) {
       if (w.length === 2) {
-        if (!_2d(w)) { throw new TypeError('Array with 2 numbers expected for first argument'); }
-        if (!_2d(x)) { throw new TypeError('Array with 2 numbers expected for second argument'); }
-        if (!_2d(y)) { throw new TypeError('Array with 2 numbers expected for third argument'); }
-        if (!_2d(z)) { throw new TypeError('Array with 2 numbers expected for fourth argument'); }
+        if (!_2d(w)) { throw new TypeError('Array with 2 numbers or BigNumbers expected for first argument'); }
+        if (!_2d(x)) { throw new TypeError('Array with 2 numbers or BigNumbers expected for second argument'); }
+        if (!_2d(y)) { throw new TypeError('Array with 2 numbers or BigNumbers expected for third argument'); }
+        if (!_2d(z)) { throw new TypeError('Array with 2 numbers or BigNumbers expected for fourth argument'); }
 
         return _intersect2d(w, x, y, z);
       }
       else if (w.length === 3) {
-        if (!_3d(w)) { throw new TypeError('Array with 3 numbers expected for first argument'); }
-        if (!_3d(x)) { throw new TypeError('Array with 3 numbers expected for second argument'); }
-        if (!_3d(y)) { throw new TypeError('Array with 3 numbers expected for third argument'); }
-        if (!_3d(z)) { throw new TypeError('Array with 3 numbers expected for fourth argument'); }
+        if (!_3d(w)) { throw new TypeError('Array with 3 numbers or BigNumbers expected for first argument'); }
+        if (!_3d(x)) { throw new TypeError('Array with 3 numbers or BigNumbers expected for second argument'); }
+        if (!_3d(y)) { throw new TypeError('Array with 3 numbers or BigNumbers expected for third argument'); }
+        if (!_3d(z)) { throw new TypeError('Array with 3 numbers or BigNumbers expected for fourth argument'); }
 
         return _intersect3d(w[0], w[1], w[2], x[0], x[1], x[2], y[0], y[1], y[2], z[0], z[1], z[2]);
       }
@@ -62107,16 +62836,21 @@ function factory (type, config, load, typed) {
     }
   });
 
+  function _isNumber(a) {
+    // intersect supports numbers and bignumbers
+    return (typeof a === 'number' || type.isBigNumber(a));
+  }
+
   function _2d(x) {
-    return x.length === 2 && typeof x[0] === 'number' && typeof x[1] === 'number';
+    return x.length === 2 && _isNumber(x[0]) && _isNumber(x[1]);
   }
 
   function _3d(x) {
-    return x.length === 3 && typeof x[0] === 'number' && typeof x[1] === 'number' && typeof x[2] === 'number';
+    return x.length === 3 && _isNumber(x[0]) && _isNumber(x[1]) && _isNumber(x[2]);
   }
 
   function _4d(x) {
-    return x.length === 4 && typeof x[0] === 'number' && typeof x[1] === 'number' && typeof x[2] === 'number' && typeof x[3] === 'number';
+    return x.length === 4 && _isNumber(x[0]) && _isNumber(x[1]) && _isNumber(x[2]) && _isNumber(x[3]);
   }
 
   function _intersect2d(p1a, p1b, p2a, p2b){
@@ -62124,30 +62858,44 @@ function factory (type, config, load, typed) {
     var o2 = p2a;
     var d1 = subtract(o1, p1b);
     var d2 = subtract(o2, p2b);
-    var det = d1[0]*d2[1] - d2[0]*d1[1];
-    if (abs(det) < config.epsilon) {
+    var det = subtract(multiplyScalar(d1[0], d2[1]), multiplyScalar(d2[0], d1[1]));
+    if (smaller(abs(det), config.epsilon)) {
       return null;
     }
-    var t = (d2[0]*o1[1] - d2[1]*o1[0] - d2[0]*o2[1] + d2[1]*o2[0]) / det;
-    return add(multiply(d1, t), o1); 
+    var d20o11 = multiplyScalar(d2[0], o1[1]);
+    var d21o10 = multiplyScalar(d2[1], o1[0]);
+    var d20o21 = multiplyScalar(d2[0], o2[1]);
+    var d21o20 = multiplyScalar(d2[1], o2[0]);
+    var t = divideScalar(addScalar(subtract(subtract(d20o11, d21o10), d20o21), d21o20), det);
+    return add(multiply(d1, t), o1);
+  }
+
+  function _intersect3dHelper(a, b, c, d, e, f, g, h, i, j, k, l){
+      // (a - b)*(c - d) + (e - f)*(g - h) + (i - j)*(k - l)
+      var add1 = multiplyScalar(subtract(a, b), subtract(c, d));
+      var add2 = multiplyScalar(subtract(e, f), subtract(g, h));
+      var add3 = multiplyScalar(subtract(i, j), subtract(k, l));
+      return addScalar(addScalar(add1, add2), add3);
   }
 
   function _intersect3d(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4){
-    var d1343 = (x1 - x3)*(x4 - x3) + (y1 - y3)*(y4 - y3) + (z1 - z3)*(z4 - z3);
-    var d4321 = (x4 - x3)*(x2 - x1) + (y4 - y3)*(y2 - y1) + (z4 - z3)*(z2 - z1);
-    var d1321 = (x1 - x3)*(x2 - x1) + (y1 - y3)*(y2 - y1) + (z1 - z3)*(z2 - z1);
-    var d4343 = (x4 - x3)*(x4 - x3) + (y4 - y3)*(y4 - y3) + (z4 - z3)*(z4 - z3);
-    var d2121 = (x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1) + (z2 - z1)*(z2 - z1);
-    var ta = ( d1343*d4321 - d1321*d4343 ) / ( d2121*d4343 - d4321*d4321 );
-    var tb = ( d1343 + ta * d4321 ) / (d4343);
+    var d1343 = _intersect3dHelper(x1, x3, x4, x3, y1, y3, y4, y3, z1, z3, z4, z3);
+    var d4321 = _intersect3dHelper(x4, x3, x2, x1, y4, y3, y2, y1, z4, z3, z2, z1);
+    var d1321 = _intersect3dHelper(x1, x3, x2, x1, y1, y3, y2, y1, z1, z3, z2, z1);
+    var d4343 = _intersect3dHelper(x4, x3, x4, x3, y4, y3, y4, y3, z4, z3, z4, z3);
+    var d2121 = _intersect3dHelper(x2, x1, x2, x1, y2, y1, y2, y1, z2, z1, z2, z1);
+    var ta = divideScalar(
+      subtract(multiplyScalar(d1343, d4321), multiplyScalar(d1321, d4343)),
+      subtract(multiplyScalar(d2121, d4343), multiplyScalar(d4321, d4321)));
+    var tb = divideScalar(addScalar(d1343, multiplyScalar(ta, d4321)), d4343);
 
-    var pax = x1 + ta * (x2 - x1);
-    var pay = y1 + ta * (y2 - y1);
-    var paz = z1 + ta * (z2 - z1);
-    var pbx = x3 + tb * (x4 - x3);
-    var pby = y3 + tb * (y4 - y3);
-    var pbz = z3 + tb * (z4 - z3);
-    if (pax === pbx && pay === pby && paz === pbz){
+    var pax = addScalar(x1, multiplyScalar(ta, subtract(x2, x1)));
+    var pay = addScalar(y1, multiplyScalar(ta, subtract(y2, y1)));
+    var paz = addScalar(z1, multiplyScalar(ta, subtract(z2, z1)));
+    var pbx = addScalar(x3, multiplyScalar(tb, subtract(x4, x3)));
+    var pby = addScalar(y3, multiplyScalar(tb, subtract(y4, y3)));
+    var pbz = addScalar(z3, multiplyScalar(tb, subtract(z4, z3)));
+    if (equalScalar(pax, pbx) && equalScalar(pay, pby) && equalScalar(paz, pbz)){
       return [pax, pay, paz];
     }
     else{
@@ -62156,10 +62904,18 @@ function factory (type, config, load, typed) {
   }
 
   function _intersectLinePlane(x1, y1, z1, x2, y2, z2, x, y, z, c){
-    var t = (c - x1*x - y1*y - z1*z)/(x2*x + y2*y + z2*z - x1*x - y1*y - z1*z);
-    var px = x1 + t * (x2 - x1);
-    var py = y1 + t * (y2 - y1);
-    var pz = z1 + t * (z2 - z1);
+    var x1x = multiplyScalar(x1, x);
+    var x2x = multiplyScalar(x2, x);
+    var y1y = multiplyScalar(y1, y);
+    var y2y = multiplyScalar(y2, y);
+    var z1z = multiplyScalar(z1, z);
+    var z2z = multiplyScalar(z2, z);
+    var t = divideScalar(
+      subtract(subtract(subtract(c, x1x), y1y), z1z),
+      subtract(subtract(subtract(addScalar(addScalar(x2x, y2y), z2z), x1x), y1y), z1z));
+    var px = addScalar(x1, multiplyScalar(t, subtract(x2, x1)));
+    var py = addScalar(y1, multiplyScalar(t, subtract(y2, y1)));
+    var pz = addScalar(z1, multiplyScalar(t, subtract(z2, z1)));
     return [px, py, pz];
     // TODO: Add cases when line is parallel to the plane:
     //       (a) no intersection,
@@ -62174,7 +62930,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 499 */
+/* 501 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -62182,6 +62938,13 @@ exports.factory = factory;
 
 function factory (type, config, load, typed) {
   var matrix = load(__webpack_require__(0));
+  var add = load(__webpack_require__(16));
+  var subtract = load(__webpack_require__(21));
+  var multiply = load(__webpack_require__(22));
+  var divide = load(__webpack_require__(14));
+  var negate = load(__webpack_require__(37));
+  var sqrt = load(__webpack_require__(52));
+  var abs = load(__webpack_require__(28));
 
   /**
     * Calculates:
@@ -62239,12 +63002,12 @@ function factory (type, config, load, typed) {
     'Array, Array, Array': function(x, y, z){
       // Point to Line 2D; (x=Point, y=LinePoint1, z=LinePoint2)
       if (x.length == 2 && y.length == 2 && z.length == 2){
-        if (!_2d(x)) { throw new TypeError('Array with 2 numbers expected for first argument'); }
-        if (!_2d(y)) { throw new TypeError('Array with 2 numbers expected for second argument'); }
-        if (!_2d(z)) { throw new TypeError('Array with 2 numbers expected for third argument'); }
-        var m = (z[1]-z[0])/(y[1]-y[0]);
-        var xCoeff = m*m*y[0];
-        var yCoeff = -1*(m*y[0]);
+        if (!_2d(x)) { throw new TypeError('Array with 2 numbers or BigNumbers expected for first argument'); }
+        if (!_2d(y)) { throw new TypeError('Array with 2 numbers or BigNumbers expected for second argument'); }
+        if (!_2d(z)) { throw new TypeError('Array with 2 numbers or BigNumbers expected for third argument'); }
+        var m = divide(subtract(z[1], z[0]), subtract(y[1], y[0]));
+        var xCoeff = multiply(multiply(m, m), y[0]);
+        var yCoeff = negate(multiply(m, y[0]));
         var constant = x[1];
 
         return _distancePointLine2D(x[0], x[1], xCoeff, yCoeff, constant);
@@ -62255,14 +63018,14 @@ function factory (type, config, load, typed) {
     },
     'Object, Object, Object': function(x, y, z){
       if (Object.keys(x).length == 2 && Object.keys(y).length == 2 && Object.keys(z).length == 2){
-        if (!_2d(x)) { throw new TypeError('Values of pointX and pointY should be numbers'); }
-        if (!_2d(y)) { throw new TypeError('Values of lineOnePtX and lineOnePtY should be numbers'); }
-        if (!_2d(z)) { throw new TypeError('Values of lineTwoPtX and lineTwoPtY should be numbers'); }
+        if (!_2d(x)) { throw new TypeError('Values of pointX and pointY should be numbers or BigNumbers'); }
+        if (!_2d(y)) { throw new TypeError('Values of lineOnePtX and lineOnePtY should be numbers or BigNumbers'); }
+        if (!_2d(z)) { throw new TypeError('Values of lineTwoPtX and lineTwoPtY should be numbers or BigNumbers'); }
         if (x.hasOwnProperty('pointX') && x.hasOwnProperty('pointY') && y.hasOwnProperty('lineOnePtX') &&
           y.hasOwnProperty('lineOnePtY') && z.hasOwnProperty('lineTwoPtX') && z.hasOwnProperty('lineTwoPtY')){
-          var m = (z.lineTwoPtY-z.lineTwoPtX)/(y.lineOnePtY-y.lineOnePtX);
-          var xCoeff = m*m*y.lineOnePtX;
-          var yCoeff = -1*(m*y.lineOnePtX);
+          var m = divide(subtract(z.lineTwoPtY, z.lineTwoPtX), subtract(y.lineOnePtY, y.lineOnePtX));
+          var xCoeff = multiply(multiply(m, m), y.lineOnePtX);
+          var yCoeff = negate(multiply(m, y.lineOnePtX));
           var constant = x.pointX;
 
           return _distancePointLine2D(x.pointX, x.pointY, xCoeff, yCoeff, constant);
@@ -62278,29 +63041,29 @@ function factory (type, config, load, typed) {
     'Array, Array': function(x, y){
       // Point to Line 2D; (x=[pointX, pointY], y=[x-coeff, y-coeff, const])
       if (x.length == 2 && y.length == 3){
-        if (!_2d(x)) { throw new TypeError('Array with 2 numbers expected for first argument'); }
-        if (!_3d(y)) { throw new TypeError('Array with 3 numbers expected for second argument'); }
+        if (!_2d(x)) { throw new TypeError('Array with 2 numbers or BigNumbers expected for first argument'); }
+        if (!_3d(y)) { throw new TypeError('Array with 3 numbers or BigNumbers expected for second argument'); }
 
         return _distancePointLine2D(x[0], x[1], y[0], y[1], y[2]);
       }
       // Point to Line 3D
       else if (x.length == 3 && y.length == 6){
-        if (!_3d(x)) { throw new TypeError('Array with 3 numbers expected for first argument'); }
-        if (!_parametricLine(y)) { throw new TypeError('Array with 6 numbers expected for second argument'); }
+        if (!_3d(x)) { throw new TypeError('Array with 3 numbers or BigNumbers expected for first argument'); }
+        if (!_parametricLine(y)) { throw new TypeError('Array with 6 numbers or BigNumbers expected for second argument'); }
 
         return _distancePointLine3D(x[0], x[1], x[2], y[0], y[1], y[2], y[3], y[4], y[5]);
       }
       // Point to Point 2D
       else if (x.length == 2 && y.length == 2){
-        if (!_2d(x)) { throw new TypeError('Array with 2 numbers expected for first argument'); }
-        if (!_2d(y)) { throw new TypeError('Array with 2 numbers expected for second argument'); }
+        if (!_2d(x)) { throw new TypeError('Array with 2 numbers or BigNumbers expected for first argument'); }
+        if (!_2d(y)) { throw new TypeError('Array with 2 numbers or BigNumbers expected for second argument'); }
 
         return _distance2d(x[0], x[1], y[0], y[1]);
       }
       // Point to Point 3D
       else if(x.length == 3 && y.length == 3){
-        if (!_3d(x)) { throw new TypeError('Array with 3 numbers expected for first argument'); }
-        if (!_3d(y)) { throw new TypeError('Array with 3 numbers expected for second argument'); }
+        if (!_3d(x)) { throw new TypeError('Array with 3 numbers or BigNumbers expected for first argument'); }
+        if (!_3d(y)) { throw new TypeError('Array with 3 numbers or BigNumbers expected for second argument'); }
 
         return _distance3d(x[0], x[1], x[2], y[0], y[1], y[2]);
       }
@@ -62310,10 +63073,10 @@ function factory (type, config, load, typed) {
     },
     'Object, Object': function(x, y){
       if (Object.keys(x).length == 2 && Object.keys(y).length == 3){
-        if (!_2d(x)) { throw new TypeError('Values of pointX and pointY should be numbers'); }
-        if (!_3d(y)) { throw new TypeError('Values of xCoeffLine, yCoeffLine and constant should be numbers'); }
+        if (!_2d(x)) { throw new TypeError('Values of pointX and pointY should be numbers or BigNumbers'); }
+        if (!_3d(y)) { throw new TypeError('Values of xCoeffLine, yCoeffLine and constant should be numbers or BigNumbers'); }
         if (x.hasOwnProperty('pointX') && x.hasOwnProperty('pointY') && y.hasOwnProperty('xCoeffLine') &&
-          y.hasOwnProperty('yCoeffLine') && y.hasOwnProperty('yCoeffLine')){
+          y.hasOwnProperty('yCoeffLine') && y.hasOwnProperty('constant')){
 
           return _distancePointLine2D(x.pointX, x.pointY, y.xCoeffLine, y.yCoeffLine, y.constant);
         }
@@ -62323,8 +63086,8 @@ function factory (type, config, load, typed) {
       }
       // Point to Line 3D
       else if (Object.keys(x).length == 3 && Object.keys(y).length == 6){
-        if (!_3d(x)) { throw new TypeError('Values of pointX, pointY and pointZ should be numbers'); }
-        if (!_parametricLine(y)) { throw new TypeError('Values of x0, y0, z0, a, b and c should be numbers'); }
+        if (!_3d(x)) { throw new TypeError('Values of pointX, pointY and pointZ should be numbers or BigNumbers'); }
+        if (!_parametricLine(y)) { throw new TypeError('Values of x0, y0, z0, a, b and c should be numbers or BigNumbers'); }
         if (x.hasOwnProperty('pointX') && x.hasOwnProperty('pointY') && y.hasOwnProperty('x0') &&
           y.hasOwnProperty('y0') && y.hasOwnProperty('z0') && y.hasOwnProperty('a') &&
           y.hasOwnProperty('b') && y.hasOwnProperty('c')){
@@ -62337,8 +63100,8 @@ function factory (type, config, load, typed) {
       }
       // Point to Point 2D
       else if (Object.keys(x).length == 2 && Object.keys(y).length == 2){
-        if (!_2d(x)) { throw new TypeError('Values of pointOneX and pointOneY should be numbers'); }
-        if (!_2d(y)) { throw new TypeError('Values of pointTwoX and pointTwoY should be numbers'); }
+        if (!_2d(x)) { throw new TypeError('Values of pointOneX and pointOneY should be numbers or BigNumbers'); }
+        if (!_2d(y)) { throw new TypeError('Values of pointTwoX and pointTwoY should be numbers or BigNumbers'); }
         if (x.hasOwnProperty('pointOneX') && x.hasOwnProperty('pointOneY') &&
           y.hasOwnProperty('pointTwoX') && y.hasOwnProperty('pointTwoY')){
 
@@ -62350,8 +63113,8 @@ function factory (type, config, load, typed) {
       }
       // Point to Point 3D
       else if(Object.keys(x).length == 3 && Object.keys(y).length == 3){
-        if (!_3d(x)) { throw new TypeError('Values of pointOneX, pointOneY and pointOneZ should be numbers'); }
-        if (!_3d(y)) { throw new TypeError('Values of pointTwoX, pointTwoY and pointTwoZ should be numbers'); }
+        if (!_3d(x)) { throw new TypeError('Values of pointOneX, pointOneY and pointOneZ should be numbers or BigNumbers'); }
+        if (!_3d(y)) { throw new TypeError('Values of pointTwoX, pointTwoY and pointTwoZ should be numbers or BigNumbers'); }
         if (x.hasOwnProperty('pointOneX') && x.hasOwnProperty('pointOneY') && x.hasOwnProperty('pointOneZ') &&
           y.hasOwnProperty('pointTwoX') && y.hasOwnProperty('pointTwoY') && y.hasOwnProperty('pointTwoZ')){
 
@@ -62371,110 +63134,117 @@ function factory (type, config, load, typed) {
       return _distancePairwise(arr);
     }
   });
+
+  function _isNumber(a) {
+    // distance supports numbers and bignumbers
+    return (typeof a === 'number' || type.isBigNumber(a));
+  }
+
+  function _2d(a){
+    // checks if the number of arguments are correct in count and are valid (should be numbers)
+    if (a.constructor !== Array){
+      a = _objectToArray(a);
+    }
+    return _isNumber(a[0]) && _isNumber(a[1]);
+  }
+
+  function _3d(a){
+    // checks if the number of arguments are correct in count and are valid (should be numbers)
+    if (a.constructor !== Array){
+      a = _objectToArray(a);
+    }
+    return _isNumber(a[0]) && _isNumber(a[1]) &&  _isNumber(a[2]);
+  }
+
+  function _parametricLine(a){
+    if (a.constructor !== Array){
+      a = _objectToArray(a);
+    }
+    return _isNumber(a[0]) && _isNumber(a[1]) && _isNumber(a[2]) &&
+      _isNumber(a[3]) && _isNumber(a[4]) && _isNumber(a[5]);
+  }
+
+  function _objectToArray(o){
+    var keys = Object.keys(o);
+    var a = [];
+    for (var i = 0; i < keys.length; i++) {
+      a.push(o[keys[i]]);
+    }
+    return a;
+  }
+
+  function _pairwise(a){
+    //checks for valid arguments passed to _distancePairwise(Array)
+    if (a[0].length == 2 && _isNumber(a[0][0]) && _isNumber(a[0][1])){
+      for(var i in a){
+        if (a[i].length != 2 || !_isNumber(a[i][0]) || !_isNumber(a[i][1])){
+          return false;
+        }
+      }
+    }
+    else if (a[0].length == 3 && _isNumber(a[0][0]) && _isNumber(a[0][1]) && _isNumber(a[0][2])){
+      for(var i in a){
+        if (a[i].length != 3 || !_isNumber(a[i][0]) || !_isNumber(a[i][1]) || !_isNumber(a[i][2])){
+          return false;
+        }
+      }
+    }
+    else{
+      return false;
+    }
+    return true;
+  }
+
+  function _distancePointLine2D(x, y, a, b, c){
+    var num =  abs(add(add(multiply(a, x), multiply(b, y)), c));
+    var den = sqrt(add(multiply(a, a), multiply(b, b)));
+    var result = divide(num, den);
+    return result;
+  }
+
+  function _distancePointLine3D(x, y, z, x0, y0, z0, a, b, c){
+    var num = [ subtract(multiply(subtract(y0, y), c), multiply(subtract(z0, z), b)),
+                subtract(multiply(subtract(z0, z), a), multiply(subtract(x0, x), c)),
+                subtract(multiply(subtract(x0, x), b), multiply(subtract(y0, y), a)) ];
+    num = sqrt(add(add(multiply(num[0], num[0]), multiply(num[1], num[1])), multiply(num[2], num[2])));
+    var den = sqrt(add(add(multiply(a, a), multiply(b, b)), multiply(c, c)));
+    var result = divide(num, den);
+    return result;
+  }
+
+  function _distance2d(x1, y1, x2, y2){
+    var yDiff = subtract(y2, y1);
+    var xDiff = subtract(x2, x1);
+    var radicant = add(multiply(yDiff, yDiff), multiply(xDiff, xDiff));
+    var result = sqrt(radicant);
+    return result;
+  }
+
+  function _distance3d(x1, y1, z1, x2, y2, z2){
+    var zDiff = subtract(z2, z1);
+    var yDiff = subtract(y2, y1);
+    var xDiff = subtract(x2, x1);
+    var radicant = add(add(multiply(zDiff, zDiff), multiply(yDiff, yDiff)), multiply(xDiff, xDiff));
+    var result = sqrt(radicant);
+    return result;
+  }
+
+  function _distancePairwise(a){
+    var result = [];
+    for(var i = 0; i < a.length-1; i++){
+      for(var j = i+1; j < a.length; j++){
+        if (a[0].length == 2){
+          result.push(_distance2d(a[i][0], a[i][1], a[j][0], a[j][1]));
+        }
+        else if (a[0].length == 3){
+          result.push(_distance3d(a[i][0], a[i][1], a[i][2], a[j][0], a[j][1], a[j][2]));
+        }
+      }
+    }
+    return result;
+  }
+
   return distance;
-}
-
-function _2d(a){
-  // checks if the number of arguments are correct in count and are valid (should be numbers)
-  if (a.constructor !== Array){
-    a = _objectToArray(a);
-  }
-  return typeof a[0] === 'number' && typeof a[1] === 'number';
-}
-
-function _3d(a){
-  // checks if the number of arguments are correct in count and are valid (should be numbers)
-  if (a.constructor !== Array){
-    a = _objectToArray(a);
-  }
-  return typeof a[0] === 'number' && typeof a[1] === 'number' && typeof a[2] === 'number';
-}
-
-function _parametricLine(a){
-  if (a.constructor !== Array){
-    a = _objectToArray(a);
-  }
-  return typeof a[0] === 'number' && typeof a[1] === 'number' && typeof a[2] === 'number' &&
-    typeof a[3] === 'number' && typeof a[4] === 'number' && typeof a[5] === 'number';
-
-}
-
-function _objectToArray(o){
-  var keys = Object.keys(o);
-  var a = [];
-  for (var i = 0; i < keys.length; i++) {
-    a.push(o[keys[i]]);
-  }
-  return a;
-}
-
-function _pairwise(a){
-  //checks for valid arguments passed to _distancePairwise(Array)
-  if (a[0].length == 2 && typeof a[0][0] === 'number' && typeof a[0][1] === 'number'){
-    for(var i in a){
-      if (a[i].length != 2 || typeof a[i][0] !== 'number' || typeof a[i][1] !== 'number'){
-        return false;
-      }
-    }
-  }
-  else if (a[0].length == 3 && typeof a[0][0] === 'number' && typeof a[0][1] === 'number' && typeof a[0][2] === 'number'){
-    for(var i in a){
-      if (a[i].length != 3 || typeof a[i][0] !== 'number' || typeof a[i][1] !== 'number' || typeof a[i][2] !== 'number'){
-        return false;
-      }
-    }
-  }
-  else{
-    return false;
-  }
-  return true;
-}
-
-function _distancePointLine2D(x, y, a, b, c){
-  var num =  Math.abs(a*x + b*y + c);
-  var den = Math.pow((a*a + b*b), 0.5);
-  var result = (num/den);
-  return result;
-}
-
-function _distancePointLine3D(x, y, z, x0, y0, z0, a, b, c){
-  var num = [((y0-y)*(c))-((z0-z)*(b)), ((z0-z)*(a))-((x0-x)*(c)), ((x0-x)*(b))-((y0-y)*(a))]
-  num = Math.pow(num[0]*num[0] + num[1]*num[1] + num[2]*num[2], 0.5);
-  var den = Math.pow(a*a + b*b + c*c, 0.5);
-  var result = num/den;
-  return result;
-}
-
-function _distance2d(x1, y1, x2, y2){
-  var yDiff = y2 - y1;
-  var xDiff = x2 - x1;
-  var radicant = yDiff * yDiff + xDiff * xDiff;
-  var result = Math.pow(radicant, 0.5);
-  return result;
-}
-
-function _distance3d(x1, y1, z1, x2, y2, z2){
-  var zDiff = z2 - z1;
-  var yDiff = y2 - y1;
-  var xDiff = x2 - x1;
-  var radicant = zDiff * zDiff + yDiff * yDiff + xDiff * xDiff;
-  var result = Math.pow(radicant, 0.5);
-  return result;
-}
-
-function _distancePairwise(a){
-  var result = [];
-  for(var i = 0; i < a.length-1; i++){
-    for(var j = i+1; j < a.length; j++){
-      if (a[0].length == 2){
-        result.push(_distance2d(a[i][0], a[i][1], a[j][0], a[j][1]));
-      }
-      else if (a[0].length == 3){
-        result.push(_distance3d(a[i][0], a[i][1], a[i][2], a[j][0], a[j][1], a[j][2]));
-      }
-    }
-  }
-  return result;
 }
 
 exports.name = 'distance';
@@ -62482,19 +63252,19 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 500 */
+/* 502 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(501),
-  __webpack_require__(150),
-  __webpack_require__(502),
-  __webpack_require__(503)
+  __webpack_require__(503),
+  __webpack_require__(153),
+  __webpack_require__(504),
+  __webpack_require__(505)
 ];
 
 
 /***/ }),
-/* 501 */
+/* 503 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -62504,13 +63274,13 @@ function factory (type, config, load, typed) {
   var latex = __webpack_require__(4);
 
   var matrix = load(__webpack_require__(0));
-  var zeros = load(__webpack_require__(40));
-  var not = load(__webpack_require__(150));
-  var isZero = load(__webpack_require__(87));
+  var zeros = load(__webpack_require__(42));
+  var not = load(__webpack_require__(153));
+  var isZero = load(__webpack_require__(88));
 
   var algorithm02 = load(__webpack_require__(24));
   var algorithm06 = load(__webpack_require__(71));
-  var algorithm11 = load(__webpack_require__(17));
+  var algorithm11 = load(__webpack_require__(19));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
 
@@ -62672,7 +63442,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 502 */
+/* 504 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -62683,9 +63453,9 @@ function factory (type, config, load, typed) {
 
   var matrix = load(__webpack_require__(0));
 
-  var algorithm03 = load(__webpack_require__(15));
-  var algorithm05 = load(__webpack_require__(63));
-  var algorithm12 = load(__webpack_require__(16));
+  var algorithm03 = load(__webpack_require__(17));
+  var algorithm05 = load(__webpack_require__(64));
+  var algorithm12 = load(__webpack_require__(18));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
   
@@ -62837,7 +63607,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 503 */
+/* 505 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -62848,9 +63618,9 @@ function factory (type, config, load, typed) {
 
   var matrix = load(__webpack_require__(0));
 
-  var algorithm03 = load(__webpack_require__(15));
+  var algorithm03 = load(__webpack_require__(17));
   var algorithm07 = load(__webpack_require__(26));
-  var algorithm12 = load(__webpack_require__(16));
+  var algorithm12 = load(__webpack_require__(18));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
   
@@ -63002,39 +63772,39 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 504 */
+/* 506 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
   __webpack_require__(67),
-  __webpack_require__(505),
-  __webpack_require__(127),
-  __webpack_require__(506),
   __webpack_require__(507),
-  __webpack_require__(64),
+  __webpack_require__(129),
   __webpack_require__(508),
   __webpack_require__(509),
+  __webpack_require__(65),
   __webpack_require__(510),
-  __webpack_require__(126),
   __webpack_require__(511),
-  __webpack_require__(151),
   __webpack_require__(512),
-  __webpack_require__(93),
-  __webpack_require__(129),
+  __webpack_require__(128),
   __webpack_require__(513),
+  __webpack_require__(154),
   __webpack_require__(514),
-  __webpack_require__(28),
-  __webpack_require__(152),
+  __webpack_require__(94),
+  __webpack_require__(131),
+  __webpack_require__(515),
   __webpack_require__(516),
-  __webpack_require__(22),
-  __webpack_require__(147),
+  __webpack_require__(29),
+  __webpack_require__(155),
+  __webpack_require__(518),
+  __webpack_require__(23),
+  __webpack_require__(150),
   __webpack_require__(70),
-  __webpack_require__(40)
+  __webpack_require__(42)
 ];
 
 
 /***/ }),
-/* 505 */
+/* 507 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -63142,7 +63912,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 506 */
+/* 508 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -63319,7 +64089,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 507 */
+/* 509 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -63328,7 +64098,7 @@ exports.factory = factory;
 var size = __webpack_require__(2).size;
 
 function factory (type, config, load, typed) {
-  var add      = load(__webpack_require__(18));
+  var add      = load(__webpack_require__(20));
   var multiply = load(__webpack_require__(12));
 
   /**
@@ -63405,7 +64175,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 508 */
+/* 510 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -63496,7 +64266,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 509 */
+/* 511 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -63548,7 +64318,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 510 */
+/* 512 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -63632,7 +64402,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 511 */
+/* 513 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -63642,7 +64412,7 @@ var size = __webpack_require__(2).size;
 
 function factory(type, config, load, typed) {
   var matrix = load(__webpack_require__(0));
-  var multiplyScalar = load(__webpack_require__(23))
+  var multiplyScalar = load(__webpack_require__(22))
     /**
      * Calculates the kronecker product of 2 matrices or vectors.
      *
@@ -63729,7 +64499,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 512 */
+/* 514 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -63870,13 +64640,13 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 513 */
+/* 515 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var DimensionError = __webpack_require__(10);
+var DimensionError = __webpack_require__(11);
 
 var isInteger = __webpack_require__(3).isInteger;
 var array = __webpack_require__(2);
@@ -63951,14 +64721,14 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 514 */
+/* 516 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var DimensionError = __webpack_require__(10);
-var ArgumentsError = __webpack_require__(53);
+var DimensionError = __webpack_require__(11);
+var ArgumentsError = __webpack_require__(46);
 
 var isInteger = __webpack_require__(3).isInteger;
 var format = __webpack_require__(9).format;
@@ -64096,7 +64866,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 515 */
+/* 517 */
 /***/ (function(module, exports) {
 
 /*
@@ -64147,7 +64917,7 @@ module.exports = function naturalSort (a, b) {
 
 
 /***/ }),
-/* 516 */
+/* 518 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -64215,25 +64985,25 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 517 */
+/* 519 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
   //require('./distribution'), // TODO: rethink math.distribution
   __webpack_require__(73),
   __webpack_require__(72),
-  __webpack_require__(149),
-  __webpack_require__(518),
-  __webpack_require__(519),
+  __webpack_require__(152),
   __webpack_require__(520),
   __webpack_require__(521),
-  __webpack_require__(524),
-  __webpack_require__(525)
+  __webpack_require__(522),
+  __webpack_require__(523),
+  __webpack_require__(526),
+  __webpack_require__(527)
 ];
 
 
 /***/ }),
-/* 518 */
+/* 520 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -64242,11 +65012,11 @@ module.exports = [
 
 function factory(type, config, load, typed) {
     var matrix = load(__webpack_require__(0));
-    var divide = load(__webpack_require__(49));
-    var sum = load(__webpack_require__(153));
+    var divide = load(__webpack_require__(51));
+    var sum = load(__webpack_require__(156));
     var multiply = load(__webpack_require__(12));
-    var dotDivide = load(__webpack_require__(144));
-    var log = load(__webpack_require__(146));
+    var dotDivide = load(__webpack_require__(147));
+    var log = load(__webpack_require__(149));
     var isNumeric = load(__webpack_require__(80));
 
     /**
@@ -64331,21 +65101,21 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 519 */
+/* 521 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var deepForEach = __webpack_require__(44);
+var deepForEach = __webpack_require__(45);
 
 function factory (type, config, load, typed) {
-  var add = load(__webpack_require__(18));
+  var add = load(__webpack_require__(20));
   var multiply = load(__webpack_require__(12));
-  var divide = load(__webpack_require__(49));
+  var divide = load(__webpack_require__(51));
   var factorial = load(__webpack_require__(72));
-  var isInteger = load(__webpack_require__(50));
-  var isPositive = load(__webpack_require__(58));
+  var isInteger = load(__webpack_require__(53));
+  var isPositive = load(__webpack_require__(60));
 
   /**
    * Multinomial Coefficients compute the number of ways of picking a1, a2, ..., ai unordered outcomes from `n` possibilities.
@@ -64391,7 +65161,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 520 */
+/* 522 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -64492,14 +65262,14 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 521 */
+/* 523 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 function factory (type, config, load, typed) {
-  var distribution = load(__webpack_require__(94));
+  var distribution = load(__webpack_require__(95));
 
   /**
    * Random pick one or more values from a one dimensional array.
@@ -64528,8 +65298,8 @@ function factory (type, config, load, typed) {
    * @param {Array} array     A one dimensional array
    * @param {Int} number      An int or float
    * @param {Array} weights   An array of ints or floats
-   * @return {number} One of the elements of the provided input array
-   * @return {array} An array of elements of the provided input array
+   * @return {number | Array} Returns a single random value from array when number is 1 or undefined.
+   *                          Returns an array with the configured number of elements when number is > 1.
    */
   // TODO: rework pickRandom to a typed-function
   var pickRandom =  distribution('uniform').pickRandom;
@@ -64544,13 +65314,13 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 522 */
+/* 524 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var seedrandom = __webpack_require__(523);
+var seedrandom = __webpack_require__(525);
 
 // create a random seed here to prevent an infinite loop from seed-random
 // inside the factory. Reason is that math.random is defined as a getter/setter
@@ -64593,7 +65363,7 @@ exports.math = true;
 
 
 /***/ }),
-/* 523 */
+/* 525 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -64771,17 +65541,17 @@ function tostring(a) {
 //
 mixkey(Math.random(), pool);
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(154)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(157)))
 
 /***/ }),
-/* 524 */
+/* 526 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 function factory (type, config, load, typed) {
-  var distribution = load(__webpack_require__(94));
+  var distribution = load(__webpack_require__(95));
 
   /**
    * Return a random number larger or equal to `min` and smaller than `max`
@@ -64826,14 +65596,14 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 525 */
+/* 527 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 function factory (type, config, load, typed) {
-  var distribution = load(__webpack_require__(94));
+  var distribution = load(__webpack_require__(95));
 
   /**
    * Return a random integer number larger or equal to `min` and smaller than `max`
@@ -64876,24 +65646,24 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 526 */
+/* 528 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(51),
+  __webpack_require__(54),
   __webpack_require__(33),
-  __webpack_require__(527),
+  __webpack_require__(529),
   __webpack_require__(32),
   __webpack_require__(36),
-  __webpack_require__(139),
-  __webpack_require__(46),
-  __webpack_require__(528),
-  __webpack_require__(133)
+  __webpack_require__(142),
+  __webpack_require__(41),
+  __webpack_require__(530),
+  __webpack_require__(136)
 ];
 
 
 /***/ }),
-/* 527 */
+/* 529 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -64981,22 +65751,22 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 528 */
+/* 530 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var nearlyEqual = __webpack_require__(3).nearlyEqual;
-var bigNearlyEqual = __webpack_require__(37);
+var bigNearlyEqual = __webpack_require__(39);
 
 function factory (type, config, load, typed) {
 
   var matrix = load(__webpack_require__(0));
 
-  var algorithm03 = load(__webpack_require__(15));
+  var algorithm03 = load(__webpack_require__(17));
   var algorithm07 = load(__webpack_require__(26));
-  var algorithm12 = load(__webpack_require__(16));
+  var algorithm12 = load(__webpack_require__(18));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
 
@@ -65162,25 +65932,25 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 529 */
+/* 531 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(530),
-  __webpack_require__(155),
-  __webpack_require__(531),
-  __webpack_require__(156),
   __webpack_require__(532),
+  __webpack_require__(158),
   __webpack_require__(533),
+  __webpack_require__(159),
   __webpack_require__(534),
   __webpack_require__(535),
-  __webpack_require__(157),
-  __webpack_require__(536)
+  __webpack_require__(536),
+  __webpack_require__(537),
+  __webpack_require__(160),
+  __webpack_require__(538)
 ];
 
 
 /***/ }),
-/* 530 */
+/* 532 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -65190,9 +65960,9 @@ var flatten = __webpack_require__(2).flatten;
 
 function factory (type, config, load, typed) {
   var index = load(__webpack_require__(27));
-  var matrix = load(__webpack_require__(45));
-  var size = load(__webpack_require__(28));
-  var subset = load(__webpack_require__(22));
+  var matrix = load(__webpack_require__(47));
+  var size = load(__webpack_require__(29));
+  var subset = load(__webpack_require__(23));
   var compareNatural = load(__webpack_require__(33));
   
   /**
@@ -65247,7 +66017,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 531 */
+/* 533 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -65258,9 +66028,9 @@ var flatten = __webpack_require__(2).flatten;
 function factory (type, config, load, typed) {
   var equal = load(__webpack_require__(32));
   var index = load(__webpack_require__(27));
-  var matrix = load(__webpack_require__(45));
-  var size = load(__webpack_require__(28));
-  var subset = load(__webpack_require__(22));
+  var matrix = load(__webpack_require__(47));
+  var size = load(__webpack_require__(29));
+  var subset = load(__webpack_require__(23));
   var compareNatural = load(__webpack_require__(33));
   
   /**
@@ -65314,7 +66084,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 532 */
+/* 534 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -65326,8 +66096,8 @@ var identify = __webpack_require__(2).identify;
 function factory (type, config, load, typed) {
   var equal = load(__webpack_require__(32));
   var index = load(__webpack_require__(27));
-  var size = load(__webpack_require__(28));
-  var subset = load(__webpack_require__(22));
+  var size = load(__webpack_require__(29));
+  var subset = load(__webpack_require__(23));
   var compareNatural = load(__webpack_require__(33));
   
   /**
@@ -65386,7 +66156,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 533 */
+/* 535 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -65397,8 +66167,8 @@ var flatten = __webpack_require__(2).flatten;
 function factory (type, config, load, typed) {
   var equal = load(__webpack_require__(32));
   var index = load(__webpack_require__(27));
-  var size = load(__webpack_require__(28));
-  var subset = load(__webpack_require__(22));
+  var size = load(__webpack_require__(29));
+  var subset = load(__webpack_require__(23));
   
   /**
    * Count the multiplicity of an element in a multiset.
@@ -65445,7 +66215,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 534 */
+/* 536 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -65455,8 +66225,8 @@ var flatten = __webpack_require__(2).flatten;
 
 function factory (type, config, load, typed) {
   var index = load(__webpack_require__(27));
-  var size = load(__webpack_require__(28));
-  var subset = load(__webpack_require__(22));
+  var size = load(__webpack_require__(29));
+  var subset = load(__webpack_require__(23));
   var compareNatural = load(__webpack_require__(33));
   
   /**
@@ -65529,7 +66299,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 535 */
+/* 537 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -65591,7 +66361,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 536 */
+/* 538 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -65602,10 +66372,10 @@ var flatten = __webpack_require__(2).flatten;
 function factory (type, config, load, typed) {
   var index = load(__webpack_require__(27));
   var concat = load(__webpack_require__(67));
-  var size = load(__webpack_require__(28));
-  var subset = load(__webpack_require__(22));
-  var setIntersect = load(__webpack_require__(156));
-  var setSymDifference = load(__webpack_require__(157));
+  var size = load(__webpack_require__(29));
+  var subset = load(__webpack_require__(23));
+  var setIntersect = load(__webpack_require__(159));
+  var setSymDifference = load(__webpack_require__(160));
   
   /**
    * Create the union of two (multi)sets.
@@ -65650,16 +66420,16 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 537 */
+/* 539 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(538)
+  __webpack_require__(540)
 ];
 
 
 /***/ }),
-/* 538 */
+/* 540 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -65863,26 +66633,26 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 539 */
+/* 541 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(540),
-  __webpack_require__(124),
-  __webpack_require__(125),
-  __webpack_require__(158),
-  __webpack_require__(128),
-  __webpack_require__(541),
   __webpack_require__(542),
+  __webpack_require__(126),
+  __webpack_require__(127),
+  __webpack_require__(161),
+  __webpack_require__(130),
   __webpack_require__(543),
   __webpack_require__(544),
-  __webpack_require__(153),
-  __webpack_require__(159)
+  __webpack_require__(545),
+  __webpack_require__(546),
+  __webpack_require__(156),
+  __webpack_require__(162)
 ];
 
 
 /***/ }),
-/* 540 */
+/* 542 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -65891,9 +66661,9 @@ module.exports = [
 var flatten = __webpack_require__(2).flatten;
 
 function factory (type, config, load, typed) {
-  var abs      = load(__webpack_require__(31));
-  var map      = load(__webpack_require__(151));
-  var median   = load(__webpack_require__(158));
+  var abs      = load(__webpack_require__(28));
+  var map      = load(__webpack_require__(154));
+  var median   = load(__webpack_require__(161));
   var subtract = load(__webpack_require__(21));
 
   /**
@@ -65953,7 +66723,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 541 */
+/* 543 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -66036,16 +66806,16 @@ exports.name = 'mode';
 exports.factory = factory;
 
 /***/ }),
-/* 542 */
+/* 544 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var deepForEach = __webpack_require__(44);
+var deepForEach = __webpack_require__(45);
 
 function factory (type, config, load, typed) {
-  var multiply = load(__webpack_require__(23));
+  var multiply = load(__webpack_require__(22));
 
   /**
    * Compute the product of a matrix or a list with values.
@@ -66119,7 +66889,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 543 */
+/* 545 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -66128,13 +66898,13 @@ exports.factory = factory;
 var isInteger = __webpack_require__(3).isInteger;
 var isNumber = __webpack_require__(3).isNumber;
 var flatten = __webpack_require__(2).flatten;
-var isCollection = __webpack_require__(48);
+var isCollection = __webpack_require__(50);
 
 function factory (type, config, load, typed) {
-  var add = load(__webpack_require__(18));
+  var add = load(__webpack_require__(20));
   var multiply = load(__webpack_require__(12));
-  var partitionSelect = load(__webpack_require__(93));
-  var compare = load(__webpack_require__(51));
+  var partitionSelect = load(__webpack_require__(94));
+  var compare = load(__webpack_require__(54));
 
   /**
    * Compute the prob order quantile of a matrix or a list with values.
@@ -66383,15 +67153,15 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 544 */
+/* 546 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 function factory (type, config, load, typed) {
-  var sqrt       = load(__webpack_require__(59));
-  var variance   = load(__webpack_require__(159));
+  var sqrt       = load(__webpack_require__(52));
+  var variance   = load(__webpack_require__(162));
 
   /**
    * Compute the standard deviation of a matrix or a  list with values.
@@ -66464,17 +67234,17 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 545 */
+/* 547 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(110),
-  __webpack_require__(546)
+  __webpack_require__(111),
+  __webpack_require__(548)
 ];
 
 
 /***/ }),
-/* 546 */
+/* 548 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -66568,14 +67338,12 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 547 */
+/* 549 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(548),
-  __webpack_require__(160),
-  __webpack_require__(549),
   __webpack_require__(550),
+  __webpack_require__(163),
   __webpack_require__(551),
   __webpack_require__(552),
   __webpack_require__(553),
@@ -66596,12 +67364,14 @@ module.exports = [
   __webpack_require__(568),
   __webpack_require__(569),
   __webpack_require__(570),
-  __webpack_require__(571)
+  __webpack_require__(571),
+  __webpack_require__(572),
+  __webpack_require__(573)
 ];
 
 
 /***/ }),
-/* 548 */
+/* 550 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -66667,7 +67437,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 549 */
+/* 551 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -66728,7 +67498,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 550 */
+/* 552 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -66790,7 +67560,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 551 */
+/* 553 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -66855,7 +67625,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 552 */
+/* 554 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -66915,7 +67685,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 553 */
+/* 555 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -66979,7 +67749,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 554 */
+/* 556 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -66988,7 +67758,7 @@ exports.factory = factory;
 var deepMap = __webpack_require__(1);
 
 function factory (type, config, load, typed) {
-  var acosh = typed.find(load(__webpack_require__(160)), ['Complex']);
+  var acosh = typed.find(load(__webpack_require__(163)), ['Complex']);
 
   /**
    * Calculate the hyperbolic arcsecant of a value,
@@ -67050,7 +67820,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 555 */
+/* 557 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -67117,7 +67887,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 556 */
+/* 558 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -67177,7 +67947,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 557 */
+/* 559 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -67239,7 +68009,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 558 */
+/* 560 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -67250,10 +68020,10 @@ function factory (type, config, load, typed) {
   var matrix = load(__webpack_require__(0));
 
   var algorithm02 = load(__webpack_require__(24));
-  var algorithm03 = load(__webpack_require__(15));
-  var algorithm09 = load(__webpack_require__(145));
-  var algorithm11 = load(__webpack_require__(17));
-  var algorithm12 = load(__webpack_require__(16));
+  var algorithm03 = load(__webpack_require__(17));
+  var algorithm09 = load(__webpack_require__(148));
+  var algorithm11 = load(__webpack_require__(19));
+  var algorithm12 = load(__webpack_require__(18));
   var algorithm13 = load(__webpack_require__(8));
   var algorithm14 = load(__webpack_require__(6));
 
@@ -67398,7 +68168,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 559 */
+/* 561 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -67470,7 +68240,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 560 */
+/* 562 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -67539,7 +68309,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 561 */
+/* 563 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -67612,7 +68382,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 562 */
+/* 564 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -67677,7 +68447,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 563 */
+/* 565 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -67753,7 +68523,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 564 */
+/* 566 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -67818,7 +68588,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 565 */
+/* 567 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -67900,7 +68670,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 566 */
+/* 568 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -67965,7 +68735,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 567 */
+/* 569 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -68040,7 +68810,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 568 */
+/* 570 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -68110,7 +68880,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 569 */
+/* 571 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -68184,7 +68954,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 570 */
+/* 572 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -68250,7 +69020,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 571 */
+/* 573 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -68328,15 +69098,15 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 572 */
+/* 574 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(573)
+  __webpack_require__(575)
 ];
 
 /***/ }),
-/* 573 */
+/* 575 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -68433,24 +69203,24 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 574 */
+/* 576 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(132),
-  __webpack_require__(50),
-  __webpack_require__(60),
+  __webpack_require__(135),
+  __webpack_require__(53),
+  __webpack_require__(61),
   __webpack_require__(80),
-  __webpack_require__(58),
-  __webpack_require__(575),
-  __webpack_require__(87),
-  __webpack_require__(576),
+  __webpack_require__(60),
+  __webpack_require__(577),
+  __webpack_require__(88),
+  __webpack_require__(578),
   __webpack_require__(81)
 ];
 
 
 /***/ }),
-/* 575 */
+/* 577 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -68538,7 +69308,7 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 576 */
+/* 578 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -68611,16 +69381,16 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 577 */
+/* 579 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = [
-  __webpack_require__(578)
+  __webpack_require__(580)
 ];
 
 
 /***/ }),
-/* 578 */
+/* 580 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -68649,15 +69419,15 @@ exports.factory = factory;
 
 
 /***/ }),
-/* 579 */
+/* 581 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var ArgumentsError = __webpack_require__(53);
-var DimensionError = __webpack_require__(10);
-var IndexError = __webpack_require__(54);
+var ArgumentsError = __webpack_require__(46);
+var DimensionError = __webpack_require__(11);
+var IndexError = __webpack_require__(56);
 
 module.exports = [
   {
@@ -68686,7 +69456,7 @@ module.exports = [
 
 
 /***/ }),
-/* 580 */
+/* 582 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -68717,7 +69487,7 @@ function randomBiasGen(n) {
 }
 
 /***/ }),
-/* 581 */
+/* 583 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, process) {// Copyright Joyent, Inc. and other Node contributors.
@@ -69245,7 +70015,7 @@ function isPrimitive(arg) {
 }
 exports.isPrimitive = isPrimitive;
 
-exports.isBuffer = __webpack_require__(583);
+exports.isBuffer = __webpack_require__(585);
 
 function objectToString(o) {
   return Object.prototype.toString.call(o);
@@ -69289,7 +70059,7 @@ exports.log = function() {
  *     prototype.
  * @param {function} superCtor Constructor function to inherit prototype from.
  */
-exports.inherits = __webpack_require__(584);
+exports.inherits = __webpack_require__(586);
 
 exports._extend = function(origin, add) {
   // Don't do anything if add isn't an object
@@ -69307,10 +70077,10 @@ function hasOwnProperty(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(154), __webpack_require__(582)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(157), __webpack_require__(584)))
 
 /***/ }),
-/* 582 */
+/* 584 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser
@@ -69500,7 +70270,7 @@ process.umask = function() { return 0; };
 
 
 /***/ }),
-/* 583 */
+/* 585 */
 /***/ (function(module, exports) {
 
 module.exports = function isBuffer(arg) {
@@ -69511,7 +70281,7 @@ module.exports = function isBuffer(arg) {
 }
 
 /***/ }),
-/* 584 */
+/* 586 */
 /***/ (function(module, exports) {
 
 if (typeof Object.create === 'function') {
@@ -69540,7 +70310,7 @@ if (typeof Object.create === 'function') {
 
 
 /***/ }),
-/* 585 */
+/* 587 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -69552,11 +70322,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _simulation_util = __webpack_require__(52);
+var _simulation_util = __webpack_require__(55);
 
 var SimulationUtil = _interopRequireWildcard(_simulation_util);
 
-var _config = __webpack_require__(29);
+var _config = __webpack_require__(30);
 
 var Config = _interopRequireWildcard(_config);
 
@@ -69610,7 +70380,7 @@ var Blob = function () {
 exports.default = Blob;
 
 /***/ }),
-/* 586 */
+/* 588 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -69620,11 +70390,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _simulation_util = __webpack_require__(52);
+var _simulation_util = __webpack_require__(55);
 
 var SimulationUtil = _interopRequireWildcard(_simulation_util);
 
-var _config = __webpack_require__(29);
+var _config = __webpack_require__(30);
 
 var Config = _interopRequireWildcard(_config);
 
@@ -69644,7 +70414,7 @@ var Food = function Food(id, position) {
 exports.default = Food;
 
 /***/ }),
-/* 587 */
+/* 589 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -69655,7 +70425,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.setUpIndex = setUpIndex;
 
-var _config = __webpack_require__(29);
+var _config = __webpack_require__(30);
 
 var Config = _interopRequireWildcard(_config);
 
@@ -69777,7 +70547,7 @@ function clickEndConditions(condition, button) {
 }
 
 /***/ }),
-/* 588 */
+/* 590 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
