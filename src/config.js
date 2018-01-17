@@ -13,7 +13,7 @@ export let END_CONDITIONS = ["DEPTH", "NUM"];
 export const TIME_THRESHOLD = 15;
 export const NUM_THRESHOLD = 1;
 export const SIZE_THRESHOLD = 80;
-export const DEPTH_THRESHOLD = 1000;
+export const DEPTH_THRESHOLD = 3000;
 
 // Network constants
 // possible inputs: SIZE, POS, VEL, CONS, PRED, FOOD, BLOB
