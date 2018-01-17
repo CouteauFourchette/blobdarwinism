@@ -1,8 +1,8 @@
 // Simulation constants
 export let NUM_BLOBS = 20;
 export let NUM_FOOD = 200;
-export let WIDTH = 3200;
-export let HEIGHT = 1700;
+export let WIDTH = 3840;
+export let HEIGHT = 2160;
 export const MAX_SPEED = 2;
 export const FOOD_SIZE = 5;
 export const INITIAL_BLOB_SIZE = 10;
