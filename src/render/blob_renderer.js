@@ -262,9 +262,9 @@ export default class BlobRenderer {
   }
 
   createOrthographicMatrix(){
-    this.GL.canvas.width = Config.WIDTH;
-    this.GL.canvas.height = Config.HEIGHT;
-    this.GL.viewport(0, 0, Config.WIDTH, Config.HEIGHT);
+    this.GL.canvas.width = 1920;
+    this.GL.canvas.height = 1080;
+    this.GL.viewport(0, 0, 1920, 1080);
     mat4.ortho(this.orthographicMatrix, 0, Config.WIDTH, Config.HEIGHT, 0, 0, 100);
   }
 }
