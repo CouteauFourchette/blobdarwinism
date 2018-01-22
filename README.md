@@ -24,7 +24,6 @@ Users will be able to manipulate various simulation variables, including the num
    - [ ] Port the app to another platform (Electron)
 
 ## Technologies & Technical Challenges
-  ##### Backend: Flask
   ##### Frontend: JavaScript, WebGL
   #### Libraries: Synapse.js
 
@@ -60,51 +59,3 @@ Users will be able to manipulate various simulation variables, including the num
     Instead, we will use a genetic algorithm to update these weights between generations. This means that an individual blob will not itself learn or improve, but will pass down its behavior (weights) genetically with some probability. This probability is equal to a blob's normalized "fitness," a heuristic which reflects the blobs success and is a function of its size and survival duration.
 
     The following is [our demo](https://couteaufourchette.github.io/blobgeneticdemo/) of the described demo algorithm.
-
-
-
-## Accomplished over the Weekend
- - Research machine learning topics including neural networks and genetic algorithms
- - Determine the rules and and constraints of our simulation
- - Create the project skeleton
- - Write the underlying "game logic" necessary for the simulation to run
-
-## Group Members & Work Breakdown
-
-**Julien Gurunlian**,
-**Garrett Tongue**,
-**Brandt Sheets**,
-
-### Day 1
-  - Refactor the simulation logic as needed
-  - Review our neural network design and begin implementation using synapse.js
-  - Interface neural network with blobs class
-  - Test neural network with random weights
-
-
-### Day 2
-  - Debug neural network implementation
-  - Write first version of genetic algorithm
-  - Integrate and test the genetic algorithm with neural network
-
-### Day 3
-  - Optimize neural network and/or genetic algorithm through extensive testing
-  - Design a simple UI with some variables for the user to modify **Brandt**
-  - Build a backend with flask for serving and data persistence **Julien**
-
-
-### Day 4
-  - Further enhance UI
-  - Refactor simulation to allow user to manipulate more variables
-  - Get heroku set up
-  - Optimize WebGL rendering **Garrett**
-
-### Day 5
-  - Enhance the simulation with visual effects and textures **Garrett**
-  - Add support for continuous simulation mode (rather than discrete generations) **Julien**
-  - Choose a bonus feature to add
-
-### Day 6
- - Fix any outstanding bugs
- - improve UX
- - Update README to reflect any project changes **Brandt**
